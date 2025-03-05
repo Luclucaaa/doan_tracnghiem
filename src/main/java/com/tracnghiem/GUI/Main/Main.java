@@ -34,6 +34,7 @@ public class Main extends javax.swing.JFrame {
     private ExamDialog examDialog;
     private TestDialog testDialog;
     private TopicDialog topicDialog;
+    private TopicDialog topicDialogInstance = null;
     public Main() {
         initComponents();
         questionDialog = new QuestionDialog(this, true);
@@ -594,11 +595,6 @@ public class Main extends javax.swing.JFrame {
         cz1.setText("Thêm");
         cz1.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         cz1.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        cz1.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                cz1MouseClicked(evt);
-            }
-        });
         cz1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cz1ActionPerformed(evt);
@@ -679,7 +675,7 @@ public class Main extends javax.swing.JFrame {
                 {null, null, null, null}
             },
             new String [] {
-                "Mã chủ đề", "Tên chủ đề", "Mô tả", "Trạng thái"
+                "Mã chủ đề", "Tên chủ đề", "Chủ đề chính", "Trạng thái"
             }
         ));
         jScrollPane2.setViewportView(jTable2);
@@ -1197,70 +1193,121 @@ public class Main extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton2ActionPerformed
 
     private void cz1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cz1ActionPerformed
-        TopicDialog topicDialog = new TopicDialog(this, true);
-    
-    topicDialog.setAddButtonActionListener(new ActionListener() {
-        @Override
-        public void actionPerformed(ActionEvent e) {
-            try {
-                String tpTitle = topicDialog.getTpTitle(); // Lấy tên chủ đề từ jTextField5
-                int tpParent = Integer.parseInt(topicDialog.getTpDescription()); // Lấy tpParent từ jTextArea1 (giả định là số)
-                int tpStatus = topicDialog.getTpStatus().equals("Active") ? 1 : 0; // Lấy trạng thái từ jTextField2
+        if (topicDialogInstance == null || !topicDialogInstance.isVisible()) {
+        topicDialogInstance = new TopicDialog(this, true); // Sử dụng constructor mặc định (isEditMode = false)
+        
+        topicDialogInstance.setAddButtonActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    // Lấy dữ liệu từ TopicDialog
+                    String tpTitle = topicDialogInstance.getTpTitle().trim(); // Lấy và loại bỏ khoảng trắng
+                    if (tpTitle.isEmpty()) {
+                        JOptionPane.showMessageDialog(null, "Tên chủ đề không được để trống!");
+                        return;
+                    }
 
-                TopicDTO newTopic = new TopicDTO(tpTitle, tpParent, tpStatus);
-                TopicBUS topicBUS = new TopicBUS();
-                if (topicBUS.addTopic(newTopic)) {
-                    JOptionPane.showMessageDialog(null, "Thêm chủ đề thành công!");
-                    loadTopics(); // Cập nhật lại bảng
-                    topicDialog.dispose();
-                } else {
-                    JOptionPane.showMessageDialog(null, "Thêm chủ đề thất bại!");
+                    int tpParent = topicDialogInstance.getTpParent(); // Lấy tpParent từ ParentTopic
+                    String tpStatus = topicDialogInstance.getTpStatus(); // Lấy trạng thái từ isStatus
+                    int tpStatusValue = tpStatus.equals("Active") ? 1 : 0;
+
+                    // Tạo TopicDTO (không cần tpID vì tự động tăng trong MySQL)
+                    TopicDTO newTopic = new TopicDTO(tpTitle, tpParent, tpStatusValue);
+
+                    TopicBUS topicBUS = new TopicBUS();
+                    if (topicBUS.addTopic(newTopic)) {
+                        JOptionPane.showMessageDialog(null, "Thêm chủ đề thành công!");
+                        loadTopics(); // Cập nhật lại bảng để hiển thị chủ đề mới
+                        topicDialogInstance.dispose(); // Đóng dialog sau khi thêm thành công
+                        topicDialogInstance = null; // Đặt lại instance về null để có thể tạo mới
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Thêm chủ đề thất bại! Vui lòng kiểm tra kết nối cơ sở dữ liệu hoặc dữ liệu nhập.");
+                    }
+                } catch (Exception ex) {
+                    System.out.println("Error adding topic: " + ex.getMessage()); // Log chi tiết
+                    JOptionPane.showMessageDialog(null, "Đã xảy ra lỗi: " + ex.getMessage());
                 }
-            } catch (NumberFormatException ex) {
-                JOptionPane.showMessageDialog(null, "Vui lòng nhập đúng định dạng cho tpParent (số nguyên)!");
             }
-        }
-    });
+        });
 
-    topicDialog.setVisible(true);        // TODO add your handling code here:
+        topicDialogInstance.setVisible(true); // Hiển thị dialog
+    } else {
+        // Nếu dialog đã hiển thị, chỉ đưa nó lên trên
+        topicDialogInstance.toFront();
+    }       // TODO add your handling code here:
     }//GEN-LAST:event_cz1ActionPerformed
 
     private void cz3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cz3ActionPerformed
         int selectedRow = jTable2.getSelectedRow();
     if (selectedRow >= 0) {
-        String tpID = jTable2.getValueAt(selectedRow, 0).toString(); // Lấy mã chủ đề từ cột 0
+        String tpIDStr = jTable2.getValueAt(selectedRow, 0).toString(); // Lấy mã chủ đề (ví dụ: "000")
+        int tpID;
+        try {
+            // Loại bỏ tất cả các ký tự không phải số và parse thành số nguyên
+            tpID = Integer.parseInt(tpIDStr.replaceAll("[^0-9]", ""));
+            if (tpID == 0) {
+                // Nếu tpID là 0, thử tìm lại bằng cách kiểm tra các bản ghi trong topics
+                TopicBUS topicBUS = new TopicBUS();
+                ArrayList<TopicDTO> allTopics = topicBUS.getAllActiveTopics();
+                for (TopicDTO topic : allTopics) {
+                    if (topic.getTpTitle().equals(jTable2.getValueAt(selectedRow, 1).toString())) {
+                        tpID = topic.getTpID();
+                        System.out.println("Found tpID by title: " + tpID);
+                        break;
+                    }
+                }
+                if (tpID == 0) {
+                    JOptionPane.showMessageDialog(null, "Không thể xác định mã chủ đề từ tên chủ đề!");
+                    return;
+                }
+            }
+        } catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(null, "Lỗi định dạng mã chủ đề: " + tpIDStr);
+            return;
+        }
+
         TopicBUS topicBUS = new TopicBUS();
-        TopicDTO topic = topicBUS.getTopicByID(tpID);
+        TopicDTO topic = topicBUS.getTopicByID(String.valueOf(tpID));
 
         if (topic != null) {
-            SuaTopicDialog suaDialog = new SuaTopicDialog(this, true);
-            suaDialog.setTpID(tpID); // Đặt mã chủ đề vào jTextField1 (chỉ đọc, không cho chỉnh sửa)
-            suaDialog.setTpTitle(topic.getTpTitle()); // Đặt tên chủ đề vào jTextField5
-            suaDialog.setTpDescription(String.valueOf(topic.getTpParent())); // Đặt tpParent vào jTextArea1
-            suaDialog.setTpStatus(topic.getTpStatus() == 1 ? "Active" : "Hidden"); // Đặt trạng thái vào jTextField2
+            TopicDialog topicDialog = new TopicDialog(this, true, true); // Sử dụng isEditMode = true
+            
+            topicDialog.setTpTitle(topic.getTpTitle());
+            topicDialog.setTpParent(topic.getTpParent());
+            topicDialog.setTpStatus(topic.getTpStatus() == 1 ? "Active" : "Hidden");
 
-            suaDialog.setEditButtonActionListener(new ActionListener() {
+            topicDialog.setAddButtonActionListener(new ActionListener() {
                 @Override
                 public void actionPerformed(ActionEvent e) {
                     try {
-                        topic.setTpTitle(suaDialog.getTpTitle()); // Lấy tên chủ đề từ jTextField5
-                        topic.setTpParent(Integer.parseInt(suaDialog.getTpDescription())); // Lấy tpParent từ jTextArea1
-                        topic.setTpStatus(suaDialog.getTpStatus().equals("Active") ? 1 : 0); // Lấy trạng thái từ jTextField2
+                        String tpTitle = topicDialog.getTpTitle();
+                        int tpParent = topicDialog.getTpParent();
+                        String tpStatus = topicDialog.getTpStatus();
+                        int tpStatusValue = tpStatus.equals("Active") ? 1 : 0;
 
+                        topic.setTpTitle(tpTitle);
+                        topic.setTpParent(tpParent);
+                        topic.setTpStatus(tpStatusValue);
+
+                        TopicBUS topicBUS = new TopicBUS();
                         if (topicBUS.updateTopic(topic)) {
                             JOptionPane.showMessageDialog(null, "Cập nhật chủ đề thành công!");
-                            loadTopics(); // Cập nhật lại bảng
-                            suaDialog.dispose();
+                            loadTopics();
+                            topicDialog.dispose();
                         } else {
                             JOptionPane.showMessageDialog(null, "Cập nhật chủ đề thất bại!");
                         }
                     } catch (NumberFormatException ex) {
                         JOptionPane.showMessageDialog(null, "Vui lòng nhập đúng định dạng cho tpParent (số nguyên)!");
+                    } catch (Exception ex) {
+                        JOptionPane.showMessageDialog(null, "Đã xảy ra lỗi: " + ex.getMessage());
                     }
                 }
             });
 
-            suaDialog.setVisible(true);
+            topicDialog.setVisible(true);
+        } else {
+            JOptionPane.showMessageDialog(null, "Không tìm thấy chủ đề để sửa! Kiểm tra tpID: " + tpID + " trong bảng topics.");
         }
     } else {
         JOptionPane.showMessageDialog(null, "Vui lòng chọn một chủ đề để sửa!");
@@ -1401,11 +1448,6 @@ public class Main extends javax.swing.JFrame {
     private void cz4MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_cz4MouseClicked
         examDialog.setVisible(true);        // TODO add your handling code here:
     }//GEN-LAST:event_cz4MouseClicked
-
-    private void cz1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_cz1MouseClicked
-        topicDialog.setVisible(true);
-// TODO add your handling code here:
-    }//GEN-LAST:event_cz1MouseClicked
 
     private void cz16MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_cz16MouseClicked
         testDialog.setVisible(true);
@@ -1599,27 +1641,27 @@ public class Main extends javax.swing.JFrame {
     }        // TODO add your handling code here:
     }//GEN-LAST:event_jTextField2KeyReleased
     
-    private void loadTopics() {
-        TopicBUS topicBUS = new TopicBUS();
-    ArrayList<TopicDTO> topics = topicBUS.getAllActiveTopics(); // Lấy các chủ đề có tpStatus = 1
+   private void loadTopics() {
+    TopicBUS topicBUS = new TopicBUS();
+    ArrayList<TopicDTO> topics = topicBUS.getAllActiveTopics();
+    System.out.println("Topics retrieved: " + topics.size());
 
-    // Tạo model cho jTable2
     DefaultTableModel model = (DefaultTableModel) jTable2.getModel();
-    model.setRowCount(0); // Xóa dữ liệu cũ trong bảng
+    model.setRowCount(0); // Xóa dữ liệu cũ
 
-    // Định dạng mã chủ đề thành 3 chữ số (001, 002, ...)
     DecimalFormat formatter = new DecimalFormat("000");
 
     for (TopicDTO topic : topics) {
         String formattedTpID = formatter.format(topic.getTpID());
+        System.out.println("Loading topic - tpID: " + topic.getTpID() + ", formatted: " + formattedTpID + ", Title: " + topic.getTpTitle());
         model.addRow(new Object[]{
             formattedTpID, // Mã chủ đề (001, 002, ...)
-            topic.getTpTitle(), // Tên chủ đề
-            topic.getTpParent(), // Mô tả (ở đây dùng tpParent làm ví dụ, bạn có thể thay bằng mô tả thực tế nếu có)
-            topic.getTpStatus() == 1 ? "Active" : "Hidden" // Trạng thái
+            topic.getTpTitle(),
+            topic.getTpParent(),
+            topic.getTpStatus() == 1 ? "Active" : "Hidden"
         });
     }
-    }
+}
     /**
      * @param args the command line arguments
      */

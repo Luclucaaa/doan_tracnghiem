@@ -861,7 +861,6 @@
                     <Property name="verticalTextPosition" type="int" value="3"/>
                   </Properties>
                   <Events>
-                    <EventHandler event="mouseClicked" listener="java.awt.event.MouseListener" parameters="java.awt.event.MouseEvent" handler="cz1MouseClicked"/>
                     <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="cz1ActionPerformed"/>
                   </Events>
                 </Component>
@@ -929,7 +928,7 @@
                       <Table columnCount="4" rowCount="4">
                         <Column editable="true" title="M&#xe3; ch&#x1ee7; &#x111;&#x1ec1;" type="java.lang.Object"/>
                         <Column editable="true" title="T&#xea;n ch&#x1ee7; &#x111;&#x1ec1;" type="java.lang.Object"/>
-                        <Column editable="true" title="M&#xf4; t&#x1ea3;" type="java.lang.Object"/>
+                        <Column editable="true" title="Ch&#x1ee7; &#x111;&#x1ec1; ch&#xed;nh" type="java.lang.Object"/>
                         <Column editable="true" title="Tr&#x1ea1;ng th&#xe1;i" type="java.lang.Object"/>
                       </Table>
                     </Property>

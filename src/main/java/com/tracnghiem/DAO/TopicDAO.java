@@ -23,21 +23,21 @@ public class TopicDAO implements InterfaceDAO<TopicDTO>{
     }
     
     @Override
-    public boolean insert(TopicDTO t) {
-        boolean rs = false;
-        String sql = "INSERT INTO topics(tpTitle, tpParent, tpStatus) VALUES(?,?,?)";
-        try (Connection conn = JDBCUtil.getConnection();
+public boolean insert(TopicDTO t) {
+    boolean rs = false;
+    String sql = "INSERT INTO topics(tpTitle, tpParent, tpStatus) VALUES(?,?,?)";
+    try (Connection conn = JDBCUtil.getConnection();
             PreparedStatement ps = conn.prepareStatement(sql);) {
-            ps.setString(1, t.getTpTitle());
-            ps.setInt(2, t.getTpParent());
-            ps.setInt(3, t.getTpStatus());
+        ps.setString(1, t.getTpTitle());
+        ps.setInt(2, t.getTpParent());
+        ps.setInt(3, t.getTpStatus());
         
-            rs = ps.executeUpdate() > 0; // Nếu có ít nhất 1 dòng bị ảnh hưởng, insert thành công
-        } catch (SQLException ex) {
-            ex.printStackTrace();
-        } 
-        return rs;
-    }
+        rs = ps.executeUpdate() > 0; // Nếu có ít nhất 1 dòng bị ảnh hưởng, insert thành công
+    } catch (SQLException ex) {
+        ex.printStackTrace();
+    } 
+    return rs;
+}
 
     @Override
     public boolean update(TopicDTO t) {
@@ -57,45 +57,44 @@ public class TopicDAO implements InterfaceDAO<TopicDTO>{
     }
 
     @Override
-    public ArrayList<TopicDTO> selectAll() {
-        ArrayList<TopicDTO> list = new ArrayList<TopicDTO>();
-        String sql = "SELECT * FROM topics WHERE tpStatus=1";
-        try (Connection conn = JDBCUtil.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql);
-             ResultSet rs = ps.executeQuery()) {
-            while (rs.next()) {
-                list.add(new TopicDTO(
-                        rs.getInt("tpID"),
-                        rs.getString("tpTitle"),
-                        rs.getInt("tpParent"),
-                        rs.getInt("tpStatus")));
-            }
-        } catch (SQLException ex) {
-            ex.printStackTrace();
+public ArrayList<TopicDTO> selectAll() {
+    ArrayList<TopicDTO> list = new ArrayList<>();
+    String sql = "SELECT * FROM topics WHERE tpStatus=1 ORDER BY tpID";
+    try (Connection conn = JDBCUtil.getConnection();
+         PreparedStatement ps = conn.prepareStatement(sql);
+         ResultSet rs = ps.executeQuery()) {
+        while (rs.next()) {
+            int tpID = rs.getInt("tpID");
+            String tpTitle = rs.getString("tpTitle");
+            int tpParent = rs.getInt("tpParent");
+            int tpStatus = rs.getInt("tpStatus");
+            System.out.println("Retrieved from DB - tpID: " + tpID + ", Title: " + tpTitle + ", Parent: " + tpParent + ", Status: " + tpStatus);
+            list.add(new TopicDTO(tpTitle, tpID, tpParent));
         }
-        return list;
+    } catch (SQLException ex) {
+        ex.printStackTrace();
     }
+    return list;
+}
 
     @Override
-    public TopicDTO selectByID(String id) {
-        String sql = "SELECT * FROM topics WHERE tpID = ? AND tpStatus=1";
-        try (Connection conn = JDBCUtil.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-            ps.setString(1, id);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return new TopicDTO(
-                            rs.getInt("tpID"),
-                            rs.getString("tpTitle"),
-                            rs.getInt("tpParent"),
-                            rs.getInt("tpStatus"));
-                }
+public TopicDTO selectByID(String id) {
+    String sql = "SELECT * FROM topics WHERE tpID = ?"; // Xóa AND tpStatus=1
+    try (Connection conn = JDBCUtil.getConnection();
+         PreparedStatement ps = conn.prepareStatement(sql)) {
+        ps.setString(1, id);
+        try (ResultSet rs = ps.executeQuery()) {
+            if (rs.next()) {
+                return new TopicDTO(
+                                                rs.getString("tpTitle"), rs.getInt("tpID"),
+                        rs.getInt("tpParent"));
             }
-        } catch (SQLException ex) {
-            ex.printStackTrace();
         }
-        return null;
+    } catch (SQLException ex) {
+        ex.printStackTrace();
     }
+    return null;
+}
 
     @Override
     public boolean delete(String id) {

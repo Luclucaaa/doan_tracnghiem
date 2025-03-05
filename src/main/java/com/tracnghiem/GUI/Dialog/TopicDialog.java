@@ -18,8 +18,21 @@ public class TopicDialog extends javax.swing.JDialog {
      * Creates new form TopicDialog
      */
     public TopicDialog(java.awt.Frame parent, boolean modal) {
+        this(parent, modal, false); // Gọi constructor với isEditMode = false (thêm mới)
+    }
+
+    public TopicDialog(java.awt.Frame parent, boolean modal, boolean isEditMode) {
         super(parent, modal);
         initComponents();
+        loadParentTopics();
+        isStatus.setSelectedItem("Active"); // Đặt giá trị mặc định là "Active"
+        
+        // Đặt nhãn theo chế độ
+        if (isEditMode) {
+            jLabel1.setText("Sửa chủ đề"); // Hiển thị khi sửa
+        } else {
+            jLabel1.setText("Thêm chủ đề mới"); // Hiển thị khi thêm mới
+        }
     }
 
     /**
@@ -33,17 +46,14 @@ public class TopicDialog extends javax.swing.JDialog {
 
         jPanel1 = new javax.swing.JPanel();
         jLabel1 = new javax.swing.JLabel();
-        jLabel2 = new javax.swing.JLabel();
-        Idtopic = new javax.swing.JTextField();
         jLabel3 = new javax.swing.JLabel();
         jLabel4 = new javax.swing.JLabel();
-        IsStatus = new javax.swing.JTextField();
         jLabel5 = new javax.swing.JLabel();
         TopicName = new javax.swing.JTextField();
         jButton1 = new javax.swing.JButton();
         jButton2 = new javax.swing.JButton();
-        jScrollPane1 = new javax.swing.JScrollPane();
-        ParentID = new javax.swing.JTextArea();
+        ParentTopic = new javax.swing.JComboBox<>();
+        isStatus = new javax.swing.JComboBox<>();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
 
@@ -57,26 +67,23 @@ public class TopicDialog extends javax.swing.JDialog {
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(324, 324, 324)
+                .addGap(145, 145, 145)
                 .addComponent(jLabel1)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(15, 15, 15)
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                .addContainerGap(17, Short.MAX_VALUE)
                 .addComponent(jLabel1)
-                .addContainerGap(18, Short.MAX_VALUE))
+                .addGap(16, 16, 16))
         );
-
-        jLabel2.setFont(new java.awt.Font("Segoe UI", 0, 16)); // NOI18N
-        jLabel2.setText("Mã chủ đề");
 
         jLabel3.setFont(new java.awt.Font("Segoe UI", 0, 16)); // NOI18N
         jLabel3.setText("Tên chủ đề");
 
         jLabel4.setFont(new java.awt.Font("Segoe UI", 0, 16)); // NOI18N
-        jLabel4.setText("Mô tả");
+        jLabel4.setText("Chủ đề chính");
 
         jLabel5.setFont(new java.awt.Font("Segoe UI", 0, 16)); // NOI18N
         jLabel5.setText("Trạng thái");
@@ -94,9 +101,13 @@ public class TopicDialog extends javax.swing.JDialog {
             }
         });
 
-        ParentID.setColumns(20);
-        ParentID.setRows(5);
-        jScrollPane1.setViewportView(ParentID);
+        ParentTopic.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                ParentTopicActionPerformed(evt);
+            }
+        });
+
+        isStatus.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Active", "Hidden" }));
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -104,59 +115,50 @@ public class TopicDialog extends javax.swing.JDialog {
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(jPanel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addGroup(layout.createSequentialGroup()
+                .addGap(14, 14, 14)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 82, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                        .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jLabel4, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addGap(14, 14, 14)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                            .addComponent(jLabel3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(jLabel4, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 82, Short.MAX_VALUE))
-                        .addGap(18, 18, 18)
+                        .addComponent(TopicName, javax.swing.GroupLayout.PREFERRED_SIZE, 178, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(Idtopic, javax.swing.GroupLayout.PREFERRED_SIZE, 178, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(TopicName, javax.swing.GroupLayout.PREFERRED_SIZE, 178, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 713, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(256, 256, 256)
-                        .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 116, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(96, 96, 96)
-                        .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 116, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addContainerGap()
-                        .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 82, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addGap(28, 28, 28)
-                        .addComponent(IsStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 178, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(64, Short.MAX_VALUE))
+                            .addComponent(ParentTopic, javax.swing.GroupLayout.PREFERRED_SIZE, 279, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(isStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 279, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(0, 119, Short.MAX_VALUE))))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 116, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(96, 96, 96)
+                .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 116, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(119, 119, 119))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(layout.createSequentialGroup()
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(Idtopic, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(TopicName, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(57, 57, 57)
-                        .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGap(18, 18, 18)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 124, Short.MAX_VALUE)
-                        .addGap(18, 18, 18)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(IsStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(13, 13, 13)
+                    .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(ParentTopic, javax.swing.GroupLayout.PREFERRED_SIZE, 44, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(isStatus, javax.swing.GroupLayout.PREFERRED_SIZE, 46, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 45, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButton1, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addGap(64, 64, 64))
+                .addGap(43, 43, 43))
         );
 
         pack();
@@ -165,6 +167,10 @@ public class TopicDialog extends javax.swing.JDialog {
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_jButton2ActionPerformed
+
+    private void ParentTopicActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_ParentTopicActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_ParentTopicActionPerformed
 
     /**
      * @param args the command line arguments
@@ -210,14 +216,6 @@ public class TopicDialog extends javax.swing.JDialog {
     }
 
     // Getter và Setter cho các thành phần giao diện
-    public String getTpID() {
-        return Idtopic.getText().trim();
-    }
-
-    public void setTpID(String tpID) {
-        Idtopic.setText(tpID);
-    }
-
     public String getTpTitle() {
         return TopicName.getText().trim();
     }
@@ -226,21 +224,50 @@ public class TopicDialog extends javax.swing.JDialog {
         TopicName.setText(tpTitle);
     }
 
-    public String getTpDescription() {
-        return ParentID.getText().trim();
-    }
-
-    public void setTpDescription(String description) {
-        ParentID.setText(description);
-    }
-
     public String getTpStatus() {
-        return IsStatus.getText().trim();
+        return (String) isStatus.getSelectedItem();
     }
 
     public void setTpStatus(String status) {
-        IsStatus.setText(status);
+        isStatus.setSelectedItem(status);
     }
+
+    public int getTpParent() {
+        String selectedItem = (String) ParentTopic.getSelectedItem();
+        if (selectedItem != null && !selectedItem.isEmpty()) {
+            try {
+                // Lấy tên chủ đề (bỏ phần số "tpID - " nếu có)
+                String title = selectedItem.trim();
+                // Tìm tpID tương ứng trong danh sách chủ đề
+                com.tracnghiem.BUS.TopicBUS topicBUS = new com.tracnghiem.BUS.TopicBUS();
+                java.util.ArrayList<com.tracnghiem.DTO.TopicDTO> topics = topicBUS.getAllActiveTopics();
+                for (com.tracnghiem.DTO.TopicDTO topic : topics) {
+                    if (topic.getTpTitle().equals(title)) {
+                        return topic.getTpID();
+                    }
+                }
+                return 0; // Mặc định là 0 nếu không tìm thấy
+            } catch (Exception e) {
+                return 0; // Mặc định là 0 nếu có lỗi
+            }
+        }
+        return 0; // Mặc định là 0 nếu không có mục nào được chọn
+    }
+
+    public void setTpParent(int tpParent) {
+        // Tìm và chọn mục trong JComboBox dựa trên tpParent (tên chủ đề)
+        com.tracnghiem.BUS.TopicBUS topicBUS = new com.tracnghiem.BUS.TopicBUS();
+        java.util.ArrayList<com.tracnghiem.DTO.TopicDTO> topics = topicBUS.getAllActiveTopics();
+        for (com.tracnghiem.DTO.TopicDTO topic : topics) {
+            if (topic.getTpID() == tpParent) {
+                ParentTopic.setSelectedItem(topic.getTpTitle());
+                return;
+            }
+        }
+        // Nếu không tìm thấy, chọn mục mặc định ("Không có chủ đề cha")
+        ParentTopic.setSelectedIndex(0); // Giả sử mục đầu tiên là "Không có chủ đề cha"
+    }
+
     public javax.swing.JButton getAddButton() {
         return jButton1;
     }
@@ -248,20 +275,33 @@ public class TopicDialog extends javax.swing.JDialog {
     public void setAddButtonActionListener(ActionListener listener) {
         jButton1.addActionListener(listener);
     }
+    
+    private void loadParentTopics() {
+        try {
+            com.tracnghiem.BUS.TopicBUS topicBUS = new com.tracnghiem.BUS.TopicBUS();
+            java.util.ArrayList<com.tracnghiem.DTO.TopicDTO> topics = topicBUS.getAllActiveTopics();
+
+            ParentTopic.removeAllItems(); // Xóa các mục cũ
+            ParentTopic.addItem("Không có chủ đề cha"); // Thêm tùy chọn mặc định (tpParent = 0)
+
+            for (com.tracnghiem.DTO.TopicDTO topic : topics) {
+                ParentTopic.addItem(topic.getTpTitle()); // Chỉ thêm tên chủ đề
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JTextField Idtopic;
-    private javax.swing.JTextField IsStatus;
-    private javax.swing.JTextArea ParentID;
+    private javax.swing.JComboBox<String> ParentTopic;
     private javax.swing.JTextField TopicName;
+    private javax.swing.JComboBox<String> isStatus;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JLabel jLabel1;
-    private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JPanel jPanel1;
-    private javax.swing.JScrollPane jScrollPane1;
     // End of variables declaration//GEN-END:variables
 }

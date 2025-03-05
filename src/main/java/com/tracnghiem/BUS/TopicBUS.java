@@ -20,8 +20,8 @@ public class TopicBUS {
     }
 
     public boolean addTopic(TopicDTO topic) {
-        return topicDAO.insert(topic);
-    }
+    return topicDAO.insert(topic);
+}
 
     public boolean updateTopic(TopicDTO topic) {
         return topicDAO.update(topic);
