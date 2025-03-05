@@ -32,17 +32,17 @@ import javax.swing.text.DefaultCaret;
  * @author THELUC
  */
 public class UserFrame extends javax.swing.JFrame {
-    private int numberOfSquares;
+    private int numberOfSquares = 10;
     private Timer timer;
     private int minutes = 20; // Bắt đầu từ 20 phút
     private int seconds = 0;
     /**
      * Creates new form UserFrame
      */
-    public UserFrame(int n){
-        this.numberOfSquares = n;
+    public UserFrame(String username){ 
         initComponents();
         createSquares();
+        name.setText(username);
         setupTimer();
         startTimer();
     }
@@ -76,7 +76,7 @@ public class UserFrame extends javax.swing.JFrame {
         jLabel6 = new javax.swing.JLabel();
         contentPanel = new javax.swing.JPanel();
         HomePanel = new javax.swing.JPanel();
-        jLabel2 = new javax.swing.JLabel();
+        jLabel15 = new javax.swing.JLabel();
         UserChooseExamPanel = new javax.swing.JPanel();
         jLabel7 = new javax.swing.JLabel();
         jLabel8 = new javax.swing.JLabel();
@@ -133,6 +133,11 @@ public class UserFrame extends javax.swing.JFrame {
         );
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowOpened(java.awt.event.WindowEvent evt) {
+                formWindowOpened(evt);
+            }
+        });
 
         MenuPanel.setBackground(new java.awt.Color(255, 255, 255));
 
@@ -140,7 +145,7 @@ public class UserFrame extends javax.swing.JFrame {
 
         name.setFont(new java.awt.Font("Segoe UI", 1, 18)); // NOI18N
 
-        jLabel25.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com.tracnghiem.icon/student.png"))); // NOI18N
+        jLabel25.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icon/student.png"))); // NOI18N
 
         javax.swing.GroupLayout jPanel2Layout = new javax.swing.GroupLayout(jPanel2);
         jPanel2.setLayout(jPanel2Layout);
@@ -191,7 +196,7 @@ public class UserFrame extends javax.swing.JFrame {
             }
         });
 
-        jLabel11.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com.tracnghiem.icon/lambaithi.png"))); // NOI18N
+        jLabel11.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icon/lambaithi.png"))); // NOI18N
 
         jLabel12.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         jLabel12.setText("Làm bài thi");
@@ -224,7 +229,7 @@ public class UserFrame extends javax.swing.JFrame {
             }
         });
 
-        jLabel3.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com.tracnghiem.icon/test.png"))); // NOI18N
+        jLabel3.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icon/test.png"))); // NOI18N
 
         jLabel5.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         jLabel5.setText("Xem kết quả thi");
@@ -257,7 +262,7 @@ public class UserFrame extends javax.swing.JFrame {
             }
         });
 
-        jLabel4.setIcon(new javax.swing.ImageIcon(getClass().getResource("/com.tracnghiem.icon/student.png"))); // NOI18N
+        jLabel4.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icon/student.png"))); // NOI18N
 
         jLabel6.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         jLabel6.setText("Thông tin cá nhân");
@@ -319,19 +324,21 @@ public class UserFrame extends javax.swing.JFrame {
 
         contentPanel.setLayout(new java.awt.CardLayout());
 
-        jLabel2.setIcon(new javax.swing.ImageIcon(getClass().getResource("/image/trangchu.jpg"))); // NOI18N
+        jLabel15.setIcon(new javax.swing.ImageIcon(getClass().getResource("/image/trangchu.jpg"))); // NOI18N
 
         javax.swing.GroupLayout HomePanelLayout = new javax.swing.GroupLayout(HomePanel);
         HomePanel.setLayout(HomePanelLayout);
         HomePanelLayout.setHorizontalGroup(
             HomePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(HomePanelLayout.createSequentialGroup()
-                .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 1223, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(0, 51, Short.MAX_VALUE))
+            .addGap(0, 1274, Short.MAX_VALUE)
+            .addGroup(HomePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addComponent(jLabel15, javax.swing.GroupLayout.DEFAULT_SIZE, 1274, Short.MAX_VALUE))
         );
         HomePanelLayout.setVerticalGroup(
             HomePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jLabel2, javax.swing.GroupLayout.DEFAULT_SIZE, 850, Short.MAX_VALUE)
+            .addGap(0, 850, Short.MAX_VALUE)
+            .addGroup(HomePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addComponent(jLabel15, javax.swing.GroupLayout.DEFAULT_SIZE, 850, Short.MAX_VALUE))
         );
 
         contentPanel.add(HomePanel, "card2");
@@ -803,8 +810,9 @@ public class UserFrame extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-
-        //doLogout();
+        login loginFrame = new login();
+        loginFrame.setVisible(true);
+        this.dispose();
     }//GEN-LAST:event_jButton2ActionPerformed
 
     private void UserMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_UserMouseClicked
@@ -874,6 +882,10 @@ public class UserFrame extends javax.swing.JFrame {
     private void jButton5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton5ActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_jButton5ActionPerformed
+
+    private void formWindowOpened(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowOpened
+        this.setLocationRelativeTo(null);        // TODO add your handling code here:
+    }//GEN-LAST:event_formWindowOpened
     private void resetBackgrounds() {
         jTextArea1.setBackground(Color.WHITE);
         jTextArea3.setBackground(Color.WHITE);
@@ -962,11 +974,10 @@ public class UserFrame extends javax.swing.JFrame {
             java.util.logging.Logger.getLogger(UserFrame.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
         }
         //</editor-fold>
-        int n = 10;
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {
-                new UserFrame(n).setVisible(true);
+                new UserFrame("DefaultUser").setVisible(true);
             }
         });
     }
@@ -994,7 +1005,7 @@ public class UserFrame extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel12;
     private javax.swing.JLabel jLabel13;
     private javax.swing.JLabel jLabel14;
-    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel15;
     private javax.swing.JLabel jLabel25;
     private javax.swing.JLabel jLabel26;
     private javax.swing.JLabel jLabel3;

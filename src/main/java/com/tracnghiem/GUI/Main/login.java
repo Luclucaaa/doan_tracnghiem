@@ -4,7 +4,14 @@
  */
 package com.tracnghiem.GUI.Main;
 
+import com.tracnghiem.config.JDBCUtil;
 import java.awt.Color;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import javax.swing.Timer;
 import javax.swing.UIManager;
 
 /**
@@ -154,7 +161,7 @@ public class login extends javax.swing.JFrame {
     }// </editor-fold>//GEN-END:initComponents
 
     private void jCheckBox1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jCheckBox1ActionPerformed
-        if ( passwd_txt.getEchoChar() != '\u0000' ) {
+        if (passwd_txt.getEchoChar() != '\u0000') {
             passwd_txt.setEchoChar('\u0000');
             passwd_txt.requestFocus();
         } else {
@@ -169,24 +176,71 @@ public class login extends javax.swing.JFrame {
     }//GEN-LAST:event_formWindowOpened
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
-        String username = txtUsername.getText();
-        String password = new String(passwd_txt.getPassword());
+        String username = txtUsername.getText().trim();
+        String password = new String(passwd_txt.getPassword()).trim();
 
-    // Thay đổi thông tin đăng nhập chính xác theo hệ thống của bạn
-        String correctUsername = "admin";
-        String correctPassword = "12345";
+        if (username.isEmpty() || password.isEmpty()) {
+            lblMessage.setText("Vui lòng nhập đầy đủ thông tin!");
+            lblMessage.setForeground(Color.RED);
+            return;
+        }
 
-        if(username.equals(correctUsername) && password.equals(correctPassword)) {
-            lblMessage.setText("Đăng nhập thành công!");
-            lblMessage.setForeground(Color.GREEN); // Đổi màu chữ thành xanh
+        Connection conn = JDBCUtil.getConnection();
+        if (conn != null) {
+            try {
+                String sql = "SELECT userID, userName, isAdmin FROM users WHERE userName = ? AND userPassword = MD5(?)";
+                PreparedStatement pstmt = conn.prepareStatement(sql);
+                pstmt.setString(1, username);
+                pstmt.setString(2, password);
+                ResultSet rs = pstmt.executeQuery();
+
+                if (rs.next()) {
+                    int isAdmin = rs.getInt("isAdmin");
+                    lblMessage.setText("Đăng nhập thành công!");
+                    lblMessage.setForeground(Color.GREEN);
+                    
+                    Timer timer = new Timer(3000, new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            // Chuyển hướng dựa trên quyền
+                            if (isAdmin == 1) {
+                                // Chuyển đến Main (cho admin)
+                                Main mainFrame = new Main();
+                                mainFrame.setVisible(true);
+                            } else {
+                                // Chuyển đến UserFrame (cho người dùng thường)
+                                UserFrame userFrame = new UserFrame(username); // Truyền username và số câu hỏi mặc định
+                                userFrame.setVisible(true);
+                            }
+                            dispose(); // Đóng form login
+                            ((Timer) e.getSource()).stop(); // Dừng timer sau khi thực hiện
+                        }
+                    });
+                    timer.setRepeats(false); // Chỉ chạy một lần
+                    timer.start();
+                } else {
+                    lblMessage.setText("Tên đăng nhập hoặc mật khẩu không đúng!");
+                    lblMessage.setForeground(Color.RED);
+                }
+
+                rs.close();
+                pstmt.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+                lblMessage.setText("Lỗi kết nối cơ sở dữ liệu: " + e.getMessage());
+                lblMessage.setForeground(Color.RED);
+            } finally {
+                JDBCUtil.closeConnection(conn);
+            }
         } else {
-            lblMessage.setText("Tên đăng nhập hoặc mật khẩu không đúng!");
-            lblMessage.setForeground(Color.RED); // Đổi màu chữ thành đỏ
+            lblMessage.setText("Không thể kết nối đến cơ sở dữ liệu!");
+            lblMessage.setForeground(Color.RED);
         }// TODO add your handling code here:
     }//GEN-LAST:event_jButton3ActionPerformed
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        // TODO add your handling code here:
+        new Regist().setVisible(true);
+        this.dispose(); // Đóng form login// TODO add your handling code here:
     }//GEN-LAST:event_jButton1ActionPerformed
 
     /**
@@ -216,7 +270,16 @@ public class login extends javax.swing.JFrame {
         }
         //</editor-fold>
         //</editor-fold>
-
+        try {
+            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+                if ("Nimbus".equals(info.getName())) {
+                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
+                    break;
+                }
+            }
+        } catch (Exception ex) {
+            java.util.logging.Logger.getLogger(login.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        }
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {

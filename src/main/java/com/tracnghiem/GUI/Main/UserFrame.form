@@ -25,6 +25,9 @@
     <SyntheticProperty name="formSizePolicy" type="int" value="1"/>
     <SyntheticProperty name="generateCenter" type="boolean" value="false"/>
   </SyntheticProperties>
+  <Events>
+    <EventHandler event="windowOpened" listener="java.awt.event.WindowListener" parameters="java.awt.event.WindowEvent" handler="formWindowOpened"/>
+  </Events>
   <AuxValues>
     <AuxValue name="FormSettings_autoResourcing" type="java.lang.Integer" value="0"/>
     <AuxValue name="FormSettings_autoSetComponentName" type="java.lang.Boolean" value="false"/>
@@ -147,7 +150,7 @@
             <Component class="javax.swing.JLabel" name="jLabel25">
               <Properties>
                 <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-                  <Image iconType="3" name="/com.tracnghiem.icon/student.png"/>
+                  <Image iconType="3" name="/icon/student.png"/>
                 </Property>
               </Properties>
             </Component>
@@ -245,7 +248,7 @@
                 <Component class="javax.swing.JLabel" name="jLabel11">
                   <Properties>
                     <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-                      <Image iconType="3" name="/com.tracnghiem.icon/lambaithi.png"/>
+                      <Image iconType="3" name="/icon/lambaithi.png"/>
                     </Property>
                   </Properties>
                 </Component>
@@ -295,7 +298,7 @@
                 <Component class="javax.swing.JLabel" name="jLabel3">
                   <Properties>
                     <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-                      <Image iconType="3" name="/com.tracnghiem.icon/test.png"/>
+                      <Image iconType="3" name="/icon/test.png"/>
                     </Property>
                   </Properties>
                 </Component>
@@ -342,7 +345,7 @@
                 <Component class="javax.swing.JLabel" name="jLabel4">
                   <Properties>
                     <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-                      <Image iconType="3" name="/com.tracnghiem.icon/student.png"/>
+                      <Image iconType="3" name="/icon/student.png"/>
                     </Property>
                   </Properties>
                 </Component>
@@ -374,20 +377,23 @@
           <Layout>
             <DimensionLayout dim="0">
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Group type="102" alignment="0" attributes="0">
-                      <Component id="jLabel2" min="-2" pref="1223" max="-2" attributes="0"/>
-                      <EmptySpace min="0" pref="51" max="32767" attributes="0"/>
+                  <EmptySpace min="0" pref="1274" max="32767" attributes="0"/>
+                  <Group type="103" rootIndex="1" groupAlignment="0" attributes="0">
+                      <Component id="jLabel15" alignment="0" pref="1274" max="32767" attributes="0"/>
                   </Group>
               </Group>
             </DimensionLayout>
             <DimensionLayout dim="1">
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Component id="jLabel2" alignment="0" pref="850" max="32767" attributes="0"/>
+                  <EmptySpace min="0" pref="850" max="32767" attributes="0"/>
+                  <Group type="103" rootIndex="1" groupAlignment="0" attributes="0">
+                      <Component id="jLabel15" alignment="0" pref="850" max="32767" attributes="0"/>
+                  </Group>
               </Group>
             </DimensionLayout>
           </Layout>
           <SubComponents>
-            <Component class="javax.swing.JLabel" name="jLabel2">
+            <Component class="javax.swing.JLabel" name="jLabel15">
               <Properties>
                 <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
                   <Image iconType="3" name="/image/trangchu.jpg"/>

@@ -4,6 +4,15 @@
  */
 package com.tracnghiem.GUI.Main;
 
+import com.tracnghiem.config.JDBCUtil;
+import java.awt.Color;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import javax.swing.Timer;
+
 /**
  *
  * @author THELUC
@@ -39,6 +48,11 @@ public class Regist extends javax.swing.JFrame {
         jLabel6 = new javax.swing.JLabel();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        addWindowListener(new java.awt.event.WindowAdapter() {
+            public void windowOpened(java.awt.event.WindowEvent evt) {
+                formWindowOpened(evt);
+            }
+        });
 
         jLabel1.setFont(new java.awt.Font("Arial", 1, 36)); // NOI18N
         jLabel1.setText("ĐĂNG KÝ");
@@ -70,6 +84,11 @@ public class Regist extends javax.swing.JFrame {
         jButton1.setBackground(new java.awt.Color(153, 255, 255));
         jButton1.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
         jButton1.setText("ĐĂNG KÝ");
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
+            }
+        });
 
         jLabel6.setText("gggggg");
 
@@ -133,6 +152,89 @@ public class Regist extends javax.swing.JFrame {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        String username = jTextField1.getText().trim();
+        String email = jTextField2.getText().trim();
+        String password = new String(jPasswordField1.getPassword()).trim();
+        String confirmPassword = new String(jPasswordField2.getPassword()).trim();
+
+        if (username.isEmpty() || email.isEmpty() || password.isEmpty() || confirmPassword.isEmpty()) {
+            jLabel6.setText("Vui lòng nhập đầy đủ thông tin!");
+            jLabel6.setForeground(Color.RED);
+            return;
+        }
+
+        if (!password.equals(confirmPassword)) {
+            jLabel6.setText("Mật khẩu không khớp!");
+            jLabel6.setForeground(Color.RED);
+            return;
+        }
+
+        Connection conn = JDBCUtil.getConnection();
+        if (conn != null) {
+            try {
+                // Kiểm tra xem username đã tồn tại chưa
+                String checkSql = "SELECT * FROM users WHERE userName = ?";
+                PreparedStatement checkStmt = conn.prepareStatement(checkSql);
+                checkStmt.setString(1, username);
+                ResultSet rs = checkStmt.executeQuery();
+                if (rs.next()) {
+                    jLabel6.setText("Tên tài khoản đã tồn tại!");
+                    jLabel6.setForeground(Color.RED);
+                    rs.close();
+                    checkStmt.close();
+                    return;
+                }
+
+                // Thêm người dùng mới với isAdmin = 0 (người dùng thường)
+                String insertSql = "INSERT INTO users (userName, userEmail, userPassword, userFullName, isAdmin) VALUES (?, ?, MD5(?), ?, 0)";
+                PreparedStatement pstmt = conn.prepareStatement(insertSql);
+                pstmt.setString(1, username);
+                pstmt.setString(2, email);
+                pstmt.setString(3, password);
+                pstmt.setString(4, username); // userFullName tạm dùng username
+                int rows = pstmt.executeUpdate();
+
+                if (rows > 0) {
+                    jLabel6.setText("Đăng ký thành công!");
+                    jLabel6.setForeground(Color.GREEN);
+
+                    // Sử dụng Timer để chuyển hướng sau 3 giây
+                    Timer timer = new Timer(3000, new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            // Chuyển đến UserFrame cho người dùng mới
+                            UserFrame userFrame = new UserFrame(username); // Truyền username và số câu hỏi mặc định
+                            userFrame.setVisible(true);
+                            dispose(); // Đóng form đăng ký
+                            ((Timer) e.getSource()).stop(); // Dừng timer sau khi thực hiện
+                        }
+                    });
+                    timer.setRepeats(false); // Chỉ chạy một lần
+                    timer.start();
+                } else {
+                    jLabel6.setText("Đăng ký thất bại!");
+                    jLabel6.setForeground(Color.RED);
+                }
+
+                pstmt.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+                jLabel6.setText("Lỗi kết nối cơ sở dữ liệu: " + e.getMessage());
+                jLabel6.setForeground(Color.RED);
+            } finally {
+                JDBCUtil.closeConnection(conn);
+            }
+        } else {
+            jLabel6.setText("Không thể kết nối đến cơ sở dữ liệu!");
+            jLabel6.setForeground(Color.RED);
+        }// TODO add your handling code here:
+    }//GEN-LAST:event_jButton1ActionPerformed
+
+    private void formWindowOpened(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowOpened
+        this.setLocationRelativeTo(null);        // TODO add your handling code here:
+    }//GEN-LAST:event_formWindowOpened
+
     /**
      * @param args the command line arguments
      */
@@ -160,7 +262,16 @@ public class Regist extends javax.swing.JFrame {
         }
         //</editor-fold>
         //</editor-fold>
-
+        try {
+            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+                if ("Nimbus".equals(info.getName())) {
+                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
+                    break;
+                }
+            }
+        } catch (Exception ex) {
+            java.util.logging.Logger.getLogger(Regist.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        }
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {

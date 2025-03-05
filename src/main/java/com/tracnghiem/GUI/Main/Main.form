@@ -24,6 +24,9 @@
     <SyntheticProperty name="formSizePolicy" type="int" value="1"/>
     <SyntheticProperty name="generateCenter" type="boolean" value="false"/>
   </SyntheticProperties>
+  <Events>
+    <EventHandler event="windowOpened" listener="java.awt.event.WindowListener" parameters="java.awt.event.WindowEvent" handler="formWindowOpened"/>
+  </Events>
   <AuxValues>
     <AuxValue name="FormSettings_autoResourcing" type="java.lang.Integer" value="0"/>
     <AuxValue name="FormSettings_autoSetComponentName" type="java.lang.Boolean" value="false"/>
@@ -150,7 +153,7 @@
             <Component class="javax.swing.JLabel" name="jLabel25">
               <Properties>
                 <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-                  <Image iconType="3" name="/com.tracnghiem.icon/admin.png"/>
+                  <Image iconType="3" name="/icon/admin.png"/>
                 </Property>
               </Properties>
             </Component>
@@ -248,7 +251,7 @@
                 <Component class="javax.swing.JLabel" name="jLabel11">
                   <Properties>
                     <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-                      <Image iconType="3" name="/com.tracnghiem.icon/nguoidung.png"/>
+                      <Image iconType="3" name="/icon/nguoidung.png"/>
                     </Property>
                   </Properties>
                 </Component>
@@ -298,7 +301,7 @@
                 <Component class="javax.swing.JLabel" name="jLabel3">
                   <Properties>
                     <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-                      <Image iconType="3" name="/com.tracnghiem.icon/monhoc.png"/>
+                      <Image iconType="3" name="/icon/monhoc.png"/>
                     </Property>
                   </Properties>
                 </Component>
@@ -345,7 +348,7 @@
                 <Component class="javax.swing.JLabel" name="jLabel4">
                   <Properties>
                     <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-                      <Image iconType="3" name="/com.tracnghiem.icon/test.png"/>
+                      <Image iconType="3" name="/icon/test.png"/>
                     </Property>
                   </Properties>
                 </Component>
@@ -395,7 +398,7 @@
                 <Component class="javax.swing.JLabel" name="jLabel7">
                   <Properties>
                     <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-                      <Image iconType="3" name="/com.tracnghiem.icon/dethi.png"/>
+                      <Image iconType="3" name="/icon/dethi.png"/>
                     </Property>
                   </Properties>
                 </Component>
@@ -445,7 +448,7 @@
                 <Component class="javax.swing.JLabel" name="jLabel9">
                   <Properties>
                     <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-                      <Image iconType="3" name="/com.tracnghiem.icon/cauhoi.png"/>
+                      <Image iconType="3" name="/icon/cauhoi.png"/>
                     </Property>
                   </Properties>
                 </Component>
@@ -495,7 +498,7 @@
                 <Component class="javax.swing.JLabel" name="jLabel14">
                   <Properties>
                     <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-                      <Image iconType="3" name="/com.tracnghiem.icon/thongke.png"/>
+                      <Image iconType="3" name="/icon/thongke.png"/>
                     </Property>
                   </Properties>
                 </Component>
@@ -546,7 +549,7 @@
             <Component class="javax.swing.JLabel" name="jLabel2">
               <Properties>
                 <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-                  <Image iconType="3" name="/com.tracnghiem.image/trangchu.jpg"/>
+                  <Image iconType="3" name="/image/trangchu.jpg"/>
                 </Property>
               </Properties>
             </Component>
@@ -634,7 +637,7 @@
                       <Font name="Segoe UI" size="15" style="1"/>
                     </Property>
                     <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-                      <Image iconType="3" name="/com.tracnghiem.icon/delete.png"/>
+                      <Image iconType="3" name="/icon/delete.png"/>
                     </Property>
                     <Property name="text" type="java.lang.String" value="X&#xf3;a"/>
                     <Property name="horizontalTextPosition" type="int" value="0"/>
@@ -650,7 +653,7 @@
                       <Font name="Segoe UI" size="15" style="1"/>
                     </Property>
                     <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-                      <Image iconType="3" name="/com.tracnghiem.icon/change-user.png"/>
+                      <Image iconType="3" name="/icon/change-user.png"/>
                     </Property>
                     <Property name="text" type="java.lang.String" value="S&#x1eed;a"/>
                     <Property name="horizontalTextPosition" type="int" value="0"/>
@@ -666,7 +669,7 @@
                       <Font name="Segoe UI" size="15" style="1"/>
                     </Property>
                     <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-                      <Image iconType="3" name="/com.tracnghiem.icon/add.png"/>
+                      <Image iconType="3" name="/icon/add.png"/>
                     </Property>
                     <Property name="text" type="java.lang.String" value="Th&#xea;m"/>
                     <Property name="horizontalTextPosition" type="int" value="0"/>
@@ -704,7 +707,7 @@
                     <Component class="javax.swing.JLabel" name="jLabel13">
                       <Properties>
                         <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-                          <Image iconType="3" name="/com.tracnghiem.icon/search.png"/>
+                          <Image iconType="3" name="/icon/search.png"/>
                         </Property>
                       </Properties>
                     </Component>
@@ -716,7 +719,7 @@
                       <Font name="Segoe UI" size="15" style="1"/>
                     </Property>
                     <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-                      <Image iconType="3" name="/com.tracnghiem.icon/key.png"/>
+                      <Image iconType="3" name="/icon/key.png"/>
                     </Property>
                     <Property name="text" type="java.lang.String" value="Reset pass"/>
                     <Property name="horizontalTextPosition" type="int" value="0"/>
@@ -871,7 +874,7 @@
                       <Font name="Segoe UI" size="15" style="1"/>
                     </Property>
                     <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-                      <Image iconType="3" name="/com.tracnghiem.icon/add.png"/>
+                      <Image iconType="3" name="/icon/add.png"/>
                     </Property>
                     <Property name="text" type="java.lang.String" value="Th&#xea;m"/>
                     <Property name="horizontalTextPosition" type="int" value="0"/>
@@ -888,7 +891,7 @@
                       <Font name="Segoe UI" size="15" style="1"/>
                     </Property>
                     <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-                      <Image iconType="3" name="/com.tracnghiem.icon/delete.png"/>
+                      <Image iconType="3" name="/icon/delete.png"/>
                     </Property>
                     <Property name="text" type="java.lang.String" value="X&#xf3;a"/>
                     <Property name="horizontalTextPosition" type="int" value="0"/>
@@ -901,7 +904,7 @@
                       <Font name="Segoe UI" size="15" style="1"/>
                     </Property>
                     <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-                      <Image iconType="3" name="/com.tracnghiem.icon/change.png"/>
+                      <Image iconType="3" name="/icon/change.png"/>
                     </Property>
                     <Property name="text" type="java.lang.String" value="S&#x1eed;a"/>
                     <Property name="horizontalTextPosition" type="int" value="0"/>
@@ -921,7 +924,7 @@
                 <Component class="javax.swing.JLabel" name="jLabel18">
                   <Properties>
                     <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-                      <Image iconType="3" name="/com.tracnghiem.icon/search.png"/>
+                      <Image iconType="3" name="/icon/search.png"/>
                     </Property>
                   </Properties>
                 </Component>
@@ -1088,7 +1091,7 @@
                       <Font name="Segoe UI" size="15" style="1"/>
                     </Property>
                     <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-                      <Image iconType="3" name="/com.tracnghiem.icon/add.png"/>
+                      <Image iconType="3" name="/icon/add.png"/>
                     </Property>
                     <Property name="text" type="java.lang.String" value="Th&#xea;m"/>
                     <Property name="horizontalTextPosition" type="int" value="0"/>
@@ -1105,7 +1108,7 @@
                       <Font name="Segoe UI" size="15" style="1"/>
                     </Property>
                     <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-                      <Image iconType="3" name="/com.tracnghiem.icon/delete.png"/>
+                      <Image iconType="3" name="/icon/delete.png"/>
                     </Property>
                     <Property name="text" type="java.lang.String" value="X&#xf3;a"/>
                     <Property name="horizontalTextPosition" type="int" value="0"/>
@@ -1118,7 +1121,7 @@
                       <Font name="Segoe UI" size="15" style="1"/>
                     </Property>
                     <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-                      <Image iconType="3" name="/com.tracnghiem.icon/change.png"/>
+                      <Image iconType="3" name="/icon/change.png"/>
                     </Property>
                     <Property name="text" type="java.lang.String" value="S&#x1eed;a"/>
                     <Property name="horizontalTextPosition" type="int" value="0"/>
@@ -1141,7 +1144,7 @@
                 <Component class="javax.swing.JLabel" name="jLabel20">
                   <Properties>
                     <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-                      <Image iconType="3" name="/com.tracnghiem.icon/search.png"/>
+                      <Image iconType="3" name="/icon/search.png"/>
                     </Property>
                   </Properties>
                 </Component>
@@ -1332,7 +1335,7 @@
                       <Font name="Segoe UI" size="15" style="1"/>
                     </Property>
                     <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-                      <Image iconType="3" name="/com.tracnghiem.icon/add.png"/>
+                      <Image iconType="3" name="/icon/add.png"/>
                     </Property>
                     <Property name="text" type="java.lang.String" value="Th&#xea;m"/>
                     <Property name="horizontalTextPosition" type="int" value="0"/>
@@ -1349,7 +1352,7 @@
                       <Font name="Segoe UI" size="15" style="1"/>
                     </Property>
                     <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-                      <Image iconType="3" name="/com.tracnghiem.icon/delete.png"/>
+                      <Image iconType="3" name="/icon/delete.png"/>
                     </Property>
                     <Property name="text" type="java.lang.String" value="X&#xf3;a"/>
                     <Property name="horizontalTextPosition" type="int" value="0"/>
@@ -1362,7 +1365,7 @@
                       <Font name="Segoe UI" size="15" style="1"/>
                     </Property>
                     <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-                      <Image iconType="3" name="/com.tracnghiem.icon/change.png"/>
+                      <Image iconType="3" name="/icon/change.png"/>
                     </Property>
                     <Property name="text" type="java.lang.String" value="S&#x1eed;a"/>
                     <Property name="horizontalTextPosition" type="int" value="0"/>
@@ -1382,7 +1385,7 @@
                 <Component class="javax.swing.JLabel" name="jLabel19">
                   <Properties>
                     <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-                      <Image iconType="3" name="/com.tracnghiem.icon/search.png"/>
+                      <Image iconType="3" name="/icon/search.png"/>
                     </Property>
                   </Properties>
                 </Component>
@@ -1488,7 +1491,7 @@
                           <Component id="cz9" min="-2" pref="89" max="-2" attributes="0"/>
                           <EmptySpace type="separate" max="-2" attributes="0"/>
                           <Component id="cz8" min="-2" pref="89" max="-2" attributes="0"/>
-                          <EmptySpace pref="212" max="32767" attributes="0"/>
+                          <EmptySpace pref="182" max="32767" attributes="0"/>
                           <Group type="103" groupAlignment="0" attributes="0">
                               <Component id="jLabel28" alignment="0" min="-2" max="-2" attributes="0"/>
                               <Component id="jTextField11" alignment="0" min="-2" pref="134" max="-2" attributes="0"/>
@@ -1510,33 +1513,30 @@
                 </DimensionLayout>
                 <DimensionLayout dim="1">
                   <Group type="103" groupAlignment="0" attributes="0">
-                      <Group type="102" attributes="0">
+                      <Group type="102" alignment="0" attributes="0">
+                          <Group type="103" groupAlignment="3" attributes="0">
+                              <Component id="jLabel24" alignment="3" min="-2" max="-2" attributes="0"/>
+                              <Component id="jLabel28" alignment="3" min="-2" max="-2" attributes="0"/>
+                          </Group>
+                          <EmptySpace min="-2" pref="8" max="-2" attributes="0"/>
                           <Group type="103" groupAlignment="0" attributes="0">
-                              <Group type="102" alignment="0" attributes="0">
-                                  <EmptySpace max="-2" attributes="0"/>
-                                  <Group type="103" groupAlignment="0" max="-2" attributes="0">
-                                      <Component id="cz7" max="32767" attributes="0"/>
-                                      <Component id="cz9" max="32767" attributes="0"/>
-                                      <Component id="cz8" max="32767" attributes="0"/>
-                                  </Group>
-                              </Group>
-                              <Group type="102" alignment="0" attributes="0">
-                                  <Group type="103" groupAlignment="3" attributes="0">
-                                      <Component id="jLabel24" alignment="3" min="-2" max="-2" attributes="0"/>
-                                      <Component id="jLabel28" alignment="3" min="-2" max="-2" attributes="0"/>
-                                  </Group>
-                                  <EmptySpace min="-2" pref="8" max="-2" attributes="0"/>
-                                  <Group type="103" groupAlignment="0" attributes="0">
-                                      <Component id="jLabel27" min="-2" pref="36" max="-2" attributes="0"/>
-                                      <Group type="103" groupAlignment="3" attributes="0">
-                                          <Component id="jTextField10" alignment="3" min="-2" pref="36" max="-2" attributes="0"/>
-                                          <Component id="jTextField6" alignment="3" min="-2" pref="36" max="-2" attributes="0"/>
-                                          <Component id="jTextField11" alignment="3" min="-2" pref="36" max="-2" attributes="0"/>
-                                      </Group>
-                                  </Group>
+                              <Component id="jLabel27" min="-2" pref="36" max="-2" attributes="0"/>
+                              <Group type="103" groupAlignment="3" attributes="0">
+                                  <Component id="jTextField10" alignment="3" min="-2" pref="36" max="-2" attributes="0"/>
+                                  <Component id="jTextField6" alignment="3" min="-2" pref="36" max="-2" attributes="0"/>
+                                  <Component id="jTextField11" alignment="3" min="-2" pref="36" max="-2" attributes="0"/>
                               </Group>
                           </Group>
                           <EmptySpace min="0" pref="32" max="32767" attributes="0"/>
+                      </Group>
+                      <Group type="102" attributes="0">
+                          <EmptySpace max="-2" attributes="0"/>
+                          <Group type="103" groupAlignment="0" attributes="0">
+                              <Component id="cz9" max="32767" attributes="0"/>
+                              <Component id="cz7" pref="83" max="32767" attributes="0"/>
+                              <Component id="cz8" alignment="0" max="32767" attributes="0"/>
+                          </Group>
+                          <EmptySpace max="-2" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
@@ -1756,10 +1756,12 @@
                   <Group type="103" groupAlignment="0" attributes="0">
                       <Group type="102" alignment="1" attributes="0">
                           <EmptySpace pref="21" max="32767" attributes="0"/>
-                          <Group type="103" groupAlignment="3" attributes="0">
-                              <Component id="jLabel23" alignment="3" min="-2" pref="34" max="-2" attributes="0"/>
-                              <Component id="jTextField9" alignment="3" min="-2" pref="34" max="-2" attributes="0"/>
+                          <Group type="103" groupAlignment="0" attributes="0">
                               <Component id="jLabel22" alignment="1" min="-2" pref="34" max="-2" attributes="0"/>
+                              <Group type="103" groupAlignment="3" attributes="0">
+                                  <Component id="jLabel23" alignment="3" min="-2" pref="34" max="-2" attributes="0"/>
+                                  <Component id="jTextField9" alignment="3" min="-2" pref="34" max="-2" attributes="0"/>
+                              </Group>
                           </Group>
                           <EmptySpace min="-2" pref="27" max="-2" attributes="0"/>
                       </Group>
@@ -1780,7 +1782,7 @@
                 <Component class="javax.swing.JLabel" name="jLabel22">
                   <Properties>
                     <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
-                      <Image iconType="3" name="/com.tracnghiem.icon/search.png"/>
+                      <Image iconType="3" name="/icon/search.png"/>
                     </Property>
                   </Properties>
                 </Component>
