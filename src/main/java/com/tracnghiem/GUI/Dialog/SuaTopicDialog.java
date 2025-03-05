@@ -4,6 +4,8 @@
  */
 package com.tracnghiem.GUI.Dialog;
 
+import java.awt.event.ActionListener;
+
 /**
  *
  * @author THELUC
@@ -49,14 +51,14 @@ public class SuaTopicDialog extends javax.swing.JDialog {
         jPanel1.setBackground(new java.awt.Color(153, 255, 204));
 
         jLabel1.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
-        jLabel1.setText("Thêm chủ đề mới");
+        jLabel1.setText("Sửa chủ đề");
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
         jPanel1Layout.setHorizontalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addGap(324, 324, 324)
+                .addGap(371, 371, 371)
                 .addComponent(jLabel1)
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
@@ -214,6 +216,44 @@ public class SuaTopicDialog extends javax.swing.JDialog {
                 dialog.setVisible(true);
             }
         });
+    }
+    public String getTpID() {
+        return jTextField1.getText().trim();
+    }
+
+    public void setTpID(String tpID) {
+        jTextField1.setText(tpID);
+    }
+
+    public String getTpTitle() {
+        return jTextField5.getText().trim();
+    }
+
+    public void setTpTitle(String tpTitle) {
+        jTextField5.setText(tpTitle);
+    }
+
+    public String getTpDescription() {
+        return jTextArea1.getText().trim();
+    }
+
+    public void setTpDescription(String description) {
+        jTextArea1.setText(description);
+    }
+
+    public String getTpStatus() {
+        return jTextField2.getText().trim();
+    }
+
+    public void setTpStatus(String status) {
+        jTextField2.setText(status);
+    }
+    public javax.swing.JButton getEditButton() {
+        return jButton1;
+    }
+
+    public void setEditButtonActionListener(ActionListener listener) {
+        jButton1.addActionListener(listener);
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

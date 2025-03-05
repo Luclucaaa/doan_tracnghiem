@@ -4,10 +4,22 @@
  */
 package com.tracnghiem.GUI.Main;
 
+import com.tracnghiem.BUS.UserBUS;
+import com.tracnghiem.DTO.UserDTO;
+import com.tracnghiem.BUS.TopicBUS;
+import com.tracnghiem.DTO.TopicDTO;
 import com.tracnghiem.GUI.Dialog.ExamDialog;
 import com.tracnghiem.GUI.Dialog.QuestionDialog;
+import com.tracnghiem.GUI.Dialog.SuaTopicDialog;
+import com.tracnghiem.GUI.Dialog.SuaUserDialog;
 import com.tracnghiem.GUI.Dialog.TestDialog;
 import com.tracnghiem.GUI.Dialog.TopicDialog;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.text.DecimalFormat;
+import java.util.ArrayList;
+import javax.swing.JOptionPane;
+import javax.swing.table.DefaultTableModel;
 
 /**
  *
@@ -32,7 +44,8 @@ public class Main extends javax.swing.JFrame {
         examDialog.setLocationRelativeTo(null);
         testDialog.setLocationRelativeTo(null);
         topicDialog.setLocationRelativeTo(null);
-        
+        loadUserTable();
+        loadTopics();
         
     }
     
@@ -80,7 +93,6 @@ public class Main extends javax.swing.JFrame {
         jPanel1 = new javax.swing.JPanel();
         cz = new javax.swing.JButton();
         jButton3 = new javax.swing.JButton();
-        jButton4 = new javax.swing.JButton();
         jPanel5 = new javax.swing.JPanel();
         jLabel13 = new javax.swing.JLabel();
         jButton5 = new javax.swing.JButton();
@@ -473,18 +485,6 @@ public class Main extends javax.swing.JFrame {
             }
         });
 
-        jButton4.setFont(new java.awt.Font("Segoe UI", 1, 15)); // NOI18N
-        jButton4.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icon/add.png"))); // NOI18N
-        jButton4.setText("Thêm");
-        jButton4.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
-        jButton4.setMaximumSize(new java.awt.Dimension(80, 80));
-        jButton4.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        jButton4.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                jButton4ActionPerformed(evt);
-            }
-        });
-
         jLabel13.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icon/search.png"))); // NOI18N
 
         javax.swing.GroupLayout jPanel5Layout = new javax.swing.GroupLayout(jPanel5);
@@ -515,6 +515,11 @@ public class Main extends javax.swing.JFrame {
         });
 
         jTextField1.setFont(new java.awt.Font("Segoe UI", 0, 15)); // NOI18N
+        jTextField1.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                jTextField1KeyReleased(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
         jPanel1.setLayout(jPanel1Layout);
@@ -522,8 +527,6 @@ public class Main extends javax.swing.JFrame {
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(jButton4, javax.swing.GroupLayout.PREFERRED_SIZE, 89, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
                 .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 91, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(cz, javax.swing.GroupLayout.PREFERRED_SIZE, 91, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -538,14 +541,6 @@ public class Main extends javax.swing.JFrame {
         jPanel1Layout.setVerticalGroup(
             jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel1Layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
-                    .addComponent(jButton3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jButton4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jButton5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(cz, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(0, 0, Short.MAX_VALUE))
-            .addGroup(jPanel1Layout.createSequentialGroup()
                 .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGap(16, 16, 16)
@@ -553,7 +548,13 @@ public class Main extends javax.swing.JFrame {
                     .addGroup(jPanel1Layout.createSequentialGroup()
                         .addGap(24, 24, 24)
                         .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(19, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                .addGap(0, 0, Short.MAX_VALUE)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                    .addComponent(jButton3, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jButton5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(cz)))
         );
 
         jTable1.setModel(new javax.swing.table.DefaultTableModel(
@@ -609,6 +610,11 @@ public class Main extends javax.swing.JFrame {
         cz2.setText("Xóa");
         cz2.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         cz2.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        cz2.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cz2ActionPerformed(evt);
+            }
+        });
 
         cz3.setFont(new java.awt.Font("Segoe UI", 1, 15)); // NOI18N
         cz3.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icon/change.png"))); // NOI18N
@@ -622,6 +628,11 @@ public class Main extends javax.swing.JFrame {
         });
 
         jTextField2.setFont(new java.awt.Font("Segoe UI", 0, 15)); // NOI18N
+        jTextField2.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                jTextField2KeyReleased(evt);
+            }
+        });
 
         jLabel18.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icon/search.png"))); // NOI18N
 
@@ -1178,7 +1189,7 @@ public class Main extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-
+    
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         login loginFrame = new login();
         loginFrame.setVisible(true);
@@ -1186,11 +1197,74 @@ public class Main extends javax.swing.JFrame {
     }//GEN-LAST:event_jButton2ActionPerformed
 
     private void cz1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cz1ActionPerformed
-        // TODO add your handling code here:
+        TopicDialog topicDialog = new TopicDialog(this, true);
+    
+    topicDialog.setAddButtonActionListener(new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            try {
+                String tpTitle = topicDialog.getTpTitle(); // Lấy tên chủ đề từ jTextField5
+                int tpParent = Integer.parseInt(topicDialog.getTpDescription()); // Lấy tpParent từ jTextArea1 (giả định là số)
+                int tpStatus = topicDialog.getTpStatus().equals("Active") ? 1 : 0; // Lấy trạng thái từ jTextField2
+
+                TopicDTO newTopic = new TopicDTO(tpTitle, tpParent, tpStatus);
+                TopicBUS topicBUS = new TopicBUS();
+                if (topicBUS.addTopic(newTopic)) {
+                    JOptionPane.showMessageDialog(null, "Thêm chủ đề thành công!");
+                    loadTopics(); // Cập nhật lại bảng
+                    topicDialog.dispose();
+                } else {
+                    JOptionPane.showMessageDialog(null, "Thêm chủ đề thất bại!");
+                }
+            } catch (NumberFormatException ex) {
+                JOptionPane.showMessageDialog(null, "Vui lòng nhập đúng định dạng cho tpParent (số nguyên)!");
+            }
+        }
+    });
+
+    topicDialog.setVisible(true);        // TODO add your handling code here:
     }//GEN-LAST:event_cz1ActionPerformed
 
     private void cz3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cz3ActionPerformed
-        // TODO add your handling code here:
+        int selectedRow = jTable2.getSelectedRow();
+    if (selectedRow >= 0) {
+        String tpID = jTable2.getValueAt(selectedRow, 0).toString(); // Lấy mã chủ đề từ cột 0
+        TopicBUS topicBUS = new TopicBUS();
+        TopicDTO topic = topicBUS.getTopicByID(tpID);
+
+        if (topic != null) {
+            SuaTopicDialog suaDialog = new SuaTopicDialog(this, true);
+            suaDialog.setTpID(tpID); // Đặt mã chủ đề vào jTextField1 (chỉ đọc, không cho chỉnh sửa)
+            suaDialog.setTpTitle(topic.getTpTitle()); // Đặt tên chủ đề vào jTextField5
+            suaDialog.setTpDescription(String.valueOf(topic.getTpParent())); // Đặt tpParent vào jTextArea1
+            suaDialog.setTpStatus(topic.getTpStatus() == 1 ? "Active" : "Hidden"); // Đặt trạng thái vào jTextField2
+
+            suaDialog.setEditButtonActionListener(new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    try {
+                        topic.setTpTitle(suaDialog.getTpTitle()); // Lấy tên chủ đề từ jTextField5
+                        topic.setTpParent(Integer.parseInt(suaDialog.getTpDescription())); // Lấy tpParent từ jTextArea1
+                        topic.setTpStatus(suaDialog.getTpStatus().equals("Active") ? 1 : 0); // Lấy trạng thái từ jTextField2
+
+                        if (topicBUS.updateTopic(topic)) {
+                            JOptionPane.showMessageDialog(null, "Cập nhật chủ đề thành công!");
+                            loadTopics(); // Cập nhật lại bảng
+                            suaDialog.dispose();
+                        } else {
+                            JOptionPane.showMessageDialog(null, "Cập nhật chủ đề thất bại!");
+                        }
+                    } catch (NumberFormatException ex) {
+                        JOptionPane.showMessageDialog(null, "Vui lòng nhập đúng định dạng cho tpParent (số nguyên)!");
+                    }
+                }
+            });
+
+            suaDialog.setVisible(true);
+        }
+    } else {
+        JOptionPane.showMessageDialog(null, "Vui lòng chọn một chủ đề để sửa!");
+    }        // TODO add your handling code here:
     }//GEN-LAST:event_cz3ActionPerformed
 
     private void QuestionMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_QuestionMouseClicked
@@ -1268,7 +1342,55 @@ public class Main extends javax.swing.JFrame {
     }//GEN-LAST:event_TestMouseClicked
 
     private void jButton3MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton3MouseClicked
-       // TODO add your handling code here:
+        int selectedRow = jTable1.getSelectedRow();
+    if (selectedRow >= 0) {
+        String userID = jTable1.getValueAt(selectedRow, 0).toString(); // Lấy mã người dùng từ cột 0
+        UserBUS userBUS = new UserBUS();
+        UserDTO user = userBUS.getUserByID(userID); // Lấy thông tin người dùng từ cơ sở dữ liệu
+
+        // Mở dialog sửa thông tin
+        SuaUserDialog suaDialog = new SuaUserDialog(this, true);
+        
+        // Điền thông tin người dùng vào các trường
+        suaDialog.setIdUser(userID);
+        suaDialog.setIdUserEditable(false); // Không cho chỉnh sửa mã người dùng
+        suaDialog.setSuaUserName(user.getUserName());
+        suaDialog.setSuaUserNameDayDu(user.getUserFullName());
+        suaDialog.setSuaEmail(user.getUserEmail());
+        suaDialog.setSelectedRole(user.getIsAdmin() == 1 ? "ADMIN" : "USER");
+
+        // Xử lý khi nhấn nút "Sửa"
+        suaDialog.getJButton1().addActionListener(new java.awt.event.ActionListener() {
+            @Override
+            public void actionPerformed(java.awt.event.ActionEvent e) {
+                // Cập nhật thông tin vào UserDTO (không thay đổi mật khẩu)
+                user.setUserName(suaDialog.getSuaUserName());
+                user.setUserFullName(suaDialog.getSuaUserNameDayDu());
+                user.setUserEmail(suaDialog.getSuaEmail());
+                user.setIsAdmin(suaDialog.getSelectedRole().equals("ADMIN") ? 1 : 0);
+
+                if (userBUS.updateUser(user)) {
+                    JOptionPane.showMessageDialog(null, "Cập nhật thông tin thành công!");
+                    loadUserTable(); // Cập nhật lại bảng
+                    suaDialog.dispose();
+                } else {
+                    JOptionPane.showMessageDialog(null, "Cập nhật thông tin thất bại!");
+                }
+            }
+        });
+
+        // Xử lý khi nhấn nút "Hủy bỏ"
+        suaDialog.getJButton2().addActionListener(new java.awt.event.ActionListener() {
+            @Override
+            public void actionPerformed(java.awt.event.ActionEvent e) {
+                suaDialog.dispose();
+            }
+        });
+
+        suaDialog.setVisible(true);
+    } else {
+        JOptionPane.showMessageDialog(null, "Vui lòng chọn một người dùng để sửa!");
+    }       // TODO add your handling code here:
     }//GEN-LAST:event_jButton3MouseClicked
 
     private void cz7MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_cz7MouseClicked
@@ -1290,16 +1412,76 @@ public class Main extends javax.swing.JFrame {
         // TODO add your handling code here:
     }//GEN-LAST:event_cz16MouseClicked
 
-    private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jButton4ActionPerformed
-
     private void jButton5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton5ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_jButton5ActionPerformed
+        int selectedRow = jTable1.getSelectedRow();
+        if (selectedRow >= 0) {
+            String userID = jTable1.getValueAt(selectedRow, 0).toString(); // Lấy mã người dùng từ cột 0
+            UserBUS userBUS = new UserBUS();
+            UserDTO user = userBUS.getUserByID(userID); // Lấy thông tin người dùng từ cơ sở dữ liệu
 
+            int confirm = JOptionPane.showConfirmDialog(null, 
+                "Bạn có chắc muốn reset mật khẩu về '123' không?", 
+                "Xác nhận reset mật khẩu", 
+                JOptionPane.YES_NO_OPTION);
+            if (confirm == JOptionPane.YES_OPTION) {
+                user.setUserPassword(md5("123")); // Reset mật khẩu về "123" và mã hóa MD5
+                if (userBUS.updateUser(user)) {
+                    JOptionPane.showMessageDialog(null, "Reset mật khẩu thành công! Mật khẩu mới: 123");
+                } else {
+                    JOptionPane.showMessageDialog(null, "Reset mật khẩu thất bại!");
+                }
+            }
+        } else {
+            JOptionPane.showMessageDialog(null, "Vui lòng chọn một người dùng để reset mật khẩu!");
+        }        // TODO add your handling code here:
+    }//GEN-LAST:event_jButton5ActionPerformed
+    private String md5(String input) {
+        try {
+            java.security.MessageDigest md = java.security.MessageDigest.getInstance("MD5");
+            byte[] messageDigest = md.digest(input.getBytes());
+            java.math.BigInteger no = new java.math.BigInteger(1, messageDigest);
+            String hashtext = no.toString(16);
+            while (hashtext.length() < 32) {
+                hashtext = "0" + hashtext;
+            }
+            return hashtext;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+    private void loadUserTable() {
+        UserBUS userBUS = new UserBUS();
+        ArrayList<UserDTO> userList = userBUS.getAllUsers();
+        DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
+        model.setRowCount(0); // Xóa dữ liệu cũ
+        for (UserDTO user : userList) {
+            model.addRow(new Object[]{
+                user.getUserID(),
+                user.getUserName(),
+                user.getUserFullName(),
+                user.getUserEmail(),
+                user.getIsAdmin() == 1 ? "ADMIN" : "USER"
+            });
+        }
+    }
+    
     private void czActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_czActionPerformed
-        // TODO add your handling code here:
+        int selectedRow = jTable1.getSelectedRow();
+        if (selectedRow >= 0) {
+            String userID = jTable1.getValueAt(selectedRow, 0).toString();
+            int confirm = JOptionPane.showConfirmDialog(null, "Bạn có chắc muốn xóa người dùng này?", "Xác nhận", JOptionPane.YES_NO_OPTION);
+            if (confirm == JOptionPane.YES_OPTION) {
+                UserBUS userBUS = new UserBUS();
+                if (userBUS.deleteUser(userID)) {
+                    JOptionPane.showMessageDialog(null, "Xóa người dùng thành công!");
+                    loadUsers(); // Cập nhật lại bảng
+                } else {
+                    JOptionPane.showMessageDialog(null, "Xóa người dùng thất bại!");
+                }
+            }
+        } else {
+            JOptionPane.showMessageDialog(null, "Vui lòng chọn một người dùng để xóa!");
+        }        // TODO add your handling code here:
     }//GEN-LAST:event_czActionPerformed
 
     private void jTextField4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField4ActionPerformed
@@ -1321,11 +1503,123 @@ public class Main extends javax.swing.JFrame {
     private void jTextField11ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField11ActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_jTextField11ActionPerformed
+    //Thêm người dùng vào bảng quản lý
+    private void loadUsers() {
+        UserBUS userBUS = new UserBUS();
+        ArrayList<UserDTO> users = userBUS.getAllUsers();
 
+        // Tạo model cho jTable1
+        DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
+        model.setRowCount(0); // Xóa dữ liệu cũ trong bảng
+
+        // Định dạng mã người dùng thành 3 chữ số (001, 002, ...)
+        DecimalFormat formatter = new DecimalFormat("000");
+
+        for (UserDTO user : users) {
+            String formattedUserID = formatter.format(user.getUserID());
+            model.addRow(new Object[]{
+                formattedUserID, // Mã người dùng (001, 002, ...)
+                user.getUserName(), // Tên tài khoản
+                user.getUserFullName(), // Tên đầy đủ
+                user.getUserEmail(), // Email
+                user.getIsAdmin() == 1 ? "Admin" : "User" // Quyền (Admin hoặc User)
+            });
+        }
+}
+    
     private void formWindowOpened(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowOpened
         this.setLocationRelativeTo(null);// TODO add your handling code here:
     }//GEN-LAST:event_formWindowOpened
 
+    private void jTextField1KeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jTextField1KeyReleased
+        String searchText = jTextField1.getText().trim().toLowerCase();
+        UserBUS userBUS = new UserBUS();
+        ArrayList<UserDTO> users = userBUS.getAllUsers();
+
+        DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
+        model.setRowCount(0); // Xóa dữ liệu cũ trong bảng
+
+        DecimalFormat formatter = new DecimalFormat("000");
+
+        for (UserDTO user : users) {
+            if (user.getUserName().toLowerCase().contains(searchText) ||
+                user.getUserFullName().toLowerCase().contains(searchText) ||
+                user.getUserEmail().toLowerCase().contains(searchText)) {
+                String formattedUserID = formatter.format(user.getUserID());
+                model.addRow(new Object[]{
+                    formattedUserID,
+                    user.getUserName(),
+                    user.getUserFullName(),
+                    user.getUserEmail(),
+                    user.getIsAdmin() == 1 ? "Admin" : "User"
+                });
+            }
+        }// TODO add your handling code here:
+    }//GEN-LAST:event_jTextField1KeyReleased
+
+    private void cz2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cz2ActionPerformed
+        int selectedRow = jTable2.getSelectedRow();
+    if (selectedRow >= 0) {
+        String tpID = jTable2.getValueAt(selectedRow, 0).toString();
+        int confirm = JOptionPane.showConfirmDialog(null, "Bạn có chắc muốn xóa chủ đề này?", "Xác nhận", JOptionPane.YES_NO_OPTION);
+        if (confirm == JOptionPane.YES_OPTION) {
+            TopicBUS topicBUS = new TopicBUS();
+            if (topicBUS.deleteTopic(tpID)) {
+                JOptionPane.showMessageDialog(null, "Xóa chủ đề thành công!");
+                loadTopics(); // Cập nhật lại bảng
+            } else {
+                JOptionPane.showMessageDialog(null, "Xóa chủ đề thất bại!");
+            }
+        }
+    } else {
+        JOptionPane.showMessageDialog(null, "Vui lòng chọn một chủ đề để xóa!");
+    }        // TODO add your handling code here:
+    }//GEN-LAST:event_cz2ActionPerformed
+
+    private void jTextField2KeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jTextField2KeyReleased
+        String searchText = jTextField2.getText().trim().toLowerCase();
+    TopicBUS topicBUS = new TopicBUS();
+    ArrayList<TopicDTO> topics = topicBUS.getAllActiveTopics();
+
+    DefaultTableModel model = (DefaultTableModel) jTable2.getModel();
+    model.setRowCount(0); // Xóa dữ liệu cũ trong bảng
+
+    DecimalFormat formatter = new DecimalFormat("000");
+
+    for (TopicDTO topic : topics) {
+        if (topic.getTpTitle().toLowerCase().contains(searchText)) {
+            String formattedTpID = formatter.format(topic.getTpID());
+            model.addRow(new Object[]{
+                formattedTpID,
+                topic.getTpTitle(),
+                topic.getTpParent(), // Dùng tpParent làm ví dụ, bạn có thể thay bằng mô tả thực tế
+                topic.getTpStatus() == 1 ? "Active" : "Hidden"
+            });
+        }
+    }        // TODO add your handling code here:
+    }//GEN-LAST:event_jTextField2KeyReleased
+    
+    private void loadTopics() {
+        TopicBUS topicBUS = new TopicBUS();
+    ArrayList<TopicDTO> topics = topicBUS.getAllActiveTopics(); // Lấy các chủ đề có tpStatus = 1
+
+    // Tạo model cho jTable2
+    DefaultTableModel model = (DefaultTableModel) jTable2.getModel();
+    model.setRowCount(0); // Xóa dữ liệu cũ trong bảng
+
+    // Định dạng mã chủ đề thành 3 chữ số (001, 002, ...)
+    DecimalFormat formatter = new DecimalFormat("000");
+
+    for (TopicDTO topic : topics) {
+        String formattedTpID = formatter.format(topic.getTpID());
+        model.addRow(new Object[]{
+            formattedTpID, // Mã chủ đề (001, 002, ...)
+            topic.getTpTitle(), // Tên chủ đề
+            topic.getTpParent(), // Mô tả (ở đây dùng tpParent làm ví dụ, bạn có thể thay bằng mô tả thực tế nếu có)
+            topic.getTpStatus() == 1 ? "Active" : "Hidden" // Trạng thái
+        });
+    }
+    }
     /**
      * @param args the command line arguments
      */
@@ -1393,7 +1687,6 @@ public class Main extends javax.swing.JFrame {
     private javax.swing.JButton cz9;
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
-    private javax.swing.JButton jButton4;
     private javax.swing.JButton jButton5;
     private javax.swing.JComboBox<String> jComboBox9;
     private javax.swing.JLabel jLabel1;

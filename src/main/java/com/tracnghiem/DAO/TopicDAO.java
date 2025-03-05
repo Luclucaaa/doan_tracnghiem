@@ -27,11 +27,11 @@ public class TopicDAO implements InterfaceDAO<TopicDTO>{
         boolean rs = false;
         String sql = "INSERT INTO topics(tpTitle, tpParent, tpStatus) VALUES(?,?,?)";
         try (Connection conn = JDBCUtil.getConnection();
-                PreparedStatement ps = conn.prepareStatement(sql);) {
+            PreparedStatement ps = conn.prepareStatement(sql);) {
             ps.setString(1, t.getTpTitle());
             ps.setInt(2, t.getTpParent());
             ps.setInt(3, t.getTpStatus());
-            
+        
             rs = ps.executeUpdate() > 0; // Nếu có ít nhất 1 dòng bị ảnh hưởng, insert thành công
         } catch (SQLException ex) {
             ex.printStackTrace();

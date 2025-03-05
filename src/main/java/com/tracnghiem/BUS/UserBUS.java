@@ -7,6 +7,8 @@ package com.tracnghiem.BUS;
 import com.tracnghiem.DAO.UserDAO;
 import com.tracnghiem.DTO.UserDTO;
 import java.util.ArrayList;
+import java.security.MessageDigest;
+import java.math.BigInteger;
 
 /**
  *
@@ -40,14 +42,15 @@ public class UserBUS {
     }
 
     public UserDTO login(String username, String password) {
-        ArrayList<UserDTO> users = userDAO.selectAll();
-        for (UserDTO user : users) {
-            if (user.getUserName().equals(username) && user.getUserPassword().equals(password)) {
-                return user;
-            }
+    ArrayList<UserDTO> users = userDAO.selectAll();
+    String hashedPassword = md5(password); // Mã hóa mật khẩu đầu vào
+    for (UserDTO user : users) {
+        if (user.getUserName().equals(username) && user.getUserPassword().equals(hashedPassword)) {
+            return user;
         }
-        return null;
     }
+    return null;
+}
 
     public boolean isUsernameExists(String username) {
         ArrayList<UserDTO> users = userDAO.selectAll();
@@ -68,4 +71,18 @@ public class UserBUS {
         }
         return false;
     }
+    private String md5(String input) {
+    try {
+        java.security.MessageDigest md = java.security.MessageDigest.getInstance("MD5");
+        byte[] messageDigest = md.digest(input.getBytes());
+        java.math.BigInteger no = new java.math.BigInteger(1, messageDigest);
+        String hashtext = no.toString(16);
+        while (hashtext.length() < 32) {
+            hashtext = "0" + hashtext;
+        }
+        return hashtext;
+    } catch (Exception e) {
+        throw new RuntimeException(e);
+    }
+}
 }

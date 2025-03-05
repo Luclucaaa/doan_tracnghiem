@@ -15,7 +15,6 @@ public class TopicDTO {
     private int tpStatus;
 
     public TopicDTO(int tpID, String tpTitle, int tpParent, int tpStatus) {
-        this.tpID = tpID;
         this.tpTitle = tpTitle;
         this.tpParent = tpParent;
         this.tpStatus = tpStatus;
