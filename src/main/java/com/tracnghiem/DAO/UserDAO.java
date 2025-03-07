@@ -34,7 +34,41 @@ public class UserDAO implements InterfaceDAO<UserDTO> {
             return false;
         }
     }
-
+    public boolean updateUserInfo(UserDTO user) {
+    String sql = "UPDATE users SET userName=?, userEmail=?, userFullName=? WHERE userID=?";
+    try (Connection conn = JDBCUtil.getConnection();
+         PreparedStatement stmt = conn.prepareStatement(sql)) {
+        stmt.setString(1, user.getUserName());
+        stmt.setString(2, user.getUserEmail());
+        stmt.setString(3, user.getUserFullName());
+        stmt.setInt(4, user.getUserID());
+        return stmt.executeUpdate() > 0;
+    } catch (SQLException e) {
+        e.printStackTrace();
+        return false;
+    }
+}
+    public UserDTO getUserByUsername(String username) {
+    String sql = "SELECT * FROM users WHERE userName = ?";
+    try (Connection conn = JDBCUtil.getConnection();
+         PreparedStatement stmt = conn.prepareStatement(sql)) {
+        stmt.setString(1, username);
+        ResultSet rs = stmt.executeQuery();
+        if (rs.next()) {
+            return new UserDTO(
+                rs.getInt("userID"),
+                rs.getString("userName"),
+                rs.getString("userEmail"),
+                rs.getString("userPassword"),
+                rs.getString("userFullName"),
+                rs.getInt("isAdmin")
+            );
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return null;
+}
     @Override
     public boolean update(UserDTO user) {
         String sql = "UPDATE users SET userName=?, userEmail=?, userPassword=?, userFullName=?, isAdmin=? WHERE userID=?";
@@ -52,7 +86,6 @@ public class UserDAO implements InterfaceDAO<UserDTO> {
             return false;
         }
     }
-
     @Override
     public boolean delete(String id) {
         String sql = "DELETE FROM users WHERE userID=?";

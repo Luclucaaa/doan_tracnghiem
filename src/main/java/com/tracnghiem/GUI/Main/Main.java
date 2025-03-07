@@ -586,6 +586,8 @@ public class Main extends javax.swing.JFrame {
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 626, Short.MAX_VALUE))
         );
 
+        jScrollPane1.getAccessibleContext().setAccessibleName("");
+
         PanelPhai.add(UserPanel, "card3");
 
         jPanel7.setPreferredSize(new java.awt.Dimension(1206, 95));

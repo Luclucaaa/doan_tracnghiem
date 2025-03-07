@@ -4,7 +4,10 @@
  */
 package com.tracnghiem.GUI.Dialog;
 
+import com.tracnghiem.BUS.UserBUS;
+import com.tracnghiem.DTO.UserDTO;
 import javax.swing.JButton;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -19,7 +22,10 @@ public class SuaUserDialog extends javax.swing.JDialog {
         super(parent, modal);
         initComponents();
     }
-
+public void hideRoleSelection() {
+    jComboBox1.setVisible(false); // Ẩn ComboBox chọn quyền
+    jLabel6.setVisible(false); // Ẩn luôn label "Quyền" nếu có (thay X bằng số label phù hợp)
+}
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always

@@ -22,7 +22,7 @@ public class JDBCUtil {
             //Cac thong so
             String url = "jdbc:mySQL://localhost:3306/tracnghiem";
             String userName = "root";
-            String password = "";
+            String password = "123456";
             //Tao ket noi 
             result = DriverManager.getConnection(url, userName, password);
             
