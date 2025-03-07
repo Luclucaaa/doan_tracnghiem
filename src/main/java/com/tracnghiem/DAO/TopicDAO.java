@@ -109,4 +109,21 @@ public TopicDTO selectByID(String id) {
         }
         return rs;
     }
+        public int getIDbyTopic(String topicName) {
+        int topicID = -1; 
+        String sql = "SELECT tpID FROM topics WHERE tpTitle = ?";
+        try (Connection conn = JDBCUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, topicName);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    topicID = rs.getInt("tpID");
+                }
+            }
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+        return topicID;
+    }
+
 }
