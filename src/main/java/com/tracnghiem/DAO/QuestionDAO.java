@@ -17,7 +17,7 @@ public class QuestionDAO implements InterfaceDAO<QuestionDTO> {
         return new QuestionDAO();
     }
     
-     @Override
+    @Override
     public boolean insert(QuestionDTO question) {
         String sql = "INSERT INTO questions(qContent, qPictures, qTopicID, qLevel, qStatus) VALUES(?,?,?,?,?)";
         try (Connection conn = JDBCUtil.getConnection();
