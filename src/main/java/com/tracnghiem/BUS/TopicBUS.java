@@ -38,4 +38,7 @@ public class TopicBUS {
     public TopicDTO getTopicByID(String topicID) {
         return topicDAO.selectByID(topicID);
     }
+    public int getIDbyTopic(String topicName) {
+        return topicDAO.getIDbyTopic(topicName);
+    }
 }

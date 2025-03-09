@@ -12,7 +12,11 @@ import javax.imageio.ImageIO;
 import javax.swing.ImageIcon;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
-
+import com.tracnghiem.BUS.TopicBUS;
+import com.tracnghiem.DTO.TopicDTO;
+import java.util.ArrayList;
+import com.tracnghiem.DTO.QuestionDTO;
+import com.tracnghiem.BUS.QuestionBUS;
 /**
  *
  * @author THELUC
@@ -25,6 +29,7 @@ public class QuestionDialog extends javax.swing.JDialog {
     public QuestionDialog(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
+        loadTopicsToComboBox();
     }
 
     /**
@@ -110,7 +115,7 @@ public class QuestionDialog extends javax.swing.JDialog {
                 .addContainerGap(16, Short.MAX_VALUE))
         );
 
-        jComboBox2.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Dễ - 1 điểm", "Trung Bình - 2 điểm", "Khó - 3 điểm" }));
+        jComboBox2.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Easy", "Medium", "Diff" }));
 
         jLabel3.setFont(new java.awt.Font("Segoe UI", 0, 16)); // NOI18N
         jLabel3.setText("Chủ đề");
@@ -131,6 +136,11 @@ public class QuestionDialog extends javax.swing.JDialog {
         jButton1.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 jButton1MouseClicked(evt);
+            }
+        });
+        jButton1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton1ActionPerformed(evt);
             }
         });
 
@@ -660,11 +670,45 @@ public class QuestionDialog extends javax.swing.JDialog {
     }//GEN-LAST:event_jLabel14MouseClicked
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-        // TODO add your handling code here:
+        String topic = (String) jComboBox1.getSelectedItem();
+        String level = (String) jComboBox2.getSelectedItem();
+        String questionContent = jTextArea1.getText();
+        String answer1 = jTextArea2.getText();
+        String answer2 = jTextArea3.getText();
+        String answer3 = jTextArea4.getText();
+        String answer4 = jTextArea5.getText();
+        String answer5 = jTextArea6.getText();
+        
+        
+        if (questionContent.isEmpty() || answer1.isEmpty() || answer2.isEmpty()) {
+    JOptionPane.showMessageDialog(this, "Vui lòng nhập đầy đủ thông tin!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+     return;
+    }
+        
+    TopicBUS topicBUS = new TopicBUS();
+    int topicID = topicBUS.getIDbyTopic(topic);
+
+
+    QuestionDTO question = new QuestionDTO(
+        questionContent, // Nội dung câu hỏi
+        "",              // URL hình ảnh (tạm thời để trống)
+        topicID,         // ID
+        level,           // Mức độ
+        1                // Trạng thái (1: Hoạt động)
+     );
+    
+        QuestionBUS questionBUS = new QuestionBUS();
+        boolean isAdded = questionBUS.addQuestion(question);
+
+        if (isAdded) {
+            JOptionPane.showMessageDialog(this, "Thêm câu hỏi thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
+        } else {
+            JOptionPane.showMessageDialog(this, "Thêm câu hỏi thất bại!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+        }
     }//GEN-LAST:event_jButton2ActionPerformed
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
-        // TODO add your handling code here:
+       dispose();
     }//GEN-LAST:event_jButton3ActionPerformed
 
     private void jCheckBox1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jCheckBox1ActionPerformed
@@ -731,9 +775,21 @@ public class QuestionDialog extends javax.swing.JDialog {
         }        // TODO add your handling code here:
     }//GEN-LAST:event_jCheckBox5ActionPerformed
 
+    private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jButton1ActionPerformed
+
     /**
      * @param args the command line arguments
      */
+    private void loadTopicsToComboBox() {
+        TopicBUS topicBUS = new TopicBUS();
+        ArrayList<TopicDTO> topicList = topicBUS.getAllActiveTopics();
+
+        for (TopicDTO topic : topicList) {
+            jComboBox1.addItem(topic.getTpTitle());
+        }
+    }
     public static void main(String args[]) {
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">

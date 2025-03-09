@@ -17,9 +17,9 @@ public class QuestionDAO implements InterfaceDAO<QuestionDTO> {
         return new QuestionDAO();
     }
     
-     @Override
+    @Override
     public boolean insert(QuestionDTO question) {
-        String sql = "INSERT INTO questions(qContent, qPictures, qTopic, qLevel, qStatus) VALUES(?,?,?,?,?)";
+        String sql = "INSERT INTO questions(qContent, qPictures, qTopicID, qLevel, qStatus) VALUES(?,?,?,?,?)";
         try (Connection conn = JDBCUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, question.getQContent());
@@ -36,7 +36,7 @@ public class QuestionDAO implements InterfaceDAO<QuestionDTO> {
 
     @Override
     public boolean update(QuestionDTO question) {
-        String sql = "UPDATE questions SET qContent=?, qPictures=?, qTopic=?, qLevel=?, qStatus=? WHERE qID=?";
+        String sql = "UPDATE questions SET qContent=?, qPictures=?, qTopicID=?, qLevel=?, qStatus=? WHERE qID=?";
         try (Connection conn = JDBCUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, question.getQContent());
