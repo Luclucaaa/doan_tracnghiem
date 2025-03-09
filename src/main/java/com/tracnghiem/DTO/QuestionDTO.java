@@ -12,38 +12,30 @@ public class QuestionDTO {
     private int qID;
     private String qContent;
     private String qPictures;
-    private int qTopic;
-    private String qLevel;
-    private int qStatus;
+    private int topicID;
+    private String level;
+    private int status;
 
-    public QuestionDTO() {
-    }
-
-    public QuestionDTO(String qContent, String qPictures, int qTopic, String qLevel, int qStatus) {
-        this.qContent = qContent;
-        this.qPictures = qPictures;
-        this.qTopic = qTopic;
-        this.qLevel = qLevel;
-        this.qStatus = qStatus;
-    }
-
-    public QuestionDTO(int qID, String qContent, String qPictures, int qTopic, String qLevel, int qStatus) {
+    // Constructor đầy đủ
+    public QuestionDTO(int qID, String qContent, String qPicture, int topicID, String level, int status) {
         this.qID = qID;
         this.qContent = qContent;
-        this.qPictures = qPictures;
-        this.qTopic = qTopic;
-        this.qLevel = qLevel;
-        this.qStatus = qStatus;
+        this.qPictures = qPicture;
+        this.topicID = topicID;
+        this.level = level;
+        this.status = status;
     }
 
-    public int getQStatus() {
-        return qStatus;
+    // Constructor dùng khi thêm mới (không cần qID vì sẽ tự động sinh)
+    public QuestionDTO(String qContent, String qPicture, int topicID, String level, int status) {
+        this.qContent = qContent;
+        this.qPictures = qPicture;
+        this.topicID = topicID;
+        this.level = level;
+        this.status = status;
     }
 
-    public void setQStatus(int qStatus) {
-        this.qStatus = qStatus;
-    }
-
+    // Getter và Setter cho qID
     public int getQID() {
         return qID;
     }
@@ -52,6 +44,7 @@ public class QuestionDTO {
         this.qID = qID;
     }
 
+    // Getter và Setter cho qContent
     public String getQContent() {
         return qContent;
     }
@@ -60,32 +53,39 @@ public class QuestionDTO {
         this.qContent = qContent;
     }
 
-    public String getQPictures() {
+    // Getter và Setter cho qPicture
+    public String getQPicture() {
         return qPictures;
     }
 
-    public void setQPictures(String qPictures) {
-        this.qPictures = qPictures;
+    public void setQPicture(String qPicture) {
+        this.qPictures = qPicture;
     }
 
-    public int getQTopic() {
-        return qTopic;
+    // Getter và Setter cho topicID
+    public int getTopicID() {
+        return topicID;
     }
 
-    public void setQTopic(int qTopic) {
-        this.qTopic = qTopic;
+    public void setTopicID(int topicID) {
+        this.topicID = topicID;
     }
 
-    public String getQLevel() {
-        return qLevel;
+    // Getter và Setter cho level
+    public String getLevel() {
+        return level;
     }
 
-    public void setQLevel(String qLevel) {
-        this.qLevel = qLevel;
+    public void setLevel(String level) {
+        this.level = level;
     }
 
-    @Override
-    public String toString() {
-        return "QuestionDTO{" + "qID=" + qID + ", qContent=" + qContent + ", qPictures=" + qPictures + ", qTopic=" + qTopic + ", qLevel=" + qLevel + ", qStatus=" + qStatus + '}';
+    // Getter và Setter cho status
+    public int getStatus() {
+        return status;
+    }
+
+    public void setStatus(int status) {
+        this.status = status;
     }
 }

@@ -12,26 +12,26 @@ public class AnswerDTO {
     private int awID;
     private int qID;
     private String awContent;
-    private String awPicture;
-    private boolean isRight;
+    private String awPictures;
+    private int isRight; // Thay boolean thành int
     private int awStatus;
 
     public AnswerDTO() {
     }
 
-    public AnswerDTO(int qID, String awContent, String awPicture, boolean isRight, int awStatus) {
+    public AnswerDTO(int qID, String awContent, String awPictures, int isRight, int awStatus) {
         this.qID = qID;
         this.awContent = awContent;
-        this.awPicture = awPicture;
+        this.awPictures = awPictures;
         this.isRight = isRight;
         this.awStatus = awStatus;
     }
 
-    public AnswerDTO(int awID, int qID, String awContent, String awPicture, boolean isRight, int awStatus) {
+    public AnswerDTO(int awID, int qID, String awContent, String awPictures, int isRight, int awStatus) {
         this.awID = awID;
         this.qID = qID;
         this.awContent = awContent;
-        this.awPicture = awPicture;
+        this.awPictures = awPictures;
         this.isRight = isRight;
         this.awStatus = awStatus;
     }
@@ -68,24 +68,24 @@ public class AnswerDTO {
         this.awContent = awContent;
     }
 
-    public String getAwPicture() {
-        return awPicture;
+    public String getAwPictures() {
+        return awPictures;
     }
 
-    public void setAwPicture(String awPicture) {
-        this.awPicture = awPicture;
+    public void setAwPictures(String awPictures) {
+        this.awPictures = awPictures;
     }
 
-    public boolean isIsRight() {
+    public int getIsRight() { // Thay isIsRight() bằng getIsRight()
         return isRight;
     }
 
-    public void setIsRight(boolean isRight) {
+    public void setIsRight(int isRight) { // Thay setIsRight(boolean) bằng setIsRight(int)
         this.isRight = isRight;
     }
 
     @Override
     public String toString() {
-        return "AnswerDTO{" + "awID=" + awID + ", qID=" + qID + ", awContent=" + awContent + ", awPicture=" + awPicture + ", isRight=" + isRight + ", awStatus=" + awStatus + '}';
+        return "AnswerDTO{" + "awID=" + awID + ", qID=" + qID + ", awContent=" + awContent + ", awPictures=" + awPictures + ", isRight=" + isRight + ", awStatus=" + awStatus + '}';
     }
 }

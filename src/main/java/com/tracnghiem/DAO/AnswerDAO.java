@@ -16,21 +16,22 @@ import java.util.ArrayList;
  *
  * @author X
  */
-public class AnswerDAO implements InterfaceDAO<AnswerDTO>{
+public class AnswerDAO implements InterfaceDAO<AnswerDTO> {
 
     public static AnswerDAO getInstance() {
         return new AnswerDAO();
     }
+
     @Override
     public boolean insert(AnswerDTO t) {
         boolean rs = false;
-        String sql = "INSERT INTO answers(qID, awContent, awPicture, isRight, awStatus) VALUES(?,?,?,?,?)";
+        String sql = "INSERT INTO answers(qID, awContent, awPictures, isRight, awStatus) VALUES(?,?,?,?,?)";
         try (Connection conn = JDBCUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, t.getQID());
             ps.setString(2, t.getAwContent());
-            ps.setString(3, t.getAwPicture());
-            ps.setBoolean(4, t.isIsRight());
+            ps.setString(3, t.getAwPictures());
+            ps.setInt(4, t.getIsRight());
             ps.setInt(5, t.getAwStatus());
             rs = ps.executeUpdate() > 0;
         } catch (SQLException ex) {
@@ -38,16 +39,17 @@ public class AnswerDAO implements InterfaceDAO<AnswerDTO>{
         }
         return rs;
     }
+
     @Override
     public boolean update(AnswerDTO t) {
         boolean rs = false;
-        String sql = "UPDATE answers SET qID=?, awContent=?, awPicture=?, isRight=?, awStatus=? WHERE awID=?";
+        String sql = "UPDATE answers SET qID=?, awContent=?, awPictures=?, isRight=?, awStatus=? WHERE awID=?";
         try (Connection conn = JDBCUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, t.getQID());
             ps.setString(2, t.getAwContent());
-            ps.setString(3, t.getAwPicture());
-            ps.setBoolean(4, t.isIsRight());
+            ps.setString(3, t.getAwPictures());
+            ps.setInt(4, t.getIsRight());
             ps.setInt(5, t.getAwStatus());
             ps.setInt(6, t.getAwID());
             rs = ps.executeUpdate() > 0;
@@ -68,8 +70,8 @@ public class AnswerDAO implements InterfaceDAO<AnswerDTO>{
                 rs.add(new AnswerDTO(rsSet.getInt("awID"),
                                      rsSet.getInt("qID"),
                                      rsSet.getString("awContent"),
-                                     rsSet.getString("awPicture"),
-                                     rsSet.getBoolean("isRight"),
+                                     rsSet.getString("awPictures"),
+                                     rsSet.getInt("isRight"),
                                      rsSet.getInt("awStatus")));
             }
         } catch (SQLException ex) {
@@ -90,8 +92,8 @@ public class AnswerDAO implements InterfaceDAO<AnswerDTO>{
                     rs = new AnswerDTO(rsSet.getInt("awID"),
                                        rsSet.getInt("qID"),
                                        rsSet.getString("awContent"),
-                                       rsSet.getString("awPicture"),
-                                       rsSet.getBoolean("isRight"),
+                                       rsSet.getString("awPictures"),
+                                       rsSet.getInt("isRight"),
                                        rsSet.getInt("awStatus"));
                 }
             }
@@ -109,6 +111,29 @@ public class AnswerDAO implements InterfaceDAO<AnswerDTO>{
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setString(1, id);
             rs = ps.executeUpdate() > 0;
+        } catch (SQLException ex) {
+            ex.printStackTrace();
+        }
+        return rs;
+    }
+
+    // Thêm phương thức để lấy đáp án theo qID
+    public ArrayList<AnswerDTO> selectByQuestionID(int qID) {
+        ArrayList<AnswerDTO> rs = new ArrayList<>();
+        String sql = "SELECT * FROM answers WHERE qID = ? AND awStatus = 1";
+        try (Connection conn = JDBCUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, qID);
+            try (ResultSet rsSet = ps.executeQuery()) {
+                while (rsSet.next()) {
+                    rs.add(new AnswerDTO(rsSet.getInt("awID"),
+                                         rsSet.getInt("qID"),
+                                         rsSet.getString("awContent"),
+                                         rsSet.getString("awPictures"),
+                                         rsSet.getInt("isRight"),
+                                         rsSet.getInt("awStatus")));
+                }
+            }
         } catch (SQLException ex) {
             ex.printStackTrace();
         }

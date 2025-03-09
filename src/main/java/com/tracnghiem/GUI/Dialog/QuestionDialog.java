@@ -17,11 +17,22 @@ import com.tracnghiem.DTO.TopicDTO;
 import java.util.ArrayList;
 import com.tracnghiem.DTO.QuestionDTO;
 import com.tracnghiem.BUS.QuestionBUS;
+import com.tracnghiem.DTO.AnswerDTO;
+import java.awt.event.ActionListener;
+import java.util.Arrays;
+import java.util.List;
+import javax.swing.ButtonGroup;
+import javax.swing.JCheckBox;
+import javax.swing.JLabel;
+import javax.swing.JTextArea;
 /**
  *
  * @author THELUC
  */
 public class QuestionDialog extends javax.swing.JDialog {
+    private ButtonGroup answerGroup;
+    private String[] answerImagePaths = new String[5];
+    private String questionImagePath;
 
     /**
      * Creates new form QuestionPanel
@@ -30,6 +41,14 @@ public class QuestionDialog extends javax.swing.JDialog {
         super(parent, modal);
         initComponents();
         loadTopicsToComboBox();
+        
+        // Khởi tạo ButtonGroup để chỉ cho phép chọn 1 checkbox
+    answerGroup = new ButtonGroup();
+    answerGroup.add(jCheckBox1);
+    answerGroup.add(jCheckBox2);
+    answerGroup.add(jCheckBox3);
+    answerGroup.add(jCheckBox4);
+    answerGroup.add(jCheckBox5);
     }
 
     /**
@@ -133,11 +152,6 @@ public class QuestionDialog extends javax.swing.JDialog {
 
         jButton1.setFont(new java.awt.Font("Segoe UI", 0, 16)); // NOI18N
         jButton1.setText("Thêm hình ảnh");
-        jButton1.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                jButton1MouseClicked(evt);
-            }
-        });
         jButton1.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jButton1ActionPerformed(evt);
@@ -535,175 +549,220 @@ public class QuestionDialog extends javax.swing.JDialog {
         pack();
     }// </editor-fold>//GEN-END:initComponents
 
-    private void jButton1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton1MouseClicked
-        JFileChooser fileChooser = new JFileChooser();
-        int returnValue = fileChooser.showOpenDialog(this);
-
-        if (returnValue == JFileChooser.APPROVE_OPTION) {
-            File selectedFile = fileChooser.getSelectedFile();
-
-            try {
-                BufferedImage img = ImageIO.read(selectedFile);
-                // Scale ảnh theo JLabel
-                Image scaledImage = img.getScaledInstance(jLabel2.getWidth(), jLabel2.getHeight(), Image.SCALE_SMOOTH);
-                ImageIcon icon = new ImageIcon(scaledImage);
-
-                // Xóa text và hiển thị ảnh
-                jLabel2.setText("");
-                jLabel2.setIcon(icon);
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(this, "Lỗi khi tải hình ảnh!", "Lỗi", JOptionPane.ERROR_MESSAGE);
-            }
-        }
-// TODO add your handling code here:
-    }//GEN-LAST:event_jButton1MouseClicked
-
     private void jLabel6MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel6MouseClicked
         JFileChooser fileChooser = new JFileChooser();
-        int returnValue = fileChooser.showOpenDialog(this);
+    int returnValue = fileChooser.showOpenDialog(this);
 
-        if (returnValue == JFileChooser.APPROVE_OPTION) {
-            File selectedFile = fileChooser.getSelectedFile();
+    if (returnValue == JFileChooser.APPROVE_OPTION) {
+        File selectedFile = fileChooser.getSelectedFile();
+        try {
+            BufferedImage img = ImageIO.read(selectedFile);
+            Image scaledImage = img.getScaledInstance(jLabel6.getWidth(), jLabel6.getHeight(), Image.SCALE_SMOOTH);
+            ImageIcon icon = new ImageIcon(scaledImage);
+            jLabel6.setText("");
+            jLabel6.setIcon(icon);
 
-            try {
-                BufferedImage img = ImageIO.read(selectedFile);
-                // Scale ảnh theo JLabel
-                Image scaledImage = img.getScaledInstance(jLabel6.getWidth(), jLabel6.getHeight(), Image.SCALE_SMOOTH);
-                ImageIcon icon = new ImageIcon(scaledImage);
+            String destPath = "images/answers/" + System.currentTimeMillis() + "_" + selectedFile.getName();
+            File destFile = new File(destPath);
+            destFile.getParentFile().mkdirs();
+            ImageIO.write(img, "png", destFile);
 
-                // Xóa text và hiển thị ảnh
-                jLabel6.setText("");
-                jLabel6.setIcon(icon);
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(this, "Lỗi khi tải hình ảnh!", "Lỗi", JOptionPane.ERROR_MESSAGE);
-            }
+            answerImagePaths[0] = destPath; // Lưu đường dẫn cho đáp án 1
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Lỗi khi tải hình ảnh!", "Lỗi", JOptionPane.ERROR_MESSAGE);
         }
+    }
         // TODO add your handling code here:
     }//GEN-LAST:event_jLabel6MouseClicked
 
     private void jLabel8MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel8MouseClicked
         JFileChooser fileChooser = new JFileChooser();
-        int returnValue = fileChooser.showOpenDialog(this);
+    int returnValue = fileChooser.showOpenDialog(this);
 
-        if (returnValue == JFileChooser.APPROVE_OPTION) {
-            File selectedFile = fileChooser.getSelectedFile();
+    if (returnValue == JFileChooser.APPROVE_OPTION) {
+        File selectedFile = fileChooser.getSelectedFile();
+        try {
+            BufferedImage img = ImageIO.read(selectedFile);
+            Image scaledImage = img.getScaledInstance(jLabel8.getWidth(), jLabel8.getHeight(), Image.SCALE_SMOOTH);
+            ImageIcon icon = new ImageIcon(scaledImage);
+            jLabel8.setText("");
+            jLabel8.setIcon(icon);
 
-            try {
-                BufferedImage img = ImageIO.read(selectedFile);
-                // Scale ảnh theo JLabel
-                Image scaledImage = img.getScaledInstance(jLabel8.getWidth(), jLabel8.getHeight(), Image.SCALE_SMOOTH);
-                ImageIcon icon = new ImageIcon(scaledImage);
+            String destPath = "images/answers/" + System.currentTimeMillis() + "_" + selectedFile.getName();
+            File destFile = new File(destPath);
+            destFile.getParentFile().mkdirs();
+            ImageIO.write(img, "png", destFile);
 
-                // Xóa text và hiển thị ảnh
-                jLabel8.setText("");
-                jLabel8.setIcon(icon);
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(this, "Lỗi khi tải hình ảnh!", "Lỗi", JOptionPane.ERROR_MESSAGE);
-            }
-        }// TODO add your handling code here:
+            answerImagePaths[0] = destPath; // Lưu đường dẫn cho đáp án 1
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Lỗi khi tải hình ảnh!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+        }
+    }// TODO add your handling code here:
     }//GEN-LAST:event_jLabel8MouseClicked
 
     private void jLabel10MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel10MouseClicked
         JFileChooser fileChooser = new JFileChooser();
-        int returnValue = fileChooser.showOpenDialog(this);
+    int returnValue = fileChooser.showOpenDialog(this);
 
-        if (returnValue == JFileChooser.APPROVE_OPTION) {
-            File selectedFile = fileChooser.getSelectedFile();
+    if (returnValue == JFileChooser.APPROVE_OPTION) {
+        File selectedFile = fileChooser.getSelectedFile();
+        try {
+            BufferedImage img = ImageIO.read(selectedFile);
+            Image scaledImage = img.getScaledInstance(jLabel10.getWidth(), jLabel10.getHeight(), Image.SCALE_SMOOTH);
+            ImageIcon icon = new ImageIcon(scaledImage);
+            jLabel10.setText("");
+            jLabel10.setIcon(icon);
 
-            try {
-                BufferedImage img = ImageIO.read(selectedFile);
-                // Scale ảnh theo JLabel
-                Image scaledImage = img.getScaledInstance(jLabel10.getWidth(), jLabel10.getHeight(), Image.SCALE_SMOOTH);
-                ImageIcon icon = new ImageIcon(scaledImage);
+            String destPath = "images/answers/" + System.currentTimeMillis() + "_" + selectedFile.getName();
+            File destFile = new File(destPath);
+            destFile.getParentFile().mkdirs();
+            ImageIO.write(img, "png", destFile);
 
-                // Xóa text và hiển thị ảnh
-                jLabel10.setText("");
-                jLabel10.setIcon(icon);
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(this, "Lỗi khi tải hình ảnh!", "Lỗi", JOptionPane.ERROR_MESSAGE);
-            }
+            answerImagePaths[0] = destPath; // Lưu đường dẫn cho đáp án 1
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Lỗi khi tải hình ảnh!", "Lỗi", JOptionPane.ERROR_MESSAGE);
         }// TODO add your handling code here:
     }//GEN-LAST:event_jLabel10MouseClicked
-
+    }
     private void jLabel12MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel12MouseClicked
         JFileChooser fileChooser = new JFileChooser();
-        int returnValue = fileChooser.showOpenDialog(this);
+    int returnValue = fileChooser.showOpenDialog(this);
 
-        if (returnValue == JFileChooser.APPROVE_OPTION) {
-            File selectedFile = fileChooser.getSelectedFile();
+    if (returnValue == JFileChooser.APPROVE_OPTION) {
+        File selectedFile = fileChooser.getSelectedFile();
+        try {
+            BufferedImage img = ImageIO.read(selectedFile);
+            Image scaledImage = img.getScaledInstance(jLabel12.getWidth(), jLabel12.getHeight(), Image.SCALE_SMOOTH);
+            ImageIcon icon = new ImageIcon(scaledImage);
+            jLabel12.setText("");
+            jLabel12.setIcon(icon);
 
-            try {
-                BufferedImage img = ImageIO.read(selectedFile);
-                // Scale ảnh theo JLabel
-                Image scaledImage = img.getScaledInstance(jLabel12.getWidth(), jLabel12.getHeight(), Image.SCALE_SMOOTH);
-                ImageIcon icon = new ImageIcon(scaledImage);
+            String destPath = "images/answers/" + System.currentTimeMillis() + "_" + selectedFile.getName();
+            File destFile = new File(destPath);
+            destFile.getParentFile().mkdirs();
+            ImageIO.write(img, "png", destFile);
 
-                // Xóa text và hiển thị ảnh
-                jLabel12.setText("");
-                jLabel12.setIcon(icon);
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(this, "Lỗi khi tải hình ảnh!", "Lỗi", JOptionPane.ERROR_MESSAGE);
-            }
-        }// TODO add your handling code here:
+            answerImagePaths[0] = destPath; // Lưu đường dẫn cho đáp án 1
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Lỗi khi tải hình ảnh!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+        }
+    }// TODO add your handling code here:
     }//GEN-LAST:event_jLabel12MouseClicked
 
     private void jLabel14MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel14MouseClicked
         JFileChooser fileChooser = new JFileChooser();
-        int returnValue = fileChooser.showOpenDialog(this);
+    int returnValue = fileChooser.showOpenDialog(this);
 
-        if (returnValue == JFileChooser.APPROVE_OPTION) {
-            File selectedFile = fileChooser.getSelectedFile();
+    if (returnValue == JFileChooser.APPROVE_OPTION) {
+        File selectedFile = fileChooser.getSelectedFile();
+        try {
+            BufferedImage img = ImageIO.read(selectedFile);
+            Image scaledImage = img.getScaledInstance(jLabel14.getWidth(), jLabel14.getHeight(), Image.SCALE_SMOOTH);
+            ImageIcon icon = new ImageIcon(scaledImage);
+            jLabel14.setText("");
+            jLabel14.setIcon(icon);
 
-            try {
-                BufferedImage img = ImageIO.read(selectedFile);
-                // Scale ảnh theo JLabel
-                Image scaledImage = img.getScaledInstance(jLabel14.getWidth(), jLabel14.getHeight(), Image.SCALE_SMOOTH);
-                ImageIcon icon = new ImageIcon(scaledImage);
+            String destPath = "images/answers/" + System.currentTimeMillis() + "_" + selectedFile.getName();
+            File destFile = new File(destPath);
+            destFile.getParentFile().mkdirs();
+            ImageIO.write(img, "png", destFile);
 
-                // Xóa text và hiển thị ảnh
-                jLabel14.setText("");
-                jLabel14.setIcon(icon);
-            } catch (Exception ex) {
-                JOptionPane.showMessageDialog(this, "Lỗi khi tải hình ảnh!", "Lỗi", JOptionPane.ERROR_MESSAGE);
-            }
-        }// TODO add your handling code here:
+            answerImagePaths[0] = destPath; // Lưu đường dẫn cho đáp án 1
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Lỗi khi tải hình ảnh!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+        }
+    }// TODO add your handling code here:
     }//GEN-LAST:event_jLabel14MouseClicked
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
         String topic = (String) jComboBox1.getSelectedItem();
-        String level = (String) jComboBox2.getSelectedItem();
-        String questionContent = jTextArea1.getText();
-        String answer1 = jTextArea2.getText();
-        String answer2 = jTextArea3.getText();
-        String answer3 = jTextArea4.getText();
-        String answer4 = jTextArea5.getText();
-        String answer5 = jTextArea6.getText();
-        
-        
-        if (questionContent.isEmpty() || answer1.isEmpty() || answer2.isEmpty()) {
-    JOptionPane.showMessageDialog(this, "Vui lòng nhập đầy đủ thông tin!", "Lỗi", JOptionPane.ERROR_MESSAGE);
-     return;
+    String level = ((String) jComboBox2.getSelectedItem()).toLowerCase();
+    String questionContent = jTextArea1.getText().trim();
+    boolean hasImage = jLabel2.getIcon() != null;
+
+    if (questionContent.isEmpty() && !hasImage) {
+        JOptionPane.showMessageDialog(this, "Vui lòng nhập nội dung câu hỏi hoặc thêm hình ảnh!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+        return;
     }
-        
-    TopicBUS topicBUS = new TopicBUS();
-    int topicID = topicBUS.getIDbyTopic(topic);
 
+    String answer1 = jTextArea2.getText().trim();
+    String answer2 = jTextArea3.getText().trim();
+    String answer3 = jTextArea4.getText().trim();
+    String answer4 = jTextArea5.getText().trim();
+    String answer5 = jTextArea6.getText().trim();
 
-    QuestionDTO question = new QuestionDTO(
-        questionContent, // Nội dung câu hỏi
-        "",              // URL hình ảnh (tạm thời để trống)
-        topicID,         // ID
-        level,           // Mức độ
-        1                // Trạng thái (1: Hoạt động)
-     );
-    
-        QuestionBUS questionBUS = new QuestionBUS();
-        boolean isAdded = questionBUS.addQuestion(question);
+    String[] answers = {answer1, answer2, answer3, answer4, answer5};
+    JLabel[] answerImages = {jLabel6, jLabel8, jLabel10, jLabel12, jLabel14};
+    int answerCount = 0;
+    for (int i = 0; i < answers.length; i++) {
+        if (!answers[i].isEmpty() || answerImages[i].getIcon() != null) {
+            answerCount++;
+        }
+    }
 
-        if (isAdded) {
-            JOptionPane.showMessageDialog(this, "Thêm câu hỏi thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
-        } else {
-            JOptionPane.showMessageDialog(this, "Thêm câu hỏi thất bại!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+    if (answerCount < 2) {
+        JOptionPane.showMessageDialog(this, "Vui lòng nhập ít nhất 2 đáp án!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+        return;
+    }
+
+    boolean[] isRight = {
+        jCheckBox1.isSelected(),
+        jCheckBox2.isSelected(),
+        jCheckBox3.isSelected(),
+        jCheckBox4.isSelected(),
+        jCheckBox5.isSelected()
+    };
+    int rightAnswerCount = 0;
+    for (boolean right : isRight) {
+        if (right) rightAnswerCount++;
+    }
+    if (rightAnswerCount != 1) {
+        JOptionPane.showMessageDialog(this, "Vui lòng chọn duy nhất 1 đáp án đúng!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+        return;
+    }
+
+    try {
+            TopicBUS topicBUS = new TopicBUS();
+            int topicID = topicBUS.getIDbyTopic(topic);
+            if (topicID == -1) {
+                JOptionPane.showMessageDialog(this, "Không tìm thấy chủ đề: " + topic, "Lỗi", JOptionPane.ERROR_MESSAGE);
+                return;
+            }
+
+            String imageUrl = hasImage ? questionImagePath : "";
+            QuestionDTO question = new QuestionDTO(questionContent, imageUrl, topicID, level, 1);
+            QuestionBUS questionBUS = new QuestionBUS();
+            boolean isAdded = questionBUS.addQuestion(question);
+
+            if (isAdded) {
+                int questionID = questionBUS.getLastInsertedID();
+                if (questionID == -1) {
+                    JOptionPane.showMessageDialog(this, "Không thể lấy ID câu hỏi vừa thêm!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+                    return;
+                }
+
+                for (int i = 0; i < 5; i++) {
+                    if (!answers[i].isEmpty() || answerImages[i].getIcon() != null) {
+                        String awImageUrl = (answerImages[i].getIcon() != null) ? answerImagePaths[i] : "";
+                        questionBUS.addAnswer(new AnswerDTO(
+                            questionID,
+                            answers[i],
+                            awImageUrl,
+                            isRight[i] ? 1 : 0,
+                            1
+                        ));
+                    }
+                }
+                JOptionPane.showMessageDialog(this, "Thêm câu hỏi thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
+                dispose();
+            } else {
+                JOptionPane.showMessageDialog(this, "Thêm câu hỏi thất bại!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+            }
+
+            questionBUS.closeConnection();
+        } catch (Exception e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Lỗi hệ thống: " + e.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
         }
     }//GEN-LAST:event_jButton2ActionPerformed
 
@@ -776,7 +835,29 @@ public class QuestionDialog extends javax.swing.JDialog {
     }//GEN-LAST:event_jCheckBox5ActionPerformed
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        // TODO add your handling code here:
+        JFileChooser fileChooser = new JFileChooser();
+    int returnValue = fileChooser.showOpenDialog(this);
+
+    if (returnValue == JFileChooser.APPROVE_OPTION) {
+        File selectedFile = fileChooser.getSelectedFile();
+        try {
+            BufferedImage img = ImageIO.read(selectedFile);
+            Image scaledImage = img.getScaledInstance(jLabel2.getWidth(), jLabel2.getHeight(), Image.SCALE_SMOOTH);
+            ImageIcon icon = new ImageIcon(scaledImage);
+            jLabel2.setText("");
+            jLabel2.setIcon(icon);
+
+            // Lưu ảnh vào thư mục dự án
+            String destPath = "images/questions/" + System.currentTimeMillis() + "_" + selectedFile.getName();
+            File destFile = new File(destPath);
+            destFile.getParentFile().mkdirs(); // Tạo thư mục nếu chưa có
+            ImageIO.write(img, "png", destFile);
+
+            questionImagePath = destPath; // Lưu đường dẫn
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Lỗi khi tải hình ảnh!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+        }
+    }// TODO add your handling code here:
     }//GEN-LAST:event_jButton1ActionPerformed
 
     /**
@@ -790,6 +871,154 @@ public class QuestionDialog extends javax.swing.JDialog {
             jComboBox1.addItem(topic.getTpTitle());
         }
     }
+    
+    public void resetForm() {
+    jTextArea1.setText("");
+    jLabel2.setIcon(null);
+    jComboBox1.setSelectedIndex(0);
+    jComboBox2.setSelectedIndex(0);
+    jTextArea2.setText("");
+    jTextArea3.setText("");
+    jTextArea4.setText("");
+    jTextArea5.setText("");
+    jTextArea6.setText("");
+    jLabel6.setIcon(null);
+    jLabel8.setIcon(null);
+    jLabel10.setIcon(null);
+    jLabel12.setIcon(null);
+    jLabel14.setIcon(null);
+    jCheckBox1.setSelected(false);
+    jCheckBox2.setSelected(false);
+    jCheckBox3.setSelected(false);
+    jCheckBox4.setSelected(false);
+    jCheckBox5.setSelected(false);
+    questionImagePath = null;
+    Arrays.fill(answerImagePaths, null);
+}
+    
+    public String getQuestionContent() {
+    return jTextArea1.getText().trim();
+}
+
+// Lấy đường dẫn ảnh câu hỏi
+public String getImageUrl() {
+    return (jLabel2.getIcon() != null) ? questionImagePath : "";
+}
+
+// Lấy topicID
+public int getTopicID() {
+    String topic = (String) jComboBox1.getSelectedItem();
+    TopicBUS topicBUS = new TopicBUS();
+    int topicID = topicBUS.getIDbyTopic(topic);
+    return topicID;
+}
+
+// Lấy mức độ
+public String getLevel() {
+    return ((String) jComboBox2.getSelectedItem()).toLowerCase();
+}
+
+// Lấy danh sách đáp án
+public List<AnswerDTO> getAnswers() {
+    List<AnswerDTO> answers = new ArrayList<>();
+    String[] answerContents = {
+        jTextArea2.getText().trim(),
+        jTextArea3.getText().trim(),
+        jTextArea4.getText().trim(),
+        jTextArea5.getText().trim(),
+        jTextArea6.getText().trim()
+    };
+    JLabel[] answerImages = {jLabel6, jLabel8, jLabel10, jLabel12, jLabel14};
+    boolean[] isRight = {
+        jCheckBox1.isSelected(),
+        jCheckBox2.isSelected(),
+        jCheckBox3.isSelected(),
+        jCheckBox4.isSelected(),
+        jCheckBox5.isSelected()
+    };
+
+    for (int i = 0; i < 5; i++) {
+        if (!answerContents[i].isEmpty() || answerImages[i].getIcon() != null) {
+            String awImageUrl = (answerImages[i].getIcon() != null) ? answerImagePaths[i] : "";
+            answers.add(new AnswerDTO(
+                0, // qID sẽ được gán sau khi thêm câu hỏi
+                answerContents[i],
+                awImageUrl,
+                isRight[i] ? 1 : 0,
+                1 // awStatus mặc định là Active
+            ));
+        }
+    }
+    return answers;
+}
+
+// Thêm listener cho nút "Thêm"
+private ActionListener addButtonListener;
+
+public void setAddButtonListener(ActionListener listener) {
+    this.addButtonListener = listener;
+    jButton2.removeActionListener(jButton2.getActionListeners()[0]); // Xóa listener cũ
+    jButton2.addActionListener(listener);
+}
+
+public void setQuestionContent(String content) {
+    jTextArea1.setText(content);
+}
+
+public void setImageUrl(String imageUrl) {
+    if (imageUrl != null && !imageUrl.isEmpty()) {
+        try {
+            BufferedImage img = ImageIO.read(new File(imageUrl));
+            Image scaledImage = img.getScaledInstance(jLabel2.getWidth(), jLabel2.getHeight(), Image.SCALE_SMOOTH);
+            jLabel2.setIcon(new ImageIcon(scaledImage));
+            questionImagePath = imageUrl;
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+}
+
+public void setTopicID(int topicID) {
+    TopicBUS topicBUS = new TopicBUS();
+    TopicDTO topic = topicBUS.getTopicByID(String.valueOf(topicID));
+    if (topic != null) {
+        jComboBox1.setSelectedItem(topic.getTpTitle());
+    }
+}
+
+public void setLevel(String level) {
+    jComboBox2.setSelectedItem(level.toUpperCase());
+}
+
+public void setAnswerContents(String[] contents) {
+    JTextArea[] answerAreas = {jTextArea2, jTextArea3, jTextArea4, jTextArea5, jTextArea6};
+    for (int i = 0; i < contents.length && i < answerAreas.length; i++) {
+        answerAreas[i].setText(contents[i] != null ? contents[i] : "");
+    }
+}
+
+public void setAnswerImages(String[] images) {
+    JLabel[] answerLabels = {jLabel6, jLabel8, jLabel10, jLabel12, jLabel14};
+    for (int i = 0; i < images.length && i < answerLabels.length; i++) {
+        if (images[i] != null && !images[i].isEmpty()) {
+            try {
+                BufferedImage img = ImageIO.read(new File(images[i]));
+                Image scaledImage = img.getScaledInstance(answerLabels[i].getWidth(), answerLabels[i].getHeight(), Image.SCALE_SMOOTH);
+                answerLabels[i].setIcon(new ImageIcon(scaledImage));
+                answerImagePaths[i] = images[i];
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+    }
+}
+
+public void setAnswerIsRight(boolean[] isRight) {
+    JCheckBox[] checkBoxes = {jCheckBox1, jCheckBox2, jCheckBox3, jCheckBox4, jCheckBox5};
+    for (int i = 0; i < isRight.length && i < checkBoxes.length; i++) {
+        checkBoxes[i].setSelected(isRight[i]);
+    }
+}
     public static void main(String args[]) {
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
