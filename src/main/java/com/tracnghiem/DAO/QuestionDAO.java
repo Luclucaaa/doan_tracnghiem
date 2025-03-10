@@ -54,6 +54,23 @@ public class QuestionDAO implements InterfaceDAO<QuestionDTO> {
             return false;
         }
     }
+    
+    public ArrayList<Integer> getQuestionsByDifficulty(int topicID, String difficulty, int numQuestions) {
+    ArrayList<Integer> questionIDs = new ArrayList<>();
+    String sql = "SELECT qID FROM questions WHERE qtopicID = ? AND qlevel = ? ORDER BY RAND() LIMIT ?";
+    try (PreparedStatement stmt = conn.prepareStatement(sql)) {
+        stmt.setInt(1, topicID);
+        stmt.setString(2, difficulty);
+        stmt.setInt(3, numQuestions);
+        ResultSet rs = stmt.executeQuery();
+        while (rs.next()) {
+            questionIDs.add(rs.getInt("qID"));
+        }
+    } catch (SQLException e) {
+        e.printStackTrace();
+    }
+    return questionIDs;
+}
 
     @Override
     public boolean update(QuestionDTO t) {

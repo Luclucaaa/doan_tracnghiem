@@ -4,6 +4,7 @@
  */
 package com.tracnghiem.DTO;
 
+import java.sql.Date;
 import java.time.LocalDate;
 /**
  *
@@ -15,46 +16,28 @@ public class TestDTO {
     private String testTitle;
     private int testTime;
     private int tpID;
-    private int numEasy;
-    private int numMedium;
-    private int numDifficult;
+    private int num_easy;
+    private int num_medium;
+    private int num_diff;
     private int testLimit;
-    private LocalDate testDate;
+    private Date testDate;
     private int testStatus;
 
-    public TestDTO(String testCode, String testTitle, int testTime, int tpID, int numEasy, int numMedium, int numDifficult, int testLimit, LocalDate testDate, int testStatus) {
-        this.testCode = testCode;
-        this.testTitle = testTitle;
-        this.testTime = testTime;
-        this.tpID = tpID;
-        this.numEasy = numEasy;
-        this.numMedium = numMedium;
-        this.numDifficult = numDifficult;
-        this.testLimit = testLimit;
-        this.testDate = testDate;
-        this.testStatus = testStatus;
-    }
-    
-    public TestDTO() {
-    }
-
-    public TestDTO(int testID, String testCode, String testTitle, int testTime, int tpID, int numEasy, int numMedium, int numDifficult, int testLimit, LocalDate testDate, int testStatus) {
+    public TestDTO(int testID, String testCode, String testTitle, int testTime, int tpID, int num_easy, int num_medium, int num_diff, int testLimit, Date testDate, int testStatus) {
         this.testID = testID;
         this.testCode = testCode;
         this.testTitle = testTitle;
         this.testTime = testTime;
         this.tpID = tpID;
-        this.numEasy = numEasy;
-        this.numMedium = numMedium;
-        this.numDifficult = numDifficult;
+        this.num_easy = num_easy;
+        this.num_medium = num_medium;
+        this.num_diff = num_diff;
         this.testLimit = testLimit;
         this.testDate = testDate;
         this.testStatus = testStatus;
     }
 
-    @Override
-    public String toString() {
-        return "TestDTO{" + "testID=" + testID + ", testCode=" + testCode + ", testTitle=" + testTitle + ", testTime=" + testTime + ", tpID=" + tpID + ", numEasy=" + numEasy + ", numMedium=" + numMedium + ", numDifficult=" + numDifficult + ", testLimit=" + testLimit + ", testDate=" + testDate + ", testStatus=" + testStatus + '}';
+    public TestDTO() {
     }
 
     public int getTestID() {
@@ -97,28 +80,28 @@ public class TestDTO {
         this.tpID = tpID;
     }
 
-    public int getNumEasy() {
-        return numEasy;
+    public int getNum_easy() {
+        return num_easy;
     }
 
-    public void setNumEasy(int numEasy) {
-        this.numEasy = numEasy;
+    public void setNum_easy(int num_easy) {
+        this.num_easy = num_easy;
     }
 
-    public int getNumMedium() {
-        return numMedium;
+    public int getNum_medium() {
+        return num_medium;
     }
 
-    public void setNumMedium(int numMedium) {
-        this.numMedium = numMedium;
+    public void setNum_medium(int num_medium) {
+        this.num_medium = num_medium;
     }
 
-    public int getNumDifficult() {
-        return numDifficult;
+    public int getNum_diff() {
+        return num_diff;
     }
 
-    public void setNumDifficult(int numDifficult) {
-        this.numDifficult = numDifficult;
+    public void setNum_diff(int num_diff) {
+        this.num_diff = num_diff;
     }
 
     public int getTestLimit() {
@@ -129,11 +112,11 @@ public class TestDTO {
         this.testLimit = testLimit;
     }
 
-    public LocalDate getTestDate() {
+    public Date getTestDate() {
         return testDate;
     }
 
-    public void setTestDate(LocalDate testDate) {
+    public void setTestDate(Date testDate) {
         this.testDate = testDate;
     }
 
@@ -144,4 +127,6 @@ public class TestDTO {
     public void setTestStatus(int testStatus) {
         this.testStatus = testStatus;
     }
+    
+    
 }

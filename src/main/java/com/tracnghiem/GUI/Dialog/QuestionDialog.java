@@ -33,22 +33,79 @@ public class QuestionDialog extends javax.swing.JDialog {
     private ButtonGroup answerGroup;
     private String[] answerImagePaths = new String[5];
     private String questionImagePath;
+    private QuestionDTO questionToEdit; // Lưu trữ câu hỏi cần sửa
+    private QuestionBUS questionBUS;
 
     /**
      * Creates new form QuestionPanel
      */
     public QuestionDialog(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
+        questionBUS = new QuestionBUS();
         initComponents();
         loadTopicsToComboBox();
         
         // Khởi tạo ButtonGroup để chỉ cho phép chọn 1 checkbox
-    answerGroup = new ButtonGroup();
-    answerGroup.add(jCheckBox1);
-    answerGroup.add(jCheckBox2);
-    answerGroup.add(jCheckBox3);
-    answerGroup.add(jCheckBox4);
-    answerGroup.add(jCheckBox5);
+        answerGroup = new ButtonGroup();
+        answerGroup.add(jCheckBox1);
+        answerGroup.add(jCheckBox2);
+        answerGroup.add(jCheckBox3);
+        answerGroup.add(jCheckBox4);
+        answerGroup.add(jCheckBox5);
+    }
+    
+    public QuestionDialog(java.awt.Frame parent, boolean modal, QuestionDTO question, List<AnswerDTO> answers) {
+        super(parent, modal);
+        this.questionToEdit = question;
+        questionBUS = new QuestionBUS();
+        initComponents();
+        loadTopicsToComboBox();
+        
+        // Khởi tạo ButtonGroup để chỉ cho phép chọn 1 checkbox
+        answerGroup = new ButtonGroup();
+        answerGroup.add(jCheckBox1);
+        answerGroup.add(jCheckBox2);
+        answerGroup.add(jCheckBox3);
+        answerGroup.add(jCheckBox4);
+        answerGroup.add(jCheckBox5);
+
+        // Thay đổi tiêu đề và điền dữ liệu khi sửa
+        jLabel1.setText("Sửa câu hỏi");
+        jButton2.setText("Lưu"); // Thay đổi nút "Thêm mới" thành "Lưu"
+        fillData(question, answers);
+    }
+    private void fillData(QuestionDTO question, List<AnswerDTO> answers) {
+        // Điền dữ liệu câu hỏi
+        jTextArea1.setText(question.getQContent());
+        setImageUrl(question.getQPicture());
+        setTopicID(question.getTopicID());
+        setLevel(question.getLevel());
+
+        // Điền dữ liệu đáp án
+        JTextArea[] answerAreas = {jTextArea2, jTextArea3, jTextArea4, jTextArea5, jTextArea6};
+        JCheckBox[] checkBoxes = {jCheckBox1, jCheckBox2, jCheckBox3, jCheckBox4, jCheckBox5};
+        JLabel[] answerLabels = {jLabel6, jLabel8, jLabel10, jLabel12, jLabel14};
+
+        for (int i = 0; i < answers.size() && i < 5; i++) {
+            AnswerDTO answer = answers.get(i);
+            answerAreas[i].setText(answer.getAwContent());
+            checkBoxes[i].setSelected(answer.getIsRight() == 1);
+            setAnswerImage(answerLabels[i], answer.getAwPictures(), i);
+        }
+    }
+    
+    private void setAnswerImage(JLabel label, String imageUrl, int index) {
+        if (imageUrl != null && !imageUrl.isEmpty()) {
+            try {
+                BufferedImage img = ImageIO.read(new File(imageUrl));
+                Image scaledImage = img.getScaledInstance(label.getWidth(), label.getHeight(), Image.SCALE_SMOOTH);
+                label.setIcon(new ImageIcon(scaledImage));
+                label.setText("");
+                answerImagePaths[index] = imageUrl;
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
     }
 
     /**
@@ -558,16 +615,15 @@ public class QuestionDialog extends javax.swing.JDialog {
         try {
             BufferedImage img = ImageIO.read(selectedFile);
             Image scaledImage = img.getScaledInstance(jLabel6.getWidth(), jLabel6.getHeight(), Image.SCALE_SMOOTH);
-            ImageIcon icon = new ImageIcon(scaledImage);
+            jLabel6.setIcon(new ImageIcon(scaledImage));
             jLabel6.setText("");
-            jLabel6.setIcon(icon);
 
             String destPath = "images/answers/" + System.currentTimeMillis() + "_" + selectedFile.getName();
             File destFile = new File(destPath);
             destFile.getParentFile().mkdirs();
             ImageIO.write(img, "png", destFile);
 
-            answerImagePaths[0] = destPath; // Lưu đường dẫn cho đáp án 1
+            answerImagePaths[0] = destPath; // Đáp án 1
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Lỗi khi tải hình ảnh!", "Lỗi", JOptionPane.ERROR_MESSAGE);
         }
@@ -584,16 +640,15 @@ public class QuestionDialog extends javax.swing.JDialog {
         try {
             BufferedImage img = ImageIO.read(selectedFile);
             Image scaledImage = img.getScaledInstance(jLabel8.getWidth(), jLabel8.getHeight(), Image.SCALE_SMOOTH);
-            ImageIcon icon = new ImageIcon(scaledImage);
+            jLabel8.setIcon(new ImageIcon(scaledImage));
             jLabel8.setText("");
-            jLabel8.setIcon(icon);
 
             String destPath = "images/answers/" + System.currentTimeMillis() + "_" + selectedFile.getName();
             File destFile = new File(destPath);
             destFile.getParentFile().mkdirs();
             ImageIO.write(img, "png", destFile);
 
-            answerImagePaths[0] = destPath; // Lưu đường dẫn cho đáp án 1
+            answerImagePaths[1] = destPath; // Đáp án 2
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Lỗi khi tải hình ảnh!", "Lỗi", JOptionPane.ERROR_MESSAGE);
         }
@@ -609,19 +664,19 @@ public class QuestionDialog extends javax.swing.JDialog {
         try {
             BufferedImage img = ImageIO.read(selectedFile);
             Image scaledImage = img.getScaledInstance(jLabel10.getWidth(), jLabel10.getHeight(), Image.SCALE_SMOOTH);
-            ImageIcon icon = new ImageIcon(scaledImage);
+            jLabel10.setIcon(new ImageIcon(scaledImage));
             jLabel10.setText("");
-            jLabel10.setIcon(icon);
 
             String destPath = "images/answers/" + System.currentTimeMillis() + "_" + selectedFile.getName();
             File destFile = new File(destPath);
             destFile.getParentFile().mkdirs();
             ImageIO.write(img, "png", destFile);
 
-            answerImagePaths[0] = destPath; // Lưu đường dẫn cho đáp án 1
+            answerImagePaths[2] = destPath; // Đáp án 3
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Lỗi khi tải hình ảnh!", "Lỗi", JOptionPane.ERROR_MESSAGE);
-        }// TODO add your handling code here:
+        }
+    // TODO add your handling code here:
     }//GEN-LAST:event_jLabel10MouseClicked
     }
     private void jLabel12MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel12MouseClicked
@@ -633,16 +688,15 @@ public class QuestionDialog extends javax.swing.JDialog {
         try {
             BufferedImage img = ImageIO.read(selectedFile);
             Image scaledImage = img.getScaledInstance(jLabel12.getWidth(), jLabel12.getHeight(), Image.SCALE_SMOOTH);
-            ImageIcon icon = new ImageIcon(scaledImage);
+            jLabel12.setIcon(new ImageIcon(scaledImage));
             jLabel12.setText("");
-            jLabel12.setIcon(icon);
 
             String destPath = "images/answers/" + System.currentTimeMillis() + "_" + selectedFile.getName();
             File destFile = new File(destPath);
             destFile.getParentFile().mkdirs();
             ImageIO.write(img, "png", destFile);
 
-            answerImagePaths[0] = destPath; // Lưu đường dẫn cho đáp án 1
+            answerImagePaths[3] = destPath; // Đáp án 4
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Lỗi khi tải hình ảnh!", "Lỗi", JOptionPane.ERROR_MESSAGE);
         }
@@ -658,19 +712,19 @@ public class QuestionDialog extends javax.swing.JDialog {
         try {
             BufferedImage img = ImageIO.read(selectedFile);
             Image scaledImage = img.getScaledInstance(jLabel14.getWidth(), jLabel14.getHeight(), Image.SCALE_SMOOTH);
-            ImageIcon icon = new ImageIcon(scaledImage);
+            jLabel14.setIcon(new ImageIcon(scaledImage));
             jLabel14.setText("");
-            jLabel14.setIcon(icon);
 
             String destPath = "images/answers/" + System.currentTimeMillis() + "_" + selectedFile.getName();
             File destFile = new File(destPath);
             destFile.getParentFile().mkdirs();
             ImageIO.write(img, "png", destFile);
 
-            answerImagePaths[0] = destPath; // Lưu đường dẫn cho đáp án 1
+            answerImagePaths[4] = destPath; // Đáp án 5
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Lỗi khi tải hình ảnh!", "Lỗi", JOptionPane.ERROR_MESSAGE);
         }
+
     }// TODO add your handling code here:
     }//GEN-LAST:event_jLabel14MouseClicked
 
@@ -722,16 +776,18 @@ public class QuestionDialog extends javax.swing.JDialog {
     }
 
     try {
-            TopicBUS topicBUS = new TopicBUS();
-            int topicID = topicBUS.getIDbyTopic(topic);
-            if (topicID == -1) {
-                JOptionPane.showMessageDialog(this, "Không tìm thấy chủ đề: " + topic, "Lỗi", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
+        TopicBUS topicBUS = new TopicBUS();
+        int topicID = topicBUS.getIDbyTopic(topic);
+        if (topicID == -1) {
+            JOptionPane.showMessageDialog(this, "Không tìm thấy chủ đề: " + topic, "Lỗi", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
 
-            String imageUrl = hasImage ? questionImagePath : "";
+        String imageUrl = hasImage ? questionImagePath : "";
+
+        if (questionToEdit == null) {
+            // Thêm mới
             QuestionDTO question = new QuestionDTO(questionContent, imageUrl, topicID, level, 1);
-            QuestionBUS questionBUS = new QuestionBUS();
             boolean isAdded = questionBUS.addQuestion(question);
 
             if (isAdded) {
@@ -743,11 +799,12 @@ public class QuestionDialog extends javax.swing.JDialog {
 
                 for (int i = 0; i < 5; i++) {
                     if (!answers[i].isEmpty() || answerImages[i].getIcon() != null) {
-                        String awImageUrl = (answerImages[i].getIcon() != null) ? answerImagePaths[i] : "";
+                        String awImageUrl = (answerImages[i].getIcon() != null) ? answerImagePaths[i] : ""; // Gán rỗng nếu không có hình
                         questionBUS.addAnswer(new AnswerDTO(
+                            0,
                             questionID,
                             answers[i],
-                            awImageUrl,
+                            awImageUrl, // Sử dụng chuỗi rỗng nếu không có hình
                             isRight[i] ? 1 : 0,
                             1
                         ));
@@ -758,12 +815,43 @@ public class QuestionDialog extends javax.swing.JDialog {
             } else {
                 JOptionPane.showMessageDialog(this, "Thêm câu hỏi thất bại!", "Lỗi", JOptionPane.ERROR_MESSAGE);
             }
+        } else {
+            // Sửa câu hỏi (tương tự)
+            questionToEdit.setQContent(questionContent);
+            questionToEdit.setQPicture(imageUrl);
+            questionToEdit.setTopicID(topicID);
+            questionToEdit.setLevel(level);
+            questionToEdit.setStatus(1);
 
-            questionBUS.closeConnection();
-        } catch (Exception e) {
-            e.printStackTrace();
-            JOptionPane.showMessageDialog(this, "Lỗi hệ thống: " + e.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
+            boolean isUpdated = questionBUS.updateQuestion(questionToEdit);
+            if (isUpdated) {
+                questionBUS.deleteAnswersByQuestionID(questionToEdit.getQID());
+
+                for (int i = 0; i < 5; i++) {
+                    if (!answers[i].isEmpty() || answerImages[i].getIcon() != null) {
+                        String awImageUrl = (answerImages[i].getIcon() != null) ? answerImagePaths[i] : "";
+                        questionBUS.addAnswer(new AnswerDTO(
+                            0,
+                            questionToEdit.getQID(),
+                            answers[i],
+                            awImageUrl,
+                            isRight[i] ? 1 : 0,
+                            1
+                        ));
+                    }
+                }
+                JOptionPane.showMessageDialog(this, "Sửa câu hỏi thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
+                dispose();
+            } else {
+                JOptionPane.showMessageDialog(this, "Sửa câu hỏi thất bại!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+            }
         }
+
+        questionBUS.closeConnection();
+    } catch (Exception e) {
+        e.printStackTrace();
+        JOptionPane.showMessageDialog(this, "Lỗi hệ thống: " + e.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
+    }
     }//GEN-LAST:event_jButton2ActionPerformed
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
@@ -836,41 +924,44 @@ public class QuestionDialog extends javax.swing.JDialog {
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
         JFileChooser fileChooser = new JFileChooser();
-    int returnValue = fileChooser.showOpenDialog(this);
+        int returnValue = fileChooser.showOpenDialog(this);
 
-    if (returnValue == JFileChooser.APPROVE_OPTION) {
-        File selectedFile = fileChooser.getSelectedFile();
-        try {
-            BufferedImage img = ImageIO.read(selectedFile);
-            Image scaledImage = img.getScaledInstance(jLabel2.getWidth(), jLabel2.getHeight(), Image.SCALE_SMOOTH);
-            ImageIcon icon = new ImageIcon(scaledImage);
-            jLabel2.setText("");
-            jLabel2.setIcon(icon);
+        if (returnValue == JFileChooser.APPROVE_OPTION) {
+            File selectedFile = fileChooser.getSelectedFile();
+            try {
+                BufferedImage img = ImageIO.read(selectedFile);
+                Image scaledImage = img.getScaledInstance(jLabel2.getWidth(), jLabel2.getHeight(), Image.SCALE_SMOOTH);
+                ImageIcon icon = new ImageIcon(scaledImage);
+                jLabel2.setText("");
+                jLabel2.setIcon(icon);
 
-            // Lưu ảnh vào thư mục dự án
-            String destPath = "images/questions/" + System.currentTimeMillis() + "_" + selectedFile.getName();
-            File destFile = new File(destPath);
-            destFile.getParentFile().mkdirs(); // Tạo thư mục nếu chưa có
-            ImageIO.write(img, "png", destFile);
+                // Lưu ảnh vào thư mục dự án
+                String destPath = "images/questions/" + System.currentTimeMillis() + "_" + selectedFile.getName();
+                File destFile = new File(destPath);
+                destFile.getParentFile().mkdirs();
+                ImageIO.write(img, "png", destFile);
 
-            questionImagePath = destPath; // Lưu đường dẫn
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Lỗi khi tải hình ảnh!", "Lỗi", JOptionPane.ERROR_MESSAGE);
-        }
-    }// TODO add your handling code here:
+                questionImagePath = destPath;
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Lỗi khi tải hình ảnh!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+            }
+        }// TODO add your handling code here:
     }//GEN-LAST:event_jButton1ActionPerformed
 
     /**
      * @param args the command line arguments
      */
     private void loadTopicsToComboBox() {
-        TopicBUS topicBUS = new TopicBUS();
-        ArrayList<TopicDTO> topicList = topicBUS.getAllActiveTopics();
+    TopicBUS topicBUS = new TopicBUS();
+    ArrayList<TopicDTO> topicList = topicBUS.getAllActiveTopics();
+    System.out.println("Số lượng chủ đề lấy được: " + topicList.size()); // Log để kiểm tra
 
-        for (TopicDTO topic : topicList) {
-            jComboBox1.addItem(topic.getTpTitle());
-        }
+    jComboBox1.removeAllItems(); // Xóa các mục cũ trước khi thêm mới
+    for (TopicDTO topic : topicList) {
+        jComboBox1.addItem(topic.getTpTitle());
     }
+    System.out.println("Số lượng mục trong jComboBox1: " + jComboBox1.getItemCount()); // Log để kiểm tra
+}
     
     public void resetForm() {
     jTextArea1.setText("");
@@ -1045,7 +1136,16 @@ public void setAnswerIsRight(boolean[] isRight) {
         //</editor-fold>
         //</editor-fold>
         //</editor-fold>
-
+        try {
+            for (javax.swing.UIManager.LookAndFeelInfo info : javax.swing.UIManager.getInstalledLookAndFeels()) {
+                if ("Nimbus".equals(info.getName())) {
+                    javax.swing.UIManager.setLookAndFeel(info.getClassName());
+                    break;
+                }
+            }
+        } catch (ClassNotFoundException | InstantiationException | IllegalAccessException | javax.swing.UnsupportedLookAndFeelException ex) {
+            java.util.logging.Logger.getLogger(QuestionDialog.class.getName()).log(java.util.logging.Level.SEVERE, null, ex);
+        }
         /* Create and display the dialog */
         java.awt.EventQueue.invokeLater(new Runnable() {
             public void run() {

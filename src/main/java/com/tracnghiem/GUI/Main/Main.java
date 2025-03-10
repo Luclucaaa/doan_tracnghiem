@@ -4,12 +4,16 @@
  */
 package com.tracnghiem.GUI.Main;
 
+import com.tracnghiem.BUS.ExamBUS;
 import com.tracnghiem.BUS.QuestionBUS;
+import com.tracnghiem.BUS.TestBUS;
 import com.tracnghiem.BUS.UserBUS;
 import com.tracnghiem.DTO.UserDTO;
 import com.tracnghiem.BUS.TopicBUS;
 import com.tracnghiem.DTO.AnswerDTO;
+import com.tracnghiem.DTO.ExamDTO;
 import com.tracnghiem.DTO.QuestionDTO;
+import com.tracnghiem.DTO.TestDTO;
 import com.tracnghiem.DTO.TopicDTO;
 import com.tracnghiem.GUI.Dialog.ExamDialog;
 import com.tracnghiem.GUI.Dialog.QuestionDialog;
@@ -20,6 +24,7 @@ import com.tracnghiem.GUI.Dialog.TopicDialog;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.DecimalFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -40,16 +45,18 @@ public class Main extends javax.swing.JFrame {
     private TestDialog testDialog;
     private TopicDialog topicDialog;
     private TopicDialog topicDialogInstance = null;
+    private TopicBUS topicBUS;
     public Main() {
         initComponents();
         questionDialog = new QuestionDialog(this, true);
-        examDialog = new ExamDialog(this, true);
+        //examDialog = new ExamDialog(this, true);
         testDialog = new TestDialog(this, true);
         topicDialog = new TopicDialog(this, true);
         questionDialog.setLocationRelativeTo(null);
-        examDialog.setLocationRelativeTo(null);
+        //examDialog.setLocationRelativeTo(null);
         testDialog.setLocationRelativeTo(null);
         topicDialog.setLocationRelativeTo(null);
+        topicBUS = new TopicBUS();
         loadUserTable();
         loadTopics();
         
@@ -728,6 +735,11 @@ public class Main extends javax.swing.JFrame {
         cz17.setText("Xóa");
         cz17.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         cz17.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        cz17.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cz17ActionPerformed(evt);
+            }
+        });
 
         cz18.setFont(new java.awt.Font("Segoe UI", 1, 15)); // NOI18N
         cz18.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icon/change.png"))); // NOI18N
@@ -1338,7 +1350,7 @@ public class Main extends javax.swing.JFrame {
     }//GEN-LAST:event_QuestionMouseClicked
 
     private void cz4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cz4ActionPerformed
-        // TODO add your handling code here:
+        JOptionPane.showMessageDialog(this, "Vui lòng thêm đề thi thông qua tab Quản lý bài thi!");// TODO add your handling code here:
     }//GEN-LAST:event_cz4ActionPerformed
 
     private void cz6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cz6ActionPerformed
@@ -1357,7 +1369,23 @@ public class Main extends javax.swing.JFrame {
     }//GEN-LAST:event_cz16ActionPerformed
 
     private void cz18ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cz18ActionPerformed
-        // TODO add your handling code here:
+        int selectedRow = jTable4.getSelectedRow();
+    if (selectedRow >= 0) {
+        String testCode = jTable4.getValueAt(selectedRow, 0).toString();
+        TestBUS testBUS = new TestBUS();
+        TestDTO test = testBUS.getTestByCode(testCode);
+
+        if (test != null) {
+            TestDialog testDialog = new TestDialog(this, true);
+            testDialog.displayTestData(test, topicBUS);
+            testDialog.configureUpdateButton(test, testBUS, this);
+            testDialog.setVisible(true);
+        } else {
+            JOptionPane.showMessageDialog(null, "Không tìm thấy bài thi để sửa!");
+        }
+    } else {
+        JOptionPane.showMessageDialog(null, "Vui lòng chọn một bài thi để sửa!");
+    }// TODO add your handling code here:
     }//GEN-LAST:event_cz18ActionPerformed
 
     private void jTextField7ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField7ActionPerformed
@@ -1434,110 +1462,20 @@ public class Main extends javax.swing.JFrame {
 
     private void cz9ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cz9ActionPerformed
         int selectedRow = jTable5.getSelectedRow();
-    if (selectedRow >= 0) {
-        String qIDStr = jTable5.getValueAt(selectedRow, 0).toString();
-        int qID;
-        try {
-            qID = Integer.parseInt(qIDStr.replaceAll("[^0-9]", ""));
-        } catch (NumberFormatException ex) {
-            JOptionPane.showMessageDialog(null, "Lỗi định dạng mã câu hỏi: " + qIDStr);
-            return;
-        }
-
+    if (selectedRow != -1) {
+        int qID = Integer.parseInt(jTable5.getValueAt(selectedRow, 0).toString());
         QuestionBUS questionBUS = new QuestionBUS();
         QuestionDTO question = questionBUS.getQuestionByID(qID);
         List<AnswerDTO> answers = questionBUS.getAnswersByQuestionID(qID);
 
-        if (question != null) {
-            // Hiển thị thông tin câu hỏi trong QuestionDialog
-            questionDialog.resetForm();
-            questionDialog.setQuestionContent(question.getQContent());
-            questionDialog.setImageUrl(question.getQPicture());
-            questionDialog.setTopicID(question.getTopicID());
-            questionDialog.setLevel(question.getLevel());
+        // Mở dialog để sửa câu hỏi
+        QuestionDialog dialog = new QuestionDialog(null, true, question, answers);
+        dialog.setVisible(true);
 
-            // Hiển thị các đáp án
-            String[] answerContents = new String[5];
-            String[] answerImages = new String[5];
-            boolean[] isRight = new boolean[5];
-            for (int i = 0; i < answers.size() && i < 5; i++) {
-                AnswerDTO answer = answers.get(i);
-                answerContents[i] = answer.getAwContent();
-                answerImages[i] = answer.getAwPictures();
-                isRight[i] = (answer.getIsRight() == 1);
-            }
-            questionDialog.setAnswerContents(answerContents);
-            questionDialog.setAnswerImages(answerImages);
-            questionDialog.setAnswerIsRight(isRight);
-
-            questionDialog.setVisible(true);
-
-            // Xử lý khi nhấn nút "Sửa" trong QuestionDialog
-            questionDialog.setAddButtonListener(new ActionListener() {
-                @Override
-                public void actionPerformed(ActionEvent e) {
-                    try {
-                        // Lấy dữ liệu từ QuestionDialog
-                        String questionContent = questionDialog.getQuestionContent().trim();
-                        String imageUrl = questionDialog.getImageUrl();
-                        int topicID = questionDialog.getTopicID();
-                        String level = questionDialog.getLevel();
-                        int status = 1;
-
-                        if (questionContent.isEmpty() && imageUrl.isEmpty()) {
-                            JOptionPane.showMessageDialog(null, "Vui lòng nhập nội dung câu hỏi hoặc thêm hình ảnh!");
-                            return;
-                        }
-
-                        List<AnswerDTO> newAnswers = questionDialog.getAnswers();
-                        if (newAnswers.size() < 2) {
-                            JOptionPane.showMessageDialog(null, "Vui lòng nhập ít nhất 2 đáp án!");
-                            return;
-                        }
-
-                        int rightAnswerCount = (int) newAnswers.stream().filter(a -> a.getIsRight() == 1).count();
-                        if (rightAnswerCount != 1) {
-                            JOptionPane.showMessageDialog(null, "Vui lòng chọn duy nhất 1 đáp án đúng!");
-                            return;
-                        }
-
-                        // Cập nhật QuestionDTO
-                        question.setQContent(questionContent);
-                        question.setQPicture(imageUrl);
-                        question.setTopicID(topicID);
-                        question.setLevel(level);
-                        question.setStatus(status);
-
-                        // Xóa các đáp án cũ
-                        questionBUS.deleteAnswersByQuestionID(qID);
-
-                        // Thêm các đáp án mới
-                        for (AnswerDTO answer : newAnswers) {
-                            answer.setQID(qID);
-                            questionBUS.addAnswer(answer);
-                        }
-
-                        // Cập nhật câu hỏi
-                        if (questionBUS.updateQuestion(question)) {
-                            JOptionPane.showMessageDialog(null, "Cập nhật câu hỏi thành công!");
-                            loadQuestions();
-                            questionDialog.dispose();
-                        } else {
-                            JOptionPane.showMessageDialog(null, "Cập nhật câu hỏi thất bại!");
-                        }
-
-                        questionBUS.closeConnection();
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
-                        JOptionPane.showMessageDialog(null, "Đã xảy ra lỗi: " + ex.getMessage());
-                    }
-                }
-            });
-        } else {
-            JOptionPane.showMessageDialog(null, "Không tìm thấy câu hỏi để sửa!");
-        }
+        // Sau khi đóng dialog, làm mới bảng
+        loadQuestions();
     } else {
-        JOptionPane.showMessageDialog(null, "Vui lòng chọn một câu hỏi để sửa!");
+        JOptionPane.showMessageDialog(this, "Vui lòng chọn một câu hỏi để sửa!");
     }// TODO add your handling code here:
     }//GEN-LAST:event_cz9ActionPerformed
 
@@ -1561,16 +1499,18 @@ public class Main extends javax.swing.JFrame {
 
     private void ExamMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ExamMouseClicked
         PanelPhai.removeAll();
-        PanelPhai.add(ExamPanel, "card5");
-        PanelPhai.revalidate();
-        PanelPhai.repaint();
+    PanelPhai.add(ExamPanel, "card5");
+    loadExams(); // Tải danh sách đề thi
+    PanelPhai.revalidate();
+    PanelPhai.repaint();
     }//GEN-LAST:event_ExamMouseClicked
 
     private void TestMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_TestMouseClicked
         PanelPhai.removeAll();
-        PanelPhai.add(TestPanel, "card6");
-        PanelPhai.revalidate();
-        PanelPhai.repaint();
+    PanelPhai.add(TestPanel, "card6");
+    loadTests(); // Tải danh sách bài thi
+    PanelPhai.revalidate();
+    PanelPhai.repaint();
     }//GEN-LAST:event_TestMouseClicked
 
     private void jButton3MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jButton3MouseClicked
@@ -1630,7 +1570,10 @@ public class Main extends javax.swing.JFrame {
     }//GEN-LAST:event_cz4MouseClicked
 
     private void cz16MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_cz16MouseClicked
+        TestDialog testDialog = new TestDialog(this, true);
         testDialog.setVisible(true);
+        loadTests();
+        loadExams();
         // TODO add your handling code here:
     }//GEN-LAST:event_cz16MouseClicked
 
@@ -1911,6 +1854,25 @@ public class Main extends javax.swing.JFrame {
     private void jTextField11KeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jTextField11KeyReleased
         jTextField10KeyReleased(evt);        // TODO add your handling code here:
     }//GEN-LAST:event_jTextField11KeyReleased
+
+    private void cz17ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cz17ActionPerformed
+        int selectedRow = jTable4.getSelectedRow();
+    if (selectedRow >= 0) {
+        String testCode = jTable4.getValueAt(selectedRow, 0).toString();
+        int confirm = JOptionPane.showConfirmDialog(null, "Bạn có chắc muốn xóa bài thi này?", "Xác nhận", JOptionPane.YES_NO_OPTION);
+        if (confirm == JOptionPane.YES_OPTION) {
+            TestBUS testBUS = new TestBUS();
+            if (testBUS.deleteTest(testCode)) {
+                JOptionPane.showMessageDialog(null, "Xóa bài thi thành công!");
+                loadTests(); // Cập nhật lại bảng
+            } else {
+                JOptionPane.showMessageDialog(null, "Xóa bài thi thất bại!");
+            }
+        }
+    } else {
+        JOptionPane.showMessageDialog(null, "Vui lòng chọn một bài thi để xóa!");
+    }// TODO add your handling code here:
+    }//GEN-LAST:event_cz17ActionPerformed
     
    private void loadTopics() {
     TopicBUS topicBUS = new TopicBUS();
@@ -1981,6 +1943,49 @@ public class Main extends javax.swing.JFrame {
     }
 
     questionBUS.closeConnection();
+}
+    public void loadTests() {
+    TestBUS testBUS = new TestBUS();
+    ArrayList<TestDTO> testList = testBUS.getAllTests();
+    DefaultTableModel model = (DefaultTableModel) jTable4.getModel();
+    model.setRowCount(0); // Xóa dữ liệu cũ
+
+    DecimalFormat formatter = new DecimalFormat("000");
+    TopicBUS topicBUS = new TopicBUS();
+
+    for (TestDTO test : testList) {
+        TopicDTO topic = topicBUS.getTopicByID(String.valueOf(test.getTpID()));
+        String topicName = topic != null ? topic.getTpTitle() : "Không xác định";
+
+        model.addRow(new Object[]{
+            test.getTestCode(),
+            test.getTestTitle(),
+            topicName,
+            test.getNum_easy(),
+            test.getNum_medium(),
+            test.getNum_diff(),
+            test.getTestLimit(),
+            test.getTestTime(),
+            new SimpleDateFormat("dd/MM/yyyy").format(test.getTestDate()),
+            test.getTestStatus() == 1 ? "Active" : "Hidden"
+        });
+    }
+}
+    private void loadExams() {
+        ExamBUS examBUS = new ExamBUS();
+    ArrayList<ExamDTO> exams = examBUS.getAllExams();
+    DefaultTableModel model = (DefaultTableModel) jTable3.getModel();
+    model.setRowCount(0); // Xóa dữ liệu cũ
+
+    for (ExamDTO exam : exams) {
+        String quesIDs = exam.getExQuesIDs() != null ? exam.getExQuesIDs() : ""; // Xử lý null
+        model.addRow(new Object[]{
+            exam.getExCode(),    // Mã đề thi
+            exam.getTestCode(),  // Mã bài thi
+            exam.getExOrder(),   // Thứ tự đề
+            quesIDs             // Danh sách câu hỏi
+        });
+    }
 }
     /**
      * @param args the command line arguments

@@ -117,6 +117,10 @@ public class QuestionBUS {
         }
         return questionAnswers;
     }
+    
+    public ArrayList<Integer> getQuestionsByDifficulty(int topicID, String difficulty, int numQuestions) {
+        return questionDAO.getQuestionsByDifficulty(topicID, difficulty, numQuestions);
+    }   
 
     public boolean deleteAnswersByQuestionID(int qID) {
         List<AnswerDTO> answers = getAnswersByQuestionID(qID);

@@ -13,10 +13,18 @@ import java.util.ArrayList;
  * @author Admin
  */
 public class TestBUS {
-        private TestDAO testDAO;
+    private TestDAO testDAO;
 
     public TestBUS() {
-        this.testDAO = TestDAO.getInstance();
+        testDAO = new TestDAO();
+    }
+
+    public ArrayList<TestDTO> getAllTests() {
+        return testDAO.selectAll();
+    }
+
+    public TestDTO getTestByCode(String testCode) {
+        return testDAO.selectByID(testCode);
     }
 
     public boolean addTest(TestDTO test) {
@@ -27,28 +35,7 @@ public class TestBUS {
         return testDAO.update(test);
     }
 
-    public boolean deleteTest(String testID) {
-        return testDAO.delete(testID);
-    }
-
-    public ArrayList<TestDTO> getAllActiveTests() {
-        return testDAO.selectAll();
-    }
-
-    public TestDTO getTestByID(String testID) {
-        return testDAO.selectByID(testID);
-    }
-
-    public ArrayList<TestDTO> getTestsByTopicID(int tpID) {
-        ArrayList<TestDTO> allTests = testDAO.selectAll();
-        ArrayList<TestDTO> result = new ArrayList<>();
-
-        for (TestDTO test : allTests) {
-            if (test.getTpID() == tpID) {
-                result.add(test);
-            }
-        }
-
-        return result;
+    public boolean deleteTest(String testCode) {
+        return testDAO.delete(testCode);
     }
 }

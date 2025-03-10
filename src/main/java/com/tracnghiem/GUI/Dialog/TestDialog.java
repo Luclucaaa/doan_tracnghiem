@@ -3,23 +3,226 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/GUIForms/JDialog.java to edit this template
  */
 package com.tracnghiem.GUI.Dialog;
+
 import com.formdev.flatlaf.FlatClientProperties;
 import com.toedter.calendar.JDateChooser;
+import com.tracnghiem.BUS.TestBUS;
+import com.tracnghiem.BUS.TopicBUS;
+import com.tracnghiem.DTO.TestDTO;
+import com.tracnghiem.DTO.TopicDTO;
+import com.toedter.calendar.JDateChooser;
+import com.tracnghiem.BUS.ExamBUS;
+import com.tracnghiem.BUS.QuestionBUS;
+import com.tracnghiem.DTO.ExamDTO;
+import com.tracnghiem.DTO.QuestionDTO;
+import com.tracnghiem.GUI.Main.Main;
+import javax.swing.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Date;
+import java.util.stream.Collectors;
+import javax.swing.table.DefaultTableModel;
 
 /**
  *
  * @author THELUC
  */
 public class TestDialog extends javax.swing.JDialog {
-
+    private TestBUS testBUS;
+    private TopicBUS topicBUS;
+    private QuestionBUS questionBUS;
     /**
      * Creates new form TestDialog
      */
     public TestDialog(java.awt.Frame parent, boolean modal) {
         super(parent, modal);
         initComponents();
+        testBUS = new TestBUS();
+        topicBUS = new TopicBUS();
+        questionBUS = new QuestionBUS();
+        loadTopics();
+        loadQuestions(); // Tải danh sách câu hỏi
+        jLabel18.setText("0");
+        jLabel20.setText("0");
+        jLabel19.setText("0");
+        jLabel23.setText("0");// Tải danh sách chủ đề vào jComboBox1
+        setLocationRelativeTo(null); // Căn giữa dialog
+    }
+    
+    public void setTestCode(String testCode) {
+        jTextField4.setText(testCode);
     }
 
+    public void setTestTitle(String testTitle) {
+        jTextField2.setText(testTitle);
+    }
+
+    public void setTopic(String topic) {
+        jComboBox1.setSelectedItem(topic);
+    }
+
+    public void setTestTime(String testTime) {
+        jTextField3.setText(testTime);
+    }
+
+    public void setTestLimit(String testLimit) {
+        jTextField5.setText(testLimit);
+    }
+
+    public void setTestDate(Date testDate) {
+        jDateChooser1.setDate(testDate);
+    }
+
+    public void setNumEasy(String numEasy) {
+        jLabel18.setText(numEasy);
+    }
+
+    public void setNumMedium(String numMedium) {
+        jLabel20.setText(numMedium);
+    }
+
+    public void setNumDiff(String numDiff) {
+        jLabel19.setText(numDiff);
+    }
+
+    public void setNumExams(String numExams) {
+        jTextField1.setText(numExams);
+    }
+    
+    public void displayTestData(TestDTO test, TopicBUS topicBUS) {
+        setTestCode(test.getTestCode());
+        setTestTitle(test.getTestTitle());
+        TopicDTO topic = topicBUS.getTopicByID(String.valueOf(test.getTpID()));
+        String topicString = (topic != null) ? topic.getTpTitle() + " (" + test.getTpID() + ")" : "Không xác định";
+        setTopic(topicString);
+        setTestTime(String.valueOf(test.getTestTime()));
+        setTestLimit(String.valueOf(test.getTestLimit()));
+        setTestDate(test.getTestDate());
+        setNumEasy(String.valueOf(test.getNum_easy()));
+        setNumMedium(String.valueOf(test.getNum_medium()));
+        setNumDiff(String.valueOf(test.getNum_diff()));
+        setNumExams("1");
+    }
+
+    public void configureUpdateButton(TestDTO test, TestBUS testBUS, Main main) {
+        jButton3.setText("Cập nhật");
+        for (ActionListener al : jButton3.getActionListeners()) {
+            jButton3.removeActionListener(al);
+        }
+        jButton3.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    test.setTestTitle(getTestTitle());
+                    test.setTpID(getTopicID());
+                    test.setTestTime(getTestTime());
+                    test.setTestLimit(getTestLimit());
+                    Date testDate = getTestDate();
+                    if (testDate == null) {
+                        JOptionPane.showMessageDialog(null, "Vui lòng chọn ngày tạo!");
+                        return;
+                    }
+                    test.setTestDate(new java.sql.Date(testDate.getTime()));
+                    test.setNum_easy(getNumEasy());
+                    test.setNum_medium(getNumMedium());
+                    test.setNum_diff(getNumDiff());
+
+                    if (testBUS.updateTest(test)) {
+                        JOptionPane.showMessageDialog(null, "Cập nhật bài thi thành công!");
+                        main.loadTests();
+                        dispose();
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Cập nhật bài thi thất bại!");
+                    }
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(null, "Lỗi: " + ex.getMessage());
+                    ex.printStackTrace();
+                }
+            }
+        });
+    }
+    // Tải danh sách chủ đề vào jComboBox1
+    private void loadTopics() {
+        ArrayList<TopicDTO> topics = topicBUS.getAllActiveTopics();
+        jComboBox1.removeAllItems();
+        for (TopicDTO topic : topics) {
+            jComboBox1.addItem(topic.getTpTitle() + " (" + topic.getTpID() + ")");
+        }
+    }
+    
+    // Getter cho các trường dữ liệu
+    public String getTestCode() {
+        return jTextField4.getText().trim(); // Mã bài thi, có thể để tự động sinh sau
+    }
+
+    public String getTestTitle() {
+        return jTextField2.getText().trim();
+    }
+
+    public int getTopicID() {
+        String selectedTopic = (String) jComboBox1.getSelectedItem();
+        if (selectedTopic != null) {
+            String[] parts = selectedTopic.split("\\(");
+            String idStr = parts[1].replace(")", "");
+            return Integer.parseInt(idStr);
+        }
+        return -1;
+    }
+
+    public int getTestTime() {
+        try {
+            return Integer.parseInt(jTextField3.getText().trim());
+        } catch (NumberFormatException e) {
+            return 0;
+        }
+    }
+
+    public int getTestLimit() {
+        try {
+            return Integer.parseInt(jTextField5.getText().trim());
+        } catch (NumberFormatException e) {
+            return 0;
+        }
+    }
+
+    public Date getTestDate() {
+        return jDateChooser1.getDate();
+    }
+
+    public int getNumEasy() {
+        try {
+            return Integer.parseInt(jLabel18.getText().trim());
+        } catch (NumberFormatException e) {
+            return 0;
+        }
+    }
+
+    public int getNumMedium() {
+        try {
+            return Integer.parseInt(jLabel20.getText().trim());
+        } catch (NumberFormatException e) {
+            return 0;
+        }
+    }
+
+    public int getNumDiff() {
+        try {
+            return Integer.parseInt(jLabel19.getText().trim());
+        } catch (NumberFormatException e) {
+            return 0;
+        }
+    }
+
+    public int getNumExams() {
+        try {
+            return Integer.parseInt(jTextField1.getText().trim());
+        } catch (NumberFormatException e) {
+            return 0;
+        }
+    }
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -41,12 +244,9 @@ public class TestDialog extends javax.swing.JDialog {
         jLabel7 = new javax.swing.JLabel();
         jButton3 = new javax.swing.JButton();
         jButton4 = new javax.swing.JButton();
-        jLabel8 = new javax.swing.JLabel();
         jLabel9 = new javax.swing.JLabel();
         jPanel2 = new javax.swing.JPanel();
         jLabel10 = new javax.swing.JLabel();
-        jComboBox2 = new javax.swing.JComboBox<>();
-        jLabel5 = new javax.swing.JLabel();
         jLabel11 = new javax.swing.JLabel();
         jComboBox3 = new javax.swing.JComboBox<>();
         jScrollPane2 = new javax.swing.JScrollPane();
@@ -73,6 +273,8 @@ public class TestDialog extends javax.swing.JDialog {
         jSeparator1 = new javax.swing.JSeparator();
         jLabel21 = new javax.swing.JLabel();
         jTextField1 = new javax.swing.JTextField();
+        jDateChooser1 = new com.toedter.calendar.JDateChooser();
+        jTextField4 = new javax.swing.JTextField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setResizable(false);
@@ -123,12 +325,23 @@ public class TestDialog extends javax.swing.JDialog {
             }
         });
 
+        jComboBox1.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jComboBox1ActionPerformed(evt);
+            }
+        });
+
         jLabel7.setFont(new java.awt.Font("Segoe UI", 0, 16)); // NOI18N
         jLabel7.setText("Phút");
 
         jButton3.setBackground(new java.awt.Color(0, 255, 51));
         jButton3.setFont(new java.awt.Font("Segoe UI", 0, 16)); // NOI18N
         jButton3.setText("Thêm mới");
+        jButton3.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton3ActionPerformed(evt);
+            }
+        });
 
         jButton4.setBackground(new java.awt.Color(255, 102, 102));
         jButton4.setFont(new java.awt.Font("Segoe UI", 0, 16)); // NOI18N
@@ -139,23 +352,16 @@ public class TestDialog extends javax.swing.JDialog {
             }
         });
 
-        jLabel8.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
-        jLabel8.setText("null");
-
         jLabel9.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         jLabel9.setText("Tên bàn thi");
 
         jLabel10.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
         jLabel10.setText("Chọn câu hỏi");
 
-        jLabel5.setFont(new java.awt.Font("Segoe UI", 0, 16)); // NOI18N
-        jLabel5.setText("Chủ đề");
-
         jLabel11.setFont(new java.awt.Font("Segoe UI", 0, 16)); // NOI18N
         jLabel11.setText("Độ khó");
 
-        jComboBox3.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Dễ", "Trung bình", "Khó" }));
-        jComboBox3.setSelectedItem(getType());
+        jComboBox3.setModel(new javax.swing.DefaultComboBoxModel<>(new String[] { "Tất cả", "Dễ", "Trung bình", "Khó" }));
         jComboBox3.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 jComboBox3ActionPerformed(evt);
@@ -183,10 +389,7 @@ public class TestDialog extends javax.swing.JDialog {
 
         jTable2.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null}
+
             },
             new String [] {
                 "Title 1", "Title 2", "Title 3", "Title 4"
@@ -242,22 +445,6 @@ public class TestDialog extends javax.swing.JDialog {
             .addGroup(jPanel2Layout.createSequentialGroup()
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(jPanel2Layout.createSequentialGroup()
-                        .addGap(18, 18, 18)
-                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jLabel10)
-                            .addGroup(jPanel2Layout.createSequentialGroup()
-                                .addComponent(jLabel5, javax.swing.GroupLayout.PREFERRED_SIZE, 62, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jComboBox2, javax.swing.GroupLayout.PREFERRED_SIZE, 186, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(47, 47, 47)
-                                .addComponent(jLabel11, javax.swing.GroupLayout.PREFERRED_SIZE, 62, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jComboBox3, javax.swing.GroupLayout.PREFERRED_SIZE, 96, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(63, 63, 63)
-                                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 397, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jLabel13))))
-                    .addGroup(jPanel2Layout.createSequentialGroup()
                         .addContainerGap()
                         .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(jButton1)
@@ -282,21 +469,30 @@ public class TestDialog extends javax.swing.JDialog {
                                 .addComponent(jLabel23, javax.swing.GroupLayout.PREFERRED_SIZE, 32, javax.swing.GroupLayout.PREFERRED_SIZE))
                             .addGroup(jPanel2Layout.createSequentialGroup()
                                 .addGap(18, 18, 18)
-                                .addComponent(jButton2)))))
+                                .addComponent(jButton2))))
+                    .addGroup(jPanel2Layout.createSequentialGroup()
+                        .addGap(19, 19, 19)
+                        .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(jPanel2Layout.createSequentialGroup()
+                                .addComponent(jLabel11, javax.swing.GroupLayout.PREFERRED_SIZE, 62, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jComboBox3, javax.swing.GroupLayout.PREFERRED_SIZE, 189, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(270, 270, 270)
+                                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 397, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(jLabel13))
+                            .addComponent(jLabel10))))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         jPanel2Layout.setVerticalGroup(
             jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel2Layout.createSequentialGroup()
-                .addContainerGap()
                 .addComponent(jLabel10, javax.swing.GroupLayout.PREFERRED_SIZE, 27, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGap(12, 12, 12)
                 .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel13, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jLabel13, javax.swing.GroupLayout.DEFAULT_SIZE, 38, Short.MAX_VALUE)
                     .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 0, Short.MAX_VALUE)
                     .addGroup(jPanel2Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(jLabel5, javax.swing.GroupLayout.DEFAULT_SIZE, 36, Short.MAX_VALUE)
-                        .addComponent(jComboBox2, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addComponent(jLabel11, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(jComboBox3, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -338,6 +534,8 @@ public class TestDialog extends javax.swing.JDialog {
 
         jTextField1.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
 
+        jTextField4.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -349,7 +547,7 @@ public class TestDialog extends javax.swing.JDialog {
                     .addComponent(jPanel2, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addGap(21, 21, 21)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(jLabel3, javax.swing.GroupLayout.PREFERRED_SIZE, 62, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -361,20 +559,26 @@ public class TestDialog extends javax.swing.JDialog {
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(jLabel7, javax.swing.GroupLayout.PREFERRED_SIZE, 54, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addGap(23, 23, 23)
-                                .addComponent(jLabel6)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jTextField5, javax.swing.GroupLayout.PREFERRED_SIZE, 108, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addComponent(jLabel6))
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 77, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jLabel8, javax.swing.GroupLayout.PREFERRED_SIZE, 52, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addGap(18, 18, 18)
-                                .addComponent(jLabel9)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 422, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(jTextField4, javax.swing.GroupLayout.PREFERRED_SIZE, 79, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(jLabel12, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                        .addGap(134, 134, 134))
+                                .addComponent(jLabel9)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 389, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(jTextField5, javax.swing.GroupLayout.PREFERRED_SIZE, 108, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 166, Short.MAX_VALUE))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGap(0, 0, Short.MAX_VALUE)
+                                .addComponent(jLabel12, javax.swing.GroupLayout.PREFERRED_SIZE, 85, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                                .addComponent(jDateChooser1, javax.swing.GroupLayout.PREFERRED_SIZE, 125, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addGap(24, 24, 24))))
                     .addGroup(layout.createSequentialGroup()
                         .addGap(308, 308, 308)
                         .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 116, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -395,14 +599,19 @@ public class TestDialog extends javax.swing.JDialog {
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                        .addComponent(jLabel2, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jLabel8, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 38, Short.MAX_VALUE)
-                        .addComponent(jLabel9, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
-                        .addComponent(jLabel12, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(jScrollPane1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 41, Short.MAX_VALUE)))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jLabel2, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jDateChooser1, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jTextField4, javax.swing.GroupLayout.Alignment.LEADING))
+                        .addGap(15, 15, 15))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jLabel9, javax.swing.GroupLayout.DEFAULT_SIZE, 42, Short.MAX_VALUE)
+                            .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                .addComponent(jLabel12, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED, 14, Short.MAX_VALUE)))
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jTextField3, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel4, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -419,7 +628,7 @@ public class TestDialog extends javax.swing.JDialog {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jTextField1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel21))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jButton3, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jButton4, javax.swing.GroupLayout.PREFERRED_SIZE, 41, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -438,11 +647,11 @@ public class TestDialog extends javax.swing.JDialog {
     }//GEN-LAST:event_jTextField5ActionPerformed
 
     private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
-        // TODO add your handling code here:
+        dispose();// TODO add your handling code here:
     }//GEN-LAST:event_jButton4ActionPerformed
 
     private void jComboBox3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBox3ActionPerformed
-        // TODO add your handling code here:
+        loadQuestions();// TODO add your handling code here:
     }//GEN-LAST:event_jComboBox3ActionPerformed
 
     private void jTextField2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField2ActionPerformed
@@ -450,13 +659,203 @@ public class TestDialog extends javax.swing.JDialog {
     }//GEN-LAST:event_jTextField2ActionPerformed
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        // TODO add your handling code here:
+        int selectedRow = jTable1.getSelectedRow();
+    if (selectedRow >= 0) {
+        DefaultTableModel sourceModel = (DefaultTableModel) jTable1.getModel();
+        DefaultTableModel targetModel = (DefaultTableModel) jTable2.getModel();
+        if (targetModel.getColumnCount() == 0) {
+            targetModel.setColumnIdentifiers(new String[]{"Mã câu hỏi", "Nội dung", "Chủ đề", "Mức độ"});
+        }
+
+        Object[] rowData = new Object[sourceModel.getColumnCount()];
+        for (int i = 0; i < sourceModel.getColumnCount(); i++) {
+            rowData[i] = sourceModel.getValueAt(selectedRow, i);
+        }
+        targetModel.addRow(rowData);
+
+        // Cập nhật số lượng câu hỏi theo mức độ
+        String level = (String) sourceModel.getValueAt(selectedRow, 3);
+        updateQuestionCount(level, 1);
+    } else {
+        JOptionPane.showMessageDialog(this, "Vui lòng chọn một câu hỏi để thêm!");
+    }// TODO add your handling code here:
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
-        // TODO add your handling code here:
+        int selectedRow = jTable2.getSelectedRow();
+    if (selectedRow >= 0) {
+        DefaultTableModel model = (DefaultTableModel) jTable2.getModel();
+        String level = (String) model.getValueAt(selectedRow, 3);
+        model.removeRow(selectedRow);
+
+        // Cập nhật số lượng câu hỏi theo mức độ
+        updateQuestionCount(level, -1);
+    } else {
+        JOptionPane.showMessageDialog(this, "Vui lòng chọn một câu hỏi để xóa!");
+    }// TODO add your handling code here:
     }//GEN-LAST:event_jButton2ActionPerformed
 
+    private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
+        try {
+        String testCode = getTestCode();
+        String testTitle = getTestTitle();
+        int topicID = getTopicID();
+        int testTime = getTestTime();
+        int testLimit = getTestLimit();
+        Date testDate = getTestDate();
+        int numEasy = getNumEasy();
+        int numMedium = getNumMedium();
+        int numDiff = getNumDiff();
+        int numExams = getNumExams();
+
+        // Kiểm tra dữ liệu đầu vào
+        if (testCode.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Mã bài thi không được để trống!");
+            return;
+        }
+        if (testTitle.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Tên bài thi không được để trống!");
+            return;
+        }
+        if (topicID == -1) {
+            JOptionPane.showMessageDialog(this, "Vui lòng chọn chủ đề!");
+            return;
+        }
+        if (testTime <= 0) {
+            JOptionPane.showMessageDialog(this, "Thời gian thi phải lớn hơn 0!");
+            return;
+        }
+        if (testLimit < 0) {
+            JOptionPane.showMessageDialog(this, "Số lượt làm bài không hợp lệ!");
+            return;
+        }
+        if (testDate == null) {
+            JOptionPane.showMessageDialog(this, "Vui lòng chọn ngày tạo!");
+            return;
+        }
+        if (numEasy + numMedium + numDiff <= 0) {
+            JOptionPane.showMessageDialog(this, "Tổng số câu hỏi phải lớn hơn 0!");
+            return;
+        }
+        if (numExams <= 0 || numExams > 26) {
+            JOptionPane.showMessageDialog(this, "Số lượng đề thi phải từ 1 đến 26!");
+            return;
+        }
+
+        // Lấy danh sách câu hỏi từ bảng questions
+        QuestionBUS questionBUS = new QuestionBUS();
+        ArrayList<Integer> easyQuestions = questionBUS.getQuestionsByDifficulty(topicID, "easy", numEasy);
+        ArrayList<Integer> mediumQuestions = questionBUS.getQuestionsByDifficulty(topicID, "medium", numMedium);
+        ArrayList<Integer> diffQuestions = questionBUS.getQuestionsByDifficulty(topicID, "difficult", numDiff);
+
+        // Kết hợp danh sách câu hỏi
+        ArrayList<Integer> allQuestions = new ArrayList<>();
+        allQuestions.addAll(easyQuestions);
+        allQuestions.addAll(mediumQuestions);
+        allQuestions.addAll(diffQuestions);
+
+        if (allQuestions.size() < (numEasy + numMedium + numDiff)) {
+            JOptionPane.showMessageDialog(this, "Không đủ câu hỏi trong cơ sở dữ liệu!");
+            return;
+        }
+
+        // Tạo danh sách câu hỏi cho từng đề thi
+        ExamBUS examBUS = new ExamBUS();
+        for (int i = 0; i < numExams; i++) {
+            // Xáo trộn danh sách câu hỏi để tạo đề khác nhau
+            Collections.shuffle(allQuestions);
+            String quesIDs = allQuestions.stream()
+                .limit(numEasy + numMedium + numDiff)
+                .map(String::valueOf)
+                .collect(Collectors.joining(","));
+
+            ExamDTO exam = new ExamDTO();
+            exam.setTestCode(testCode);
+            exam.setExOrder(String.valueOf((char) ('A' + i)));
+            exam.setExCode(testCode + exam.getExOrder());
+            exam.setExQuesIDs(quesIDs); // Gán danh sách ID câu hỏi
+            if (!examBUS.addExam(exam)) {
+                JOptionPane.showMessageDialog(this, "Thêm đề thi " + exam.getExCode() + " thất bại!");
+                return;
+            }
+        }
+
+        // Tạo TestDTO và chèn vào bảng test
+        TestDTO test = new TestDTO();
+        test.setTestCode(testCode);
+        test.setTestTitle(testTitle);
+        test.setTpID(topicID);
+        test.setTestTime(testTime);
+        test.setTestLimit(testLimit);
+        test.setTestDate(new java.sql.Date(testDate.getTime()));
+        test.setNum_easy(numEasy);
+        test.setNum_medium(numMedium);
+        test.setNum_diff(numDiff);
+        test.setTestStatus(1);
+
+        if (testBUS.addTest(test)) {
+            JOptionPane.showMessageDialog(this, "Thêm bài thi và đề thi thành công!");
+            dispose();
+            
+        } else {
+            JOptionPane.showMessageDialog(this, "Thêm bài thi thất bại!");
+        }
+    } catch (Exception e) {
+        JOptionPane.showMessageDialog(this, "Lỗi: " + e.getMessage());
+        e.printStackTrace();
+    }// TODO add your handling code here:
+    }//GEN-LAST:event_jButton3ActionPerformed
+
+    private void jComboBox1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBox1ActionPerformed
+        loadQuestions();// TODO add your handling code here:
+    }//GEN-LAST:event_jComboBox1ActionPerformed
+    
+    private void loadQuestions() {
+    ArrayList<QuestionDTO> questions = questionBUS.getAllQuestions();
+    DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
+    model.setColumnIdentifiers(new String[]{"Mã câu hỏi", "Nội dung", "Chủ đề", "Mức độ"});
+    model.setRowCount(0);
+
+    TopicBUS topicBUS = new TopicBUS();
+    String selectedLevel = (String) jComboBox3.getSelectedItem();
+    int selectedTopicID = getTopicID(); // Lấy tpID từ jComboBox1
+
+    for (QuestionDTO q : questions) {
+        TopicDTO topic = topicBUS.getTopicByID(String.valueOf(q.getTopicID()));
+        String level = q.getLevel();
+        int questionTopicID = q.getTopicID();
+
+        boolean matchTopic = (selectedTopicID == -1 || questionTopicID == selectedTopicID);
+        boolean matchLevel = "Tất cả".equals(selectedLevel) || level.equalsIgnoreCase(selectedLevel) ||
+                            (selectedLevel.equals("Dễ") && level.equalsIgnoreCase("easy")) ||
+                            (selectedLevel.equals("Trung bình") && level.equalsIgnoreCase("medium")) ||
+                            (selectedLevel.equals("Khó") && level.equalsIgnoreCase("diff"));
+
+        if (matchTopic && matchLevel) {
+            model.addRow(new Object[]{
+                q.getQID(),
+                q.getQContent(),
+                topic != null ? topic.getTpTitle() : "Không xác định",
+                level
+            });
+        }
+    }
+}
+    
+    private void updateQuestionCount(String level, int delta) {
+    int easy = Integer.parseInt(jLabel18.getText().isEmpty() ? "0" : jLabel18.getText());
+    int medium = Integer.parseInt(jLabel20.getText().isEmpty() ? "0" : jLabel20.getText());
+    int diff = Integer.parseInt(jLabel19.getText().isEmpty() ? "0" : jLabel19.getText());
+
+    if (level.equalsIgnoreCase("easy")) easy += delta;
+    else if (level.equalsIgnoreCase("medium")) medium += delta;
+    else if (level.equalsIgnoreCase("diff")) diff += delta;
+
+    jLabel18.setText(String.valueOf(easy));
+    jLabel20.setText(String.valueOf(medium));
+    jLabel19.setText(String.valueOf(diff));
+    jLabel23.setText(String.valueOf(easy + medium + diff));
+}
     /**
      * @param args the command line arguments
      */
@@ -506,8 +905,8 @@ public class TestDialog extends javax.swing.JDialog {
     private javax.swing.JButton jButton3;
     private javax.swing.JButton jButton4;
     private javax.swing.JComboBox<String> jComboBox1;
-    private javax.swing.JComboBox<String> jComboBox2;
     private javax.swing.JComboBox<String> jComboBox3;
+    private com.toedter.calendar.JDateChooser jDateChooser1;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
@@ -526,10 +925,8 @@ public class TestDialog extends javax.swing.JDialog {
     private javax.swing.JLabel jLabel23;
     private javax.swing.JLabel jLabel3;
     private javax.swing.JLabel jLabel4;
-    private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
-    private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
     private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel2;
@@ -544,6 +941,7 @@ public class TestDialog extends javax.swing.JDialog {
     private javax.swing.JTextField jTextField1;
     private javax.swing.JTextField jTextField2;
     private javax.swing.JTextField jTextField3;
+    private javax.swing.JTextField jTextField4;
     private javax.swing.JTextField jTextField5;
     // End of variables declaration//GEN-END:variables
 }
