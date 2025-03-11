@@ -6,6 +6,7 @@ package com.tracnghiem.GUI.Main;
 
 import com.tracnghiem.BUS.ExamBUS;
 import com.tracnghiem.BUS.QuestionBUS;
+import com.tracnghiem.BUS.ResultBUS;
 import com.tracnghiem.BUS.TestBUS;
 import com.tracnghiem.BUS.UserBUS;
 import com.tracnghiem.DTO.UserDTO;
@@ -13,6 +14,7 @@ import com.tracnghiem.BUS.TopicBUS;
 import com.tracnghiem.DTO.AnswerDTO;
 import com.tracnghiem.DTO.ExamDTO;
 import com.tracnghiem.DTO.QuestionDTO;
+import com.tracnghiem.DTO.ResultDTO;
 import com.tracnghiem.DTO.TestDTO;
 import com.tracnghiem.DTO.TopicDTO;
 import com.tracnghiem.GUI.Dialog.ExamDialog;
@@ -23,13 +25,17 @@ import com.tracnghiem.GUI.Dialog.TestDialog;
 import com.tracnghiem.GUI.Dialog.TopicDialog;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.sql.Timestamp;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
+
 
 /**
  *
@@ -46,6 +52,7 @@ public class Main extends javax.swing.JFrame {
     private TopicDialog topicDialog;
     private TopicDialog topicDialogInstance = null;
     private TopicBUS topicBUS;
+    private ResultBUS resultBUS;
     public Main() {
         initComponents();
         questionDialog = new QuestionDialog(this, true);
@@ -57,6 +64,7 @@ public class Main extends javax.swing.JFrame {
         testDialog.setLocationRelativeTo(null);
         topicDialog.setLocationRelativeTo(null);
         topicBUS = new TopicBUS();
+        resultBUS = new ResultBUS();
         loadUserTable();
         loadTopics();
         
@@ -161,8 +169,17 @@ public class Main extends javax.swing.JFrame {
         jTextField9 = new javax.swing.JTextField();
         jLabel22 = new javax.swing.JLabel();
         jLabel23 = new javax.swing.JLabel();
+        jLabel21 = new javax.swing.JLabel();
+        jLabel30 = new javax.swing.JLabel();
+        jTextField8 = new javax.swing.JTextField();
+        jTextField12 = new javax.swing.JTextField();
         jScrollPane6 = new javax.swing.JScrollPane();
         jTable6 = new javax.swing.JTable();
+        jScrollPane7 = new javax.swing.JScrollPane();
+        jTable7 = new javax.swing.JTable();
+        jLabel29 = new javax.swing.JLabel();
+        jLabel31 = new javax.swing.JLabel();
+        jTextField13 = new javax.swing.JTextField();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setResizable(false);
@@ -1130,21 +1147,64 @@ public class Main extends javax.swing.JFrame {
                 jTextField9ActionPerformed(evt);
             }
         });
+        jTextField9.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                jTextField9KeyReleased(evt);
+            }
+        });
 
         jLabel22.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icon/search.png"))); // NOI18N
 
         jLabel23.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
-        jLabel23.setText("Thống kê kết quả thi");
+        jLabel23.setText("Kết quả thi");
+
+        jLabel21.setFont(new java.awt.Font("Segoe UI", 0, 16)); // NOI18N
+        jLabel21.setText("Mã người dùng");
+
+        jLabel30.setFont(new java.awt.Font("Segoe UI", 0, 16)); // NOI18N
+        jLabel30.setText("Mã bài thi");
+
+        jTextField8.setFont(new java.awt.Font("Segoe UI", 0, 16)); // NOI18N
+        jTextField8.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jTextField8ActionPerformed(evt);
+            }
+        });
+        jTextField8.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                jTextField8KeyReleased(evt);
+            }
+        });
+
+        jTextField12.setFont(new java.awt.Font("Segoe UI", 0, 16)); // NOI18N
+        jTextField12.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jTextField12ActionPerformed(evt);
+            }
+        });
+        jTextField12.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                jTextField12KeyReleased(evt);
+            }
+        });
 
         javax.swing.GroupLayout jPanel13Layout = new javax.swing.GroupLayout(jPanel13);
         jPanel13.setLayout(jPanel13Layout);
         jPanel13Layout.setHorizontalGroup(
             jPanel13Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel13Layout.createSequentialGroup()
-                .addGap(94, 94, 94)
-                .addComponent(jLabel23, javax.swing.GroupLayout.PREFERRED_SIZE, 297, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(463, 463, 463)
-                .addComponent(jTextField9, javax.swing.GroupLayout.DEFAULT_SIZE, 374, Short.MAX_VALUE)
+                .addContainerGap()
+                .addComponent(jLabel23, javax.swing.GroupLayout.PREFERRED_SIZE, 170, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(54, 54, 54)
+                .addComponent(jLabel21, javax.swing.GroupLayout.PREFERRED_SIZE, 119, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                .addComponent(jTextField8, javax.swing.GroupLayout.PREFERRED_SIZE, 161, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(111, 111, 111)
+                .addComponent(jLabel30)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jTextField12, javax.swing.GroupLayout.PREFERRED_SIZE, 161, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(49, 49, 49)
+                .addComponent(jTextField9, javax.swing.GroupLayout.DEFAULT_SIZE, 310, Short.MAX_VALUE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jLabel22)
                 .addContainerGap())
@@ -1152,13 +1212,22 @@ public class Main extends javax.swing.JFrame {
         jPanel13Layout.setVerticalGroup(
             jPanel13Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel13Layout.createSequentialGroup()
-                .addContainerGap(21, Short.MAX_VALUE)
-                .addGroup(jPanel13Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel22, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGroup(jPanel13Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(jLabel23, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(jTextField9, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addGap(27, 27, 27))
+                .addContainerGap()
+                .addGroup(jPanel13Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(jPanel13Layout.createSequentialGroup()
+                        .addComponent(jTextField9)
+                        .addGap(2, 2, 2))
+                    .addGroup(jPanel13Layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addGroup(jPanel13Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jLabel22, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addGroup(jPanel13Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                                .addComponent(jLabel23, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(jLabel21, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(jLabel30)
+                                .addComponent(jTextField12, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addComponent(jTextField8, javax.swing.GroupLayout.DEFAULT_SIZE, 39, Short.MAX_VALUE)))))
+                .addGap(12, 12, 12))
         );
 
         jTable6.setModel(new javax.swing.table.DefaultTableModel(
@@ -1174,19 +1243,88 @@ public class Main extends javax.swing.JFrame {
         ));
         jScrollPane6.setViewportView(jTable6);
 
+        jTable7.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null},
+                {null, null, null, null}
+            },
+            new String [] {
+                "Mã người dùng", "Mã bài thi", "Điểm số", "Thời gian hoàn thành"
+            }
+        ));
+        jScrollPane7.setViewportView(jTable7);
+        jTable7.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseClicked(java.awt.event.MouseEvent evt) {
+                if (evt.getClickCount() == 2) { // Nhấp đúp
+                    int row = jTable7.getSelectedRow();
+                    if (row != -1) {
+                        String userID = jTable7.getValueAt(row, 0).toString();
+                        String exCode = jTable7.getValueAt(row, 1).toString();
+                        ArrayList<ResultDTO> results = resultBUS.getResultsByUserID(Integer.parseInt(userID));
+                        for (ResultDTO result : results) {
+                            if (result.getExCode().equals(exCode)) {
+                                JOptionPane.showMessageDialog(null,
+                                    "Đáp án: " + result.getRsAnswer(),
+                                    "Chi tiết kết quả",
+                                    JOptionPane.INFORMATION_MESSAGE);
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        jLabel29.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
+        jLabel29.setText("Thống kê");
+
+        jLabel31.setFont(new java.awt.Font("Segoe UI", 0, 16)); // NOI18N
+        jLabel31.setText("Mã bài thi");
+
+        jTextField13.setFont(new java.awt.Font("Segoe UI", 0, 16)); // NOI18N
+        jTextField13.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jTextField13ActionPerformed(evt);
+            }
+        });
+        jTextField13.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                jTextField13KeyReleased(evt);
+            }
+        });
+
         javax.swing.GroupLayout ThongKePanelLayout = new javax.swing.GroupLayout(ThongKePanel);
         ThongKePanel.setLayout(ThongKePanelLayout);
         ThongKePanelLayout.setHorizontalGroup(
             ThongKePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addComponent(jPanel13, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addComponent(jScrollPane6)
+            .addComponent(jScrollPane7)
+            .addGroup(ThongKePanelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel29, javax.swing.GroupLayout.PREFERRED_SIZE, 170, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jLabel31)
+                .addGap(18, 18, 18)
+                .addComponent(jTextField13, javax.swing.GroupLayout.PREFERRED_SIZE, 161, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18))
         );
         ThongKePanelLayout.setVerticalGroup(
             ThongKePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(ThongKePanelLayout.createSequentialGroup()
                 .addComponent(jPanel13, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane6, javax.swing.GroupLayout.DEFAULT_SIZE, 627, Short.MAX_VALUE))
+                .addComponent(jScrollPane7, javax.swing.GroupLayout.PREFERRED_SIZE, 326, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(24, 24, 24)
+                .addGroup(ThongKePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addComponent(jLabel29, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(ThongKePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jTextField13, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jLabel31)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 36, Short.MAX_VALUE)
+                .addComponent(jScrollPane6, javax.swing.GroupLayout.PREFERRED_SIZE, 231, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
 
         PanelPhai.add(ThongKePanel, "card7");
@@ -1360,6 +1498,8 @@ public class Main extends javax.swing.JFrame {
     private void ThongKeMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ThongKeMouseClicked
         PanelPhai.removeAll();
         PanelPhai.add(ThongKePanel, "card7");
+        loadResults();    // Tải danh sách kết quả
+        loadStatistics(); // Tải thống kê
         PanelPhai.revalidate();
         PanelPhai.repaint();
     }//GEN-LAST:event_ThongKeMouseClicked
@@ -1376,15 +1516,13 @@ public class Main extends javax.swing.JFrame {
         TestDTO test = testBUS.getTestByCode(testCode);
 
         if (test != null) {
-            TestDialog testDialog = new TestDialog(this, true);
-            testDialog.displayTestData(test, topicBUS);
-            testDialog.configureUpdateButton(test, testBUS, this);
+            TestDialog testDialog = new TestDialog(this, true, test, this);
             testDialog.setVisible(true);
         } else {
-            JOptionPane.showMessageDialog(null, "Không tìm thấy bài thi để sửa!");
+            JOptionPane.showMessageDialog(this, "Không tìm thấy bài thi để sửa!");
         }
     } else {
-        JOptionPane.showMessageDialog(null, "Vui lòng chọn một bài thi để sửa!");
+        JOptionPane.showMessageDialog(this, "Vui lòng chọn một bài thi để sửa!");
     }// TODO add your handling code here:
     }//GEN-LAST:event_cz18ActionPerformed
 
@@ -1873,6 +2011,34 @@ public class Main extends javax.swing.JFrame {
         JOptionPane.showMessageDialog(null, "Vui lòng chọn một bài thi để xóa!");
     }// TODO add your handling code here:
     }//GEN-LAST:event_cz17ActionPerformed
+
+    private void jTextField8ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField8ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jTextField8ActionPerformed
+
+    private void jTextField12ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField12ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jTextField12ActionPerformed
+
+    private void jTextField13ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField13ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jTextField13ActionPerformed
+
+    private void jTextField8KeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jTextField8KeyReleased
+        filterResults();// TODO add your handling code here:
+    }//GEN-LAST:event_jTextField8KeyReleased
+
+    private void jTextField9KeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jTextField9KeyReleased
+        filterResults();// TODO add your handling code here:
+    }//GEN-LAST:event_jTextField9KeyReleased
+
+    private void jTextField12KeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jTextField12KeyReleased
+        filterResults();// TODO add your handling code here:
+    }//GEN-LAST:event_jTextField12KeyReleased
+
+    private void jTextField13KeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jTextField13KeyReleased
+        filterStatistics();// TODO add your handling code here:
+    }//GEN-LAST:event_jTextField13KeyReleased
     
    private void loadTopics() {
     TopicBUS topicBUS = new TopicBUS();
@@ -1987,6 +2153,89 @@ public class Main extends javax.swing.JFrame {
         });
     }
 }
+    
+    private void loadResults() {
+    DefaultTableModel model = (DefaultTableModel) jTable7.getModel();
+    model.setRowCount(0);
+
+    ArrayList<ResultDTO> results = resultBUS.getAllResults();
+    DecimalFormat formatter = new DecimalFormat("000");
+    SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+
+    for (ResultDTO result : results) {
+        String userID = formatter.format(result.getUserID());
+        String exCode = result.getExCode();
+        double mark = result.getRsMark();
+        String date = dateFormat.format(Timestamp.valueOf(result.getRsDate()));
+        model.addRow(new Object[]{userID, exCode, mark, date});
+    }
+}
+    
+    private void loadStatistics() {
+    DefaultTableModel model = (DefaultTableModel) jTable6.getModel();
+    model.setRowCount(0);
+
+    Map<String, int[]> statistics = resultBUS.getStatisticsByExCode("");
+    for (Map.Entry<String, int[]> entry : statistics.entrySet()) {
+        String exCode = entry.getKey();
+        int[] stats = entry.getValue();
+        model.addRow(new Object[]{exCode, stats[0], stats[1], stats[2]});
+    }
+}
+    
+    private void filterResults() {
+    String userFilter = jTextField8.getText().trim();
+    String testFilter = jTextField12.getText().trim();
+    String searchText = jTextField9.getText().trim().toLowerCase();
+
+    DefaultTableModel model = (DefaultTableModel) jTable7.getModel();
+    model.setRowCount(0);
+
+    ArrayList<ResultDTO> results;
+    if (!userFilter.isEmpty()) {
+        results = resultBUS.getResultsByUserID(Integer.parseInt(userFilter));
+    } else if (!testFilter.isEmpty()) {
+        results = resultBUS.getResultsByExCode(testFilter);
+    } else {
+        results = resultBUS.getAllResults();
+    }
+
+    DecimalFormat formatter = new DecimalFormat("000");
+    SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+
+    for (ResultDTO result : results) {
+        String userID = formatter.format(result.getUserID());
+        String exCode = result.getExCode();
+        double mark = result.getRsMark();
+        String date = dateFormat.format(Timestamp.valueOf(result.getRsDate()));
+
+        if ((!testFilter.isEmpty() && !exCode.startsWith(testFilter)) ||
+            (!userFilter.isEmpty() && !userID.equals(userFilter))) {
+            continue;
+        }
+
+        if (searchText.isEmpty() || 
+            userID.toLowerCase().contains(searchText) || 
+            exCode.toLowerCase().contains(searchText) || 
+            String.valueOf(mark).contains(searchText) || 
+            date.toLowerCase().contains(searchText)) {
+            model.addRow(new Object[]{userID, exCode, mark, date});
+        }
+    }
+}
+    private void filterStatistics() {
+    String testFilter = jTextField13.getText().trim();
+
+    DefaultTableModel model = (DefaultTableModel) jTable6.getModel();
+    model.setRowCount(0);
+
+    Map<String, int[]> statistics = resultBUS.getStatisticsByExCode(testFilter);
+    for (Map.Entry<String, int[]> entry : statistics.entrySet()) {
+        String exCode = entry.getKey();
+        int[] stats = entry.getValue();
+        model.addRow(new Object[]{exCode, stats[0], stats[1], stats[2]});
+    }
+}
     /**
      * @param args the command line arguments
      */
@@ -2069,6 +2318,7 @@ public class Main extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel19;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JLabel jLabel20;
+    private javax.swing.JLabel jLabel21;
     private javax.swing.JLabel jLabel22;
     private javax.swing.JLabel jLabel23;
     private javax.swing.JLabel jLabel24;
@@ -2076,7 +2326,10 @@ public class Main extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel26;
     private javax.swing.JLabel jLabel27;
     private javax.swing.JLabel jLabel28;
+    private javax.swing.JLabel jLabel29;
     private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel30;
+    private javax.swing.JLabel jLabel31;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
@@ -2098,21 +2351,26 @@ public class Main extends javax.swing.JFrame {
     private javax.swing.JScrollPane jScrollPane4;
     private javax.swing.JScrollPane jScrollPane5;
     private javax.swing.JScrollPane jScrollPane6;
+    private javax.swing.JScrollPane jScrollPane7;
     private javax.swing.JTable jTable1;
     private javax.swing.JTable jTable2;
     private javax.swing.JTable jTable3;
     private javax.swing.JTable jTable4;
     private javax.swing.JTable jTable5;
     private javax.swing.JTable jTable6;
+    private javax.swing.JTable jTable7;
     private javax.swing.JTextField jTextField1;
     private javax.swing.JTextField jTextField10;
     private javax.swing.JTextField jTextField11;
+    private javax.swing.JTextField jTextField12;
+    private javax.swing.JTextField jTextField13;
     private javax.swing.JTextField jTextField2;
     private javax.swing.JTextField jTextField3;
     private javax.swing.JTextField jTextField4;
     private javax.swing.JTextField jTextField5;
     private javax.swing.JTextField jTextField6;
     private javax.swing.JTextField jTextField7;
+    private javax.swing.JTextField jTextField8;
     private javax.swing.JTextField jTextField9;
     private javax.swing.JLabel name;
     // End of variables declaration//GEN-END:variables

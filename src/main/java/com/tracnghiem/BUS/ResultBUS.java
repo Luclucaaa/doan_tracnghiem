@@ -7,6 +7,7 @@ package com.tracnghiem.BUS;
 import com.tracnghiem.DAO.ResultDAO;
 import com.tracnghiem.DTO.ResultDTO;
 import java.util.ArrayList;
+import java.util.Map;
 
 /**
  *
@@ -40,25 +41,14 @@ public class ResultBUS {
     }
 
     public ArrayList<ResultDTO> getResultsByUserID(int userID) {
-        ArrayList<ResultDTO> allResults = resultDAO.selectAll();
-        ArrayList<ResultDTO> userResults = new ArrayList<>();
-        for (ResultDTO result : allResults) {
-            if (result.getUserID() == userID) {
-                userResults.add(result);
-            }
-        }
-        return userResults;
+        return resultDAO.selectByUserID(userID);
     }
 
     public ArrayList<ResultDTO> getResultsByExCode(String exCode) {
-        ArrayList<ResultDTO> allResults = resultDAO.selectAll();
-        ArrayList<ResultDTO> exCodeResults = new ArrayList<>();
-        for (ResultDTO result : allResults) {
-            if (result.getExCode().equals(exCode)) {
-                exCodeResults.add(result);
-            }
-        }
-        return exCodeResults;
+        return resultDAO.selectByExCode(exCode);
     }
 
+    public Map<String, int[]> getStatisticsByExCode(String exCodeFilter) {
+        return resultDAO.getStatisticsByExCode(exCodeFilter);
+    }
 }

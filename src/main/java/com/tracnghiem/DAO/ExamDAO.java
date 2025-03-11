@@ -111,4 +111,17 @@ public class ExamDAO implements InterfaceDAO<ExamDTO>{
         return rs;
     }
     
+    public boolean deleteByTestCode(String testCode) {
+        String sql = "DELETE FROM exams WHERE testCode = ?";
+        try (Connection conn = JDBCUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, testCode);
+            int rowsAffected = ps.executeUpdate();
+            return rowsAffected >= 0; // Xóa thành công hoặc không có bản ghi nào để xóa
+        } catch (SQLException e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+    
 }

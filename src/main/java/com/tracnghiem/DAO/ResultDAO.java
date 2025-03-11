@@ -8,6 +8,8 @@ import com.tracnghiem.config.JDBCUtil;
 import com.tracnghiem.DTO.ResultDTO;
 import java.sql.*;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
 /**
  *
  * @author X
@@ -18,7 +20,7 @@ public class ResultDAO implements InterfaceDAO<ResultDTO>{
     }
      @Override
     public boolean insert(ResultDTO result) {
-        String sql = "INSERT INTO results(userID, exCode, rsAnswer, rsMark, rsDate) VALUES(?,?,?,?,?)";
+        String sql = "INSERT INTO result(userID, exCode, rsAnswer, rsMark, rsDate) VALUES(?,?,?,?,?)";
         try (Connection conn = JDBCUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, result.getUserID());
@@ -35,7 +37,7 @@ public class ResultDAO implements InterfaceDAO<ResultDTO>{
 
     @Override
     public boolean update(ResultDTO result) {
-        String sql = "UPDATE results SET userID=?, exCode=?, rsAnswer=?, rsMark=?, rsDate=? WHERE rsID=?";
+        String sql = "UPDATE result SET userID=?, exCode=?, rsAnswer=?, rsMark=?, rsDate=? WHERE rsID=?";
         try (Connection conn = JDBCUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, result.getUserID());
@@ -53,13 +55,13 @@ public class ResultDAO implements InterfaceDAO<ResultDTO>{
 
     @Override
     public ArrayList<ResultDTO> selectAll() {
-        ArrayList<ResultDTO> results = new ArrayList<>();
-        String sql = "SELECT * FROM results";
+        ArrayList<ResultDTO> result = new ArrayList<>();
+        String sql = "SELECT * FROM result";
         try (Connection conn = JDBCUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql);
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
-                results.add(new ResultDTO(
+                result.add(new ResultDTO(
                     rs.getInt("rsID"),
                     rs.getInt("userID"),
                     rs.getString("exCode"),
@@ -71,13 +73,13 @@ public class ResultDAO implements InterfaceDAO<ResultDTO>{
         } catch (SQLException ex) {
             ex.printStackTrace();
         }
-        return results;
+        return result;
     }
 
     @Override
     public ResultDTO selectByID(String id) {
         ResultDTO result = null;
-        String sql = "SELECT * FROM results WHERE rsID=?";
+        String sql = "SELECT * FROM result WHERE rsID=?";
         try (Connection conn = JDBCUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, Integer.parseInt(id));
@@ -98,10 +100,88 @@ public class ResultDAO implements InterfaceDAO<ResultDTO>{
         }
         return result;
     }
+    public ArrayList<ResultDTO> selectByUserID(int userID) {
+    ArrayList<ResultDTO> result = new ArrayList<>();
+    String sql = "SELECT * FROM result WHERE userID = ?";
+    try (Connection conn = JDBCUtil.getConnection();
+         PreparedStatement ps = conn.prepareStatement(sql)) {
+        ps.setInt(1, userID);
+        try (ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                result.add(new ResultDTO(
+                    rs.getInt("rsID"),
+                    rs.getInt("userID"),
+                    rs.getString("exCode"),
+                    rs.getString("rsAnswer"),
+                    rs.getDouble("rsMark"),
+                    rs.getTimestamp("rsDate").toLocalDateTime()
+                ));
+            }
+        }
+    } catch (SQLException ex) {
+        ex.printStackTrace();
+    }
+    return result;
+}
+
+// Lấy kết quả theo exCode
+public ArrayList<ResultDTO> selectByExCode(String exCode) {
+    ArrayList<ResultDTO> result = new ArrayList<>();
+    String sql = "SELECT * FROM result WHERE exCode LIKE ?";
+    try (Connection conn = JDBCUtil.getConnection();
+         PreparedStatement ps = conn.prepareStatement(sql)) {
+        ps.setString(1, exCode + "%");
+        try (ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                result.add(new ResultDTO(
+                    rs.getInt("rsID"),
+                    rs.getInt("userID"),
+                    rs.getString("exCode"),
+                    rs.getString("rsAnswer"),
+                    rs.getDouble("rsMark"),
+                    rs.getTimestamp("rsDate").toLocalDateTime()
+                ));
+            }
+        }
+    } catch (SQLException ex) {
+        ex.printStackTrace();
+    }
+    return result;
+}
+
+// Lấy thống kê theo exCode (cho jTable6)
+public Map<String, int[]> getStatisticsByExCode(String exCodeFilter) {
+    Map<String, int[]> statistics = new HashMap<>();
+    String sql = "SELECT exCode, " +
+                 "COUNT(*) as total, " +
+                 "SUM(CASE WHEN rsMark >= 50 THEN 1 ELSE 0 END) as passed, " +
+                 "SUM(CASE WHEN rsMark < 50 THEN 1 ELSE 0 END) as failed " +
+                 "FROM result " +
+                 (exCodeFilter.isEmpty() ? "" : "WHERE exCode LIKE ?") +
+                 " GROUP BY exCode";
+    try (Connection conn = JDBCUtil.getConnection();
+         PreparedStatement ps = conn.prepareStatement(sql)) {
+        if (!exCodeFilter.isEmpty()) {
+            ps.setString(1, exCodeFilter + "%");
+        }
+        try (ResultSet rs = ps.executeQuery()) {
+            while (rs.next()) {
+                String exCode = rs.getString("exCode");
+                int total = rs.getInt("total");
+                int passed = rs.getInt("passed");
+                int failed = rs.getInt("failed");
+                statistics.put(exCode, new int[]{total, passed, failed});
+            }
+        }
+    } catch (SQLException ex) {
+        ex.printStackTrace();
+    }
+    return statistics;
+}
 
     @Override
     public boolean delete(String id) {
-        String sql = "DELETE FROM results WHERE rsID=?";
+        String sql = "DELETE FROM result WHERE rsID=?";
         try (Connection conn = JDBCUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, Integer.parseInt(id));

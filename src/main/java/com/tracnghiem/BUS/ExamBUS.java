@@ -18,6 +18,10 @@ public class ExamBUS {
     public ExamBUS() {
         this.examDAO = ExamDAO.getInstance();
     }
+    
+    public boolean deleteExamsByTestCode(String testCode) {
+        return examDAO.deleteByTestCode(testCode);
+    }
 
     public boolean addExam(ExamDTO exam) {
         return examDAO.insert(exam);

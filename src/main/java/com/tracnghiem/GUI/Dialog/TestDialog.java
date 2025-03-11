@@ -21,9 +21,11 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 import javax.swing.table.DefaultTableModel;
 
 /**
@@ -51,6 +53,26 @@ public class TestDialog extends javax.swing.JDialog {
         jLabel23.setText("0");// Tải danh sách chủ đề vào jComboBox1
         setLocationRelativeTo(null); // Căn giữa dialog
     }
+    
+    public TestDialog(java.awt.Frame parent, boolean modal, TestDTO testToEdit, Main main) {
+    super(parent, modal);
+    initComponents();
+    testBUS = new TestBUS();
+    topicBUS = new TopicBUS();
+    questionBUS = new QuestionBUS();
+    loadTopics();
+    loadQuestions(); // Tải danh sách câu hỏi
+    jLabel18.setText("0");
+    jLabel20.setText("0");
+    jLabel19.setText("0");
+    jLabel23.setText("0");
+
+    // Hiển thị dữ liệu bài thi cần sửa
+    displayTestData(testToEdit, topicBUS);
+    configureUpdateButton(testToEdit, testBUS, main); // Cấu hình nút "Cập nhật"
+    loadSelectedQuestions(testToEdit); // Tải câu hỏi đã chọn (nếu cần)
+    setLocationRelativeTo(null);
+}
     
     public void setTestCode(String testCode) {
         jTextField4.setText(testCode);
@@ -106,44 +128,200 @@ public class TestDialog extends javax.swing.JDialog {
         setNumDiff(String.valueOf(test.getNum_diff()));
         setNumExams("1");
     }
-
-    public void configureUpdateButton(TestDTO test, TestBUS testBUS, Main main) {
-        jButton3.setText("Cập nhật");
-        for (ActionListener al : jButton3.getActionListeners()) {
-            jButton3.removeActionListener(al);
-        }
-        jButton3.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                try {
-                    test.setTestTitle(getTestTitle());
-                    test.setTpID(getTopicID());
-                    test.setTestTime(getTestTime());
-                    test.setTestLimit(getTestLimit());
-                    Date testDate = getTestDate();
-                    if (testDate == null) {
-                        JOptionPane.showMessageDialog(null, "Vui lòng chọn ngày tạo!");
-                        return;
-                    }
-                    test.setTestDate(new java.sql.Date(testDate.getTime()));
-                    test.setNum_easy(getNumEasy());
-                    test.setNum_medium(getNumMedium());
-                    test.setNum_diff(getNumDiff());
-
-                    if (testBUS.updateTest(test)) {
-                        JOptionPane.showMessageDialog(null, "Cập nhật bài thi thành công!");
-                        main.loadTests();
-                        dispose();
-                    } else {
-                        JOptionPane.showMessageDialog(null, "Cập nhật bài thi thất bại!");
-                    }
-                } catch (Exception ex) {
-                    JOptionPane.showMessageDialog(null, "Lỗi: " + ex.getMessage());
-                    ex.printStackTrace();
+    
+    private void loadSelectedQuestions(TestDTO test) {
+    ExamBUS examBUS = new ExamBUS();
+    ArrayList<ExamDTO> exams = examBUS.getExamsByTestCode(test.getTestCode());
+    DefaultTableModel model = (DefaultTableModel) jTable2.getModel();
+    model.setRowCount(0); // Xóa dữ liệu cũ
+    if (exams != null && !exams.isEmpty()) {
+        String quesIDs = exams.get(0).getExQuesIDs();
+        if (quesIDs != null && !quesIDs.isEmpty()) {
+            String[] questionIDs = quesIDs.split(",");
+            for (String qID : questionIDs) {
+                QuestionDTO question = questionBUS.getQuestionByID(Integer.parseInt(qID.trim()));
+                if (question != null) {
+                    TopicDTO topic = topicBUS.getTopicByID(String.valueOf(question.getTopicID()));
+                    model.addRow(new Object[]{
+                        question.getQID(),
+                        question.getQContent(),
+                        topic != null ? topic.getTpTitle() : "Không xác định",
+                        question.getLevel()
+                    });
                 }
             }
-        });
+        }
     }
+    updateQuestionCount(); // Cập nhật lại số lượng câu hỏi trên giao diện
+}
+    private void updateQuestionCount() {
+    DefaultTableModel model = (DefaultTableModel) jTable2.getModel();
+    int easy = 0, medium = 0, diff = 0;
+    for (int i = 0; i < model.getRowCount(); i++) {
+        String level = (String) model.getValueAt(i, 3);
+        switch (level) {
+            case "easy": easy++; break;
+            case "medium": medium++; break;
+            case "diff": diff++; break;
+        }
+    }
+    jLabel18.setText(String.valueOf(easy));
+    jLabel20.setText(String.valueOf(medium));
+    jLabel23.setText(String.valueOf(diff));
+}
+
+    public void configureUpdateButton(TestDTO test, TestBUS testBUS, Main main) {
+    jLabel1.setText("Sửa bài thi");
+    jButton3.setText("Cập nhật");
+    for (ActionListener al : jButton3.getActionListeners()) {
+        jButton3.removeActionListener(al);
+    }
+    jButton3.addActionListener(new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            try {
+                // Cập nhật thông tin bài thi
+                test.setTestTitle(getTestTitle());
+                test.setTpID(getTopicID());
+                test.setTestTime(getTestTime());
+                test.setTestLimit(getTestLimit());
+                Date testDate = getTestDate();
+                if (testDate == null) {
+                    JOptionPane.showMessageDialog(null, "Vui lòng chọn ngày tạo!");
+                    return;
+                }
+                test.setTestDate(new java.sql.Date(testDate.getTime()));
+
+                // Lấy số lượng câu hỏi từ giao diện
+                int numEasy = getNumEasy();
+                int numMedium = getNumMedium();
+                int numDiff = getNumDiff();
+                int totalQuestions = numEasy + numMedium + numDiff;
+
+                // Kiểm tra số lượng câu hỏi
+                DefaultTableModel model = (DefaultTableModel) jTable2.getModel();
+                int tableQuestionCount = model.getRowCount();
+                if (totalQuestions != tableQuestionCount) {
+                    JOptionPane.showMessageDialog(null, "Số lượng câu hỏi (" + totalQuestions + 
+                        ") không khớp với số câu trong bảng (" + tableQuestionCount + ")!");
+                    return;
+                }
+
+                // Cập nhật số lượng câu hỏi
+                test.setNum_easy(numEasy);
+                test.setNum_medium(numMedium);
+                test.setNum_diff(numDiff);
+
+                // Kiểm tra dữ liệu đầu vào
+                if (test.getTestTitle().isEmpty()) {
+                    JOptionPane.showMessageDialog(null, "Tên bài thi không được để trống!");
+                    return;
+                }
+                if (test.getTpID() == -1) {
+                    JOptionPane.showMessageDialog(null, "Vui lòng chọn chủ đề!");
+                    return;
+                }
+                if (test.getTestTime() <= 0) {
+                    JOptionPane.showMessageDialog(null, "Thời gian thi phải lớn hơn 0!");
+                    return;
+                }
+                if (test.getTestLimit() < 0) {
+                    JOptionPane.showMessageDialog(null, "Số lượt làm bài không hợp lệ!");
+                    return;
+                }
+                if (totalQuestions <= 0) {
+                    JOptionPane.showMessageDialog(null, "Tổng số câu hỏi phải lớn hơn 0!");
+                    return;
+                }
+
+                // Lấy số lượng đề thi mới
+                int numExams = getNumExams();
+                if (numExams <= 0 || numExams > 26) {
+                    JOptionPane.showMessageDialog(null, "Số lượng đề thi phải từ 1 đến 26!");
+                    return;
+                }
+
+                // Lấy danh sách câu hỏi từ jTable2
+                String quesIDs = "";
+                if (tableQuestionCount > 0) {
+                    quesIDs = IntStream.range(0, tableQuestionCount)
+                        .mapToObj(i -> model.getValueAt(i, 0).toString())
+                        .collect(Collectors.joining(","));
+                }
+                if (quesIDs.isEmpty()) {
+                    JOptionPane.showMessageDialog(null, "Vui lòng chọn ít nhất một câu hỏi!");
+                    return;
+                }
+
+                ExamBUS examBUS = new ExamBUS();
+                ArrayList<ExamDTO> currentExams = examBUS.getExamsByTestCode(test.getTestCode());
+                int currentNumExams = currentExams.size();
+
+                // Điều chỉnh số lượng đề thi
+                if (currentNumExams != numExams) {
+                    if (numExams < currentNumExams) {
+                        int examsToRemove = currentNumExams - numExams;
+                        if (currentNumExams - examsToRemove >= 1) {
+                            for (int i = 0; i < examsToRemove; i++) {
+                                int lastIndex = currentExams.size() - 1;
+                                String exCode = currentExams.get(lastIndex).getExCode();
+                                if (!examBUS.deleteExam(exCode)) {
+                                    JOptionPane.showMessageDialog(null, "Xóa đề thi " + exCode + " thất bại!");
+                                    return;
+                                }
+                                currentExams.remove(lastIndex);
+                            }
+                        } else {
+                            JOptionPane.showMessageDialog(null, "Không thể xóa hết các đề thi do ràng buộc khóa ngoại!");
+                            return;
+                        }
+                    } else {
+                        ArrayList<Integer> allQuestions = Arrays.stream(quesIDs.split(","))
+                            .map(Integer::parseInt)
+                            .collect(Collectors.toCollection(ArrayList::new));
+                        for (int i = currentNumExams; i < numExams; i++) {
+                            Collections.shuffle(allQuestions);
+                            String newQuesIDs = allQuestions.stream()
+                                .map(String::valueOf)
+                                .collect(Collectors.joining(","));
+                            ExamDTO exam = new ExamDTO();
+                            exam.setTestCode(test.getTestCode());
+                            exam.setExOrder(String.valueOf((char) ('A' + i)));
+                            exam.setExCode(test.getTestCode() + exam.getExOrder());
+                            exam.setExQuesIDs(newQuesIDs);
+                            if (!examBUS.addExam(exam)) {
+                                JOptionPane.showMessageDialog(null, "Thêm đề thi " + exam.getExCode() + " thất bại!");
+                                return;
+                            }
+                        }
+                    }
+                }
+
+                // Cập nhật quesIDs cho tất cả các đề thi hiện có
+                ArrayList<ExamDTO> updatedExams = examBUS.getExamsByTestCode(test.getTestCode());
+                for (ExamDTO exam : updatedExams) {
+                    exam.setExQuesIDs(quesIDs);
+                    if (!examBUS.updateExam(exam)) {
+                        JOptionPane.showMessageDialog(null, "Cập nhật đề thi " + exam.getExCode() + " thất bại!");
+                        return;
+                    }
+                }
+
+                // Cập nhật bài thi trong database
+                if (testBUS.updateTest(test)) {
+                    JOptionPane.showMessageDialog(null, "Cập nhật bài thi thành công!");
+                    main.loadTests();
+                    dispose();
+                } else {
+                    JOptionPane.showMessageDialog(null, "Cập nhật bài thi thất bại!");
+                }
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(null, "Lỗi: " + ex.getMessage());
+                ex.printStackTrace();
+            }
+        }
+    });
+}
     // Tải danh sách chủ đề vào jComboBox1
     private void loadTopics() {
         ArrayList<TopicDTO> topics = topicBUS.getAllActiveTopics();
