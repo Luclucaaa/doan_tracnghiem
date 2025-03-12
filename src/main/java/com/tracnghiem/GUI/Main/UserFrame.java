@@ -1067,7 +1067,7 @@ private void loadUserInformation(String username) {
     private void formWindowOpened(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowOpened
         this.setLocationRelativeTo(null);        // TODO add your handling code here:
     }//GEN-LAST:event_formWindowOpened
-
+//sửa user
     private void bttnfixActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_bttnfixActionPerformed
           String username = name.getText().trim(); // Lấy username từ giao diện
 

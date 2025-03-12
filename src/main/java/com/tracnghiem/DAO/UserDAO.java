@@ -48,6 +48,7 @@ public class UserDAO implements InterfaceDAO<UserDTO> {
         return false;
     }
 }
+    //
     public UserDTO getUserByUsername(String username) {
     String sql = "SELECT * FROM users WHERE userName = ?";
     try (Connection conn = JDBCUtil.getConnection();

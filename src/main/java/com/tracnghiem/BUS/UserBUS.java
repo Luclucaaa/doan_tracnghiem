@@ -24,7 +24,7 @@ public class UserBUS {
     public boolean addUser(UserDTO user) {
         return userDAO.insert(user);
     }
-
+    
     public boolean updateUser(UserDTO user) {
         return userDAO.update(user);
     }
