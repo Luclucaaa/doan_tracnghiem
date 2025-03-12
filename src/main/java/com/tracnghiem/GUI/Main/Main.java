@@ -27,8 +27,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.Timestamp;
 import java.text.DecimalFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -909,11 +911,6 @@ public class Main extends javax.swing.JFrame {
         cz6.setText("Sửa");
         cz6.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
         cz6.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
-        cz6.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                cz6ActionPerformed(evt);
-            }
-        });
 
         jTextField3.setFont(new java.awt.Font("Segoe UI", 0, 15)); // NOI18N
 
@@ -1217,16 +1214,13 @@ public class Main extends javax.swing.JFrame {
                     .addGroup(jPanel13Layout.createSequentialGroup()
                         .addComponent(jTextField9)
                         .addGap(2, 2, 2))
-                    .addGroup(jPanel13Layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
-                        .addGroup(jPanel13Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(jLabel22, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
-                            .addGroup(jPanel13Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                                .addComponent(jLabel23, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addComponent(jLabel21, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addComponent(jLabel30)
-                                .addComponent(jTextField12, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addComponent(jTextField8, javax.swing.GroupLayout.DEFAULT_SIZE, 39, Short.MAX_VALUE)))))
+                    .addComponent(jLabel22, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(jPanel13Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jLabel23, javax.swing.GroupLayout.PREFERRED_SIZE, 34, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jLabel21, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jLabel30)
+                        .addComponent(jTextField12, javax.swing.GroupLayout.PREFERRED_SIZE, 38, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jTextField8, javax.swing.GroupLayout.DEFAULT_SIZE, 39, Short.MAX_VALUE)))
                 .addGap(12, 12, 12))
         );
 
@@ -1266,7 +1260,7 @@ public class Main extends javax.swing.JFrame {
                         for (ResultDTO result : results) {
                             if (result.getExCode().equals(exCode)) {
                                 JOptionPane.showMessageDialog(null,
-                                    "Đáp án: " + result.getRsAnswer(),
+                                    "Đáp án: " + result.getRs_answers(),
                                     "Chi tiết kết quả",
                                     JOptionPane.INFORMATION_MESSAGE);
                                 break;
@@ -1476,11 +1470,11 @@ public class Main extends javax.swing.JFrame {
         }
     } else {
         JOptionPane.showMessageDialog(null, "Vui lòng chọn một chủ đề để sửa!");
-    }        // TODO add your handling code here:
+    }// TODO add your handling code here:
     }//GEN-LAST:event_cz3ActionPerformed
 
     private void QuestionMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_QuestionMouseClicked
-        PanelPhai.removeAll();
+    PanelPhai.removeAll();
     PanelPhai.add(QuestionPanel, "card8");
     loadQuestions(); // Tải danh sách câu hỏi
     PanelPhai.revalidate();
@@ -1491,10 +1485,6 @@ public class Main extends javax.swing.JFrame {
         JOptionPane.showMessageDialog(this, "Vui lòng thêm đề thi thông qua tab Quản lý bài thi!");// TODO add your handling code here:
     }//GEN-LAST:event_cz4ActionPerformed
 
-    private void cz6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cz6ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_cz6ActionPerformed
-
     private void ThongKeMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ThongKeMouseClicked
         PanelPhai.removeAll();
         PanelPhai.add(ThongKePanel, "card7");
@@ -1503,10 +1493,6 @@ public class Main extends javax.swing.JFrame {
         PanelPhai.revalidate();
         PanelPhai.repaint();
     }//GEN-LAST:event_ThongKeMouseClicked
-
-    private void cz16ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cz16ActionPerformed
-        // TODO add your handling code here:
-    }//GEN-LAST:event_cz16ActionPerformed
 
     private void cz18ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cz18ActionPerformed
         int selectedRow = jTable4.getSelectedRow();
@@ -2039,6 +2025,89 @@ public class Main extends javax.swing.JFrame {
     private void jTextField13KeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jTextField13KeyReleased
         filterStatistics();// TODO add your handling code here:
     }//GEN-LAST:event_jTextField13KeyReleased
+
+    private void cz16ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cz16ActionPerformed
+        TestDialog testDialog = new TestDialog(this, true);
+    testDialog.setAddButtonListener(new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            try {
+                // Lấy thông tin từ TestDialog
+                String testCode = testDialog.getTestCode();
+                if (testCode == null || testCode.trim().isEmpty()) {
+                    throw new IllegalArgumentException("Mã bài thi không được để trống!");
+                }
+
+                String testTitle = testDialog.getTestTitle();
+                if (testTitle == null || testTitle.trim().isEmpty()) {
+                    throw new IllegalArgumentException("Tên bài thi không được để trống!");
+                }
+
+                int testTime = testDialog.getTestTime();
+                if (testTime <= 0) {
+                    throw new IllegalArgumentException("Thời gian thi phải lớn hơn 0!");
+                }
+
+                int tpID = testDialog.getTpID();
+                if (tpID <= 0) {
+                    throw new IllegalArgumentException("Chủ đề không hợp lệ!");
+                }
+
+                int numEasy = testDialog.getNumEasy();
+                int numMedium = testDialog.getNumMedium();
+                int numDiff = testDialog.getNumDiff();
+                if (numEasy + numMedium + numDiff <= 0) {
+                    throw new IllegalArgumentException("Số lượng câu hỏi phải lớn hơn 0!");
+                }
+
+                int testLimit = testDialog.getTestLimit();
+                if (testLimit <= 0) {
+                    throw new IllegalArgumentException("Giới hạn thi phải lớn hơn 0!");
+                }
+
+                String testDateStr = testDialog.getTestDate();
+                if (testDateStr == null || testDateStr.trim().isEmpty()) {
+                    throw new IllegalArgumentException("Ngày thi không được để trống!");
+                }
+
+                int numExams = testDialog.getNumExams(); // Lấy số lượng đề thi
+                if (numExams <= 0) {
+                    throw new IllegalArgumentException("Số lượng đề thi phải lớn hơn 0!");
+                }
+
+                // Chuyển đổi ngày tháng
+                SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+                sdf.setLenient(false);
+                java.sql.Date testDate;
+                try {
+                    testDate = new java.sql.Date(sdf.parse(testDateStr.trim()).getTime());
+                } catch (ParseException pe) {
+                    throw new IllegalArgumentException("Định dạng ngày thi không hợp lệ! Vui lòng dùng dd/MM/yyyy.");
+                }
+
+                // Tạo các đề thi (exams) trước
+                createRandomExams(testCode, tpID, numEasy, numMedium, numDiff, numExams);
+
+                // Tạo TestDTO và chèn vào bảng test sau
+                TestDTO newTest = new TestDTO(0, testCode, testTitle, testTime, tpID, numEasy, numMedium, numDiff, testLimit, testDate, 1); // Trạng thái mặc định là 1
+                TestBUS testBUS = new TestBUS();
+
+                if (testBUS.addTest(newTest)) {
+                    JOptionPane.showMessageDialog(null, "Thêm bài thi và đề thi thành công!");
+                    loadTests();
+                    loadExams();
+                    testDialog.dispose();
+                } else {
+                    JOptionPane.showMessageDialog(null, "Thêm bài thi thất bại!");
+                }
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(null, "Đã xảy ra lỗi: " + ex.getMessage());
+            }
+        }
+    });
+    testDialog.setVisible(true);// TODO add your handling code here:
+    }//GEN-LAST:event_cz16ActionPerformed
     
    private void loadTopics() {
     TopicBUS topicBUS = new TopicBUS();
@@ -2165,8 +2234,8 @@ public class Main extends javax.swing.JFrame {
     for (ResultDTO result : results) {
         String userID = formatter.format(result.getUserID());
         String exCode = result.getExCode();
-        double mark = result.getRsMark();
-        String date = dateFormat.format(Timestamp.valueOf(result.getRsDate()));
+        double mark = result.getRs_mark();
+        String date = dateFormat.format(Timestamp.valueOf(result.getRs_date()));
         model.addRow(new Object[]{userID, exCode, mark, date});
     }
 }
@@ -2206,8 +2275,8 @@ public class Main extends javax.swing.JFrame {
     for (ResultDTO result : results) {
         String userID = formatter.format(result.getUserID());
         String exCode = result.getExCode();
-        double mark = result.getRsMark();
-        String date = dateFormat.format(Timestamp.valueOf(result.getRsDate()));
+        String markDisplay = String.valueOf(result.getRs_mark()); // Chỉ hiển thị điểm đạt được
+        String date = dateFormat.format(Timestamp.valueOf(result.getRs_date()));
 
         if ((!testFilter.isEmpty() && !exCode.startsWith(testFilter)) ||
             (!userFilter.isEmpty() && !userID.equals(userFilter))) {
@@ -2217,9 +2286,9 @@ public class Main extends javax.swing.JFrame {
         if (searchText.isEmpty() || 
             userID.toLowerCase().contains(searchText) || 
             exCode.toLowerCase().contains(searchText) || 
-            String.valueOf(mark).contains(searchText) || 
+            markDisplay.toLowerCase().contains(searchText) || 
             date.toLowerCase().contains(searchText)) {
-            model.addRow(new Object[]{userID, exCode, mark, date});
+            model.addRow(new Object[]{userID, exCode, markDisplay, date});
         }
     }
 }
@@ -2234,6 +2303,57 @@ public class Main extends javax.swing.JFrame {
         String exCode = entry.getKey();
         int[] stats = entry.getValue();
         model.addRow(new Object[]{exCode, stats[0], stats[1], stats[2]});
+    }
+}
+
+private void createRandomExams(String testCode, int tpID, int numEasy, int numMedium, int numDiff, int numExams) {
+    QuestionBUS questionBUS = new QuestionBUS();
+    ArrayList<QuestionDTO> allQuestions = questionBUS.getQuestionsByTopic(tpID);
+
+    // Lọc câu hỏi theo mức độ
+    List<QuestionDTO> easyQuestions = allQuestions.stream()
+            .filter(q -> q.getLevel().equals("easy"))
+            .collect(Collectors.toList());
+    List<QuestionDTO> mediumQuestions = allQuestions.stream()
+            .filter(q -> q.getLevel().equals("medium"))
+            .collect(Collectors.toList());
+    List<QuestionDTO> diffQuestions = allQuestions.stream()
+            .filter(q -> q.getLevel().equals("diff"))
+            .collect(Collectors.toList());
+
+    // Tạo danh sách câu hỏi cho từng đề mà không kiểm tra số lượng tối thiểu
+    ExamBUS examBUS = new ExamBUS();
+    for (int i = 0; i < numExams; i++) {
+        char order = (char) ('A' + i);
+        List<QuestionDTO> selectedQuestions = new ArrayList<>();
+
+        // Chọn ngẫu nhiên câu hỏi dễ (lặp lại nếu không đủ)
+        Collections.shuffle(easyQuestions);
+        int easyToTake = Math.min(numEasy, easyQuestions.size());
+        selectedQuestions.addAll(easyQuestions.subList(0, easyToTake));
+
+        // Chọn ngẫu nhiên câu hỏi trung bình (lặp lại nếu không đủ)
+        Collections.shuffle(mediumQuestions);
+        int mediumToTake = Math.min(numMedium, mediumQuestions.size());
+        selectedQuestions.addAll(mediumQuestions.subList(0, mediumToTake));
+
+        // Chọn ngẫu nhiên câu hỏi khó (lặp lại nếu không đủ)
+        Collections.shuffle(diffQuestions);
+        int diffToTake = Math.min(numDiff, diffQuestions.size());
+        selectedQuestions.addAll(diffQuestions.subList(0, diffToTake));
+
+        // Xáo trộn toàn bộ danh sách câu hỏi để random thứ tự
+        Collections.shuffle(selectedQuestions);
+
+        // Tạo chuỗi exQuesIDs từ các câu hỏi đã chọn
+        String exQuesIDs = selectedQuestions.stream()
+                .map(q -> String.valueOf(q.getQID()))
+                .collect(Collectors.joining(","));
+
+        // Tạo ExamDTO
+        String exCode = testCode + order;
+        ExamDTO exam = new ExamDTO(testCode, String.valueOf(order), exCode, exQuesIDs);
+        examBUS.addExam(exam);
     }
 }
     /**

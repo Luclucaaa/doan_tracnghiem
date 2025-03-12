@@ -4,6 +4,22 @@
  */
 package com.tracnghiem.GUI.Main;
 
+import com.tracnghiem.BUS.TestBUS;
+import com.tracnghiem.BUS.TopicBUS;
+import com.tracnghiem.BUS.ExamBUS;
+import com.tracnghiem.BUS.QuestionBUS;
+import com.tracnghiem.BUS.AnswerBUS;
+import com.tracnghiem.BUS.ResultBUS;
+import com.tracnghiem.BUS.UserBUS;
+import com.tracnghiem.DTO.TestDTO;
+import com.tracnghiem.DTO.TopicDTO;
+import com.tracnghiem.DTO.ExamDTO;
+import com.tracnghiem.DTO.QuestionDTO;
+import com.tracnghiem.DTO.AnswerDTO;
+import com.tracnghiem.DTO.ResultDTO;
+import com.tracnghiem.DTO.UserDTO;
+import com.tracnghiem.GUI.Dialog.SuaUserDialog;
+import com.tracnghiem.config.JDBCUtil;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -15,6 +31,13 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
 import javax.swing.JCheckBox;
@@ -24,6 +47,7 @@ import javax.swing.JTable;
 import javax.swing.SwingConstants;
 import javax.swing.Timer;
 import javax.swing.UIManager;
+import javax.swing.table.DefaultTableModel;
 import javax.swing.text.DefaultCaret;
 
 
@@ -32,19 +56,51 @@ import javax.swing.text.DefaultCaret;
  * @author THELUC
  */
 public class UserFrame extends javax.swing.JFrame {
-    private int numberOfSquares = 10;
+    private int numberOfSquares;
     private Timer timer;
-    private int minutes = 20; // Bắt đầu từ 20 phút
+    private int minutes;
     private int seconds = 0;
+    private int currentQuestionIndex = 0; // Chỉ số câu hỏi hiện tại
+    private ArrayList<QuestionDTO> questions; // Danh sách câu hỏi thực tế
+    private ArrayList<List<AnswerDTO>> answers; // Danh sách đáp án cho từng câu hỏi
+    private TestBUS testBUS;
+    private TopicBUS topicBUS;
+    private ExamBUS examBUS;
+    private QuestionBUS questionBUS;
+    private AnswerBUS answerBUS;
+    private ArrayList<Integer> selectedAnswers; // Lưu chỉ số đáp án được chọn cho mỗi câu hỏi
+    private ArrayList<JLabel> squareLabels; // Lưu các JLabel của ô vuông để thay đổi màu sắc
+    private int remainingAttempts;
+    private int totalScore; // Điểm đạt được
+    private int maxScore;
+    private int userID; // Biến lưu ID người dùng
+    private int topicID; // Biến lưu ID chủ đề
     /**
      * Creates new form UserFrame
      */
     public UserFrame(String username){ 
-        initComponents();
-        createSquares();
+        initComponents();    
         name.setText(username);
+        // Khởi tạo BUS
+        testBUS = new TestBUS();
+        topicBUS = new TopicBUS();
+        examBUS = new ExamBUS();
+        questionBUS = new QuestionBUS();
+        answerBUS = new AnswerBUS();
+
+        // Tải dữ liệu cho panel chọn đề thi
+        loadTopics();
+        loadTests();
+
+        // Khởi tạo timer nhưng chưa chạy, sẽ chạy khi làm bài
         setupTimer();
-        startTimer();
+        
+        // Khởi tạo danh sách để lưu đáp án và ô vuông
+        selectedAnswers = new ArrayList<>();
+        squareLabels = new ArrayList<>();
+        
+        // Khởi tạo số lượt làm bài
+        remainingAttempts = 0;
     }
 
     /**
@@ -88,6 +144,11 @@ public class UserFrame extends javax.swing.JFrame {
         jScrollPane1 = new javax.swing.JScrollPane();
         jTable1 = new javax.swing.JTable();
         jButton5 = new javax.swing.JButton();
+        jLabel16 = new javax.swing.JLabel();
+        jLabel17 = new javax.swing.JLabel();
+        jLabel18 = new javax.swing.JLabel();
+        jLabel19 = new javax.swing.JLabel();
+        jLabel20 = new javax.swing.JLabel();
         TaskTheTestPanel = new javax.swing.JPanel();
         jPanel7 = new javax.swing.JPanel();
         jLabel13 = new javax.swing.JLabel();
@@ -119,6 +180,25 @@ public class UserFrame extends javax.swing.JFrame {
         jButton4 = new javax.swing.JButton();
         jButton1 = new javax.swing.JButton();
         jButton3 = new javax.swing.JButton();
+        KetQuaThiPanel = new javax.swing.JPanel();
+        jLabel2 = new javax.swing.JLabel();
+        jLabel21 = new javax.swing.JLabel();
+        jLabel22 = new javax.swing.JLabel();
+        jLabel23 = new javax.swing.JLabel();
+        jLabel24 = new javax.swing.JLabel();
+        jLabel27 = new javax.swing.JLabel();
+        jLabel28 = new javax.swing.JLabel();
+        jPanel1 = new javax.swing.JPanel();
+        jLabel29 = new javax.swing.JLabel();
+        jLabel30 = new javax.swing.JLabel();
+        jLabel31 = new javax.swing.JLabel();
+        jLabel32 = new javax.swing.JLabel();
+        jLabel33 = new javax.swing.JLabel();
+        jLabel34 = new javax.swing.JLabel();
+        jLabel35 = new javax.swing.JLabel();
+        jLabel36 = new javax.swing.JLabel();
+        jLabel37 = new javax.swing.JLabel();
+        jLabel38 = new javax.swing.JLabel();
         XemKQThiPanel = new javax.swing.JPanel();
 
         javax.swing.GroupLayout jPanel11Layout = new javax.swing.GroupLayout(jPanel11);
@@ -193,6 +273,9 @@ public class UserFrame extends javax.swing.JFrame {
         User.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseClicked(java.awt.event.MouseEvent evt) {
                 UserMouseClicked(evt);
+            }
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                UserMouseEntered(evt);
             }
         });
 
@@ -336,9 +419,9 @@ public class UserFrame extends javax.swing.JFrame {
         );
         HomePanelLayout.setVerticalGroup(
             HomePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 850, Short.MAX_VALUE)
+            .addGap(0, 854, Short.MAX_VALUE)
             .addGroup(HomePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addComponent(jLabel15, javax.swing.GroupLayout.DEFAULT_SIZE, 850, Short.MAX_VALUE))
+                .addComponent(jLabel15, javax.swing.GroupLayout.DEFAULT_SIZE, 854, Short.MAX_VALUE))
         );
 
         contentPanel.add(HomePanel, "card2");
@@ -372,13 +455,13 @@ public class UserFrame extends javax.swing.JFrame {
 
         jTable1.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null}
+                {null, null, null},
+                {null, null, null},
+                {null, null, null},
+                {null, null, null}
             },
             new String [] {
-                "Tên bài thi", "Title 2", "Title 3", "Title 4"
+                "Tên bài thi", "Số lượt làm bài", "Thời gian thi"
             }
         ));
         jScrollPane1.setViewportView(jTable1);
@@ -391,12 +474,22 @@ public class UserFrame extends javax.swing.JFrame {
             }
         });
 
+        jLabel16.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
+
+        jLabel17.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
+
+        jLabel18.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
+
+        jLabel19.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
+
+        jLabel20.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
+
         javax.swing.GroupLayout UserChooseExamPanelLayout = new javax.swing.GroupLayout(UserChooseExamPanel);
         UserChooseExamPanel.setLayout(UserChooseExamPanelLayout);
         UserChooseExamPanelLayout.setHorizontalGroup(
             UserChooseExamPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, UserChooseExamPanelLayout.createSequentialGroup()
-                .addGap(0, 12, Short.MAX_VALUE)
+                .addGap(0, 32, Short.MAX_VALUE)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 1242, javax.swing.GroupLayout.PREFERRED_SIZE))
             .addGroup(UserChooseExamPanelLayout.createSequentialGroup()
                 .addGroup(UserChooseExamPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -407,11 +500,6 @@ public class UserFrame extends javax.swing.JFrame {
                         .addGap(392, 392, 392)
                         .addComponent(jLabel9))
                     .addGroup(UserChooseExamPanelLayout.createSequentialGroup()
-                        .addGap(359, 359, 359)
-                        .addComponent(jLabel14)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(jComboBox2, javax.swing.GroupLayout.PREFERRED_SIZE, 271, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(UserChooseExamPanelLayout.createSequentialGroup()
                         .addGap(554, 554, 554)
                         .addComponent(jButton5))
                     .addGroup(UserChooseExamPanelLayout.createSequentialGroup()
@@ -421,7 +509,23 @@ public class UserFrame extends javax.swing.JFrame {
                         .addComponent(jComboBox1, javax.swing.GroupLayout.PREFERRED_SIZE, 267, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(UserChooseExamPanelLayout.createSequentialGroup()
                         .addGap(541, 541, 541)
-                        .addComponent(jLabel10)))
+                        .addComponent(jLabel10))
+                    .addGroup(UserChooseExamPanelLayout.createSequentialGroup()
+                        .addGap(163, 163, 163)
+                        .addComponent(jLabel16)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jLabel17, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jLabel18, javax.swing.GroupLayout.PREFERRED_SIZE, 51, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(281, 281, 281)
+                        .addComponent(jLabel20)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jLabel19, javax.swing.GroupLayout.PREFERRED_SIZE, 51, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(UserChooseExamPanelLayout.createSequentialGroup()
+                        .addGap(387, 387, 387)
+                        .addComponent(jLabel14)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jComboBox2, javax.swing.GroupLayout.PREFERRED_SIZE, 271, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         UserChooseExamPanelLayout.setVerticalGroup(
@@ -438,11 +542,20 @@ public class UserFrame extends javax.swing.JFrame {
                 .addComponent(jLabel10, javax.swing.GroupLayout.PREFERRED_SIZE, 44, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 314, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(18, 18, 18)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(UserChooseExamPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(jComboBox2, javax.swing.GroupLayout.PREFERRED_SIZE, 44, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel14, javax.swing.GroupLayout.PREFERRED_SIZE, 44, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 90, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 32, Short.MAX_VALUE)
+                .addGroup(UserChooseExamPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(UserChooseExamPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jLabel16, javax.swing.GroupLayout.PREFERRED_SIZE, 44, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jLabel17, javax.swing.GroupLayout.PREFERRED_SIZE, 44, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jLabel18, javax.swing.GroupLayout.PREFERRED_SIZE, 44, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addGroup(UserChooseExamPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jLabel20, javax.swing.GroupLayout.PREFERRED_SIZE, 44, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jLabel19, javax.swing.GroupLayout.PREFERRED_SIZE, 44, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGap(54, 54, 54)
                 .addComponent(jButton5, javax.swing.GroupLayout.PREFERRED_SIZE, 51, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(58, 58, 58))
         );
@@ -778,15 +891,179 @@ public class UserFrame extends javax.swing.JFrame {
 
         contentPanel.add(TaskTheTestPanel, "card6");
 
+        jLabel2.setFont(new java.awt.Font("Segoe UI", 1, 36)); // NOI18N
+        jLabel2.setText("KẾT QUẢ THI");
+        jLabel2.setToolTipText("");
+
+        jLabel21.setFont(new java.awt.Font("Segoe UI", 0, 36)); // NOI18N
+        jLabel21.setText("Bài thi:");
+
+        jLabel22.setFont(new java.awt.Font("Segoe UI", 0, 36)); // NOI18N
+
+        jLabel23.setFont(new java.awt.Font("Segoe UI", 0, 36)); // NOI18N
+        jLabel23.setText("Chủ đề:");
+
+        jLabel24.setFont(new java.awt.Font("Segoe UI", 0, 36)); // NOI18N
+
+        jLabel27.setFont(new java.awt.Font("Segoe UI", 0, 36)); // NOI18N
+        jLabel27.setText("Đề thi:");
+
+        jLabel28.setFont(new java.awt.Font("Segoe UI", 0, 36)); // NOI18N
+
+        jPanel1.setBackground(new java.awt.Color(255, 255, 255));
+        jPanel1.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 255, 51), 2));
+
+        jLabel29.setFont(new java.awt.Font("Segoe UI", 0, 30)); // NOI18N
+        jLabel29.setText("Điểm số:");
+
+        jLabel30.setFont(new java.awt.Font("Segoe UI", 0, 30)); // NOI18N
+
+        jLabel31.setFont(new java.awt.Font("Segoe UI", 0, 30)); // NOI18N
+        jLabel31.setText("Đạt:");
+
+        jLabel32.setFont(new java.awt.Font("Segoe UI", 0, 30)); // NOI18N
+
+        jLabel33.setFont(new java.awt.Font("Segoe UI", 0, 30)); // NOI18N
+        jLabel33.setText("Số câu trả lời đúng:");
+
+        jLabel34.setFont(new java.awt.Font("Segoe UI", 0, 30)); // NOI18N
+
+        jLabel35.setFont(new java.awt.Font("Segoe UI", 0, 30)); // NOI18N
+        jLabel35.setText("Thời gian làm bài:");
+
+        jLabel36.setFont(new java.awt.Font("Segoe UI", 0, 30)); // NOI18N
+
+        jLabel37.setFont(new java.awt.Font("Segoe UI", 0, 30)); // NOI18N
+        jLabel37.setText("phút");
+
+        jLabel38.setFont(new java.awt.Font("Sitka Text", 2, 48)); // NOI18N
+        jLabel38.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icon/congratulations.png"))); // NOI18N
+        jLabel38.setText("  Congratulation");
+        jLabel38.setToolTipText("");
+        jLabel38.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+
+        javax.swing.GroupLayout jPanel1Layout = new javax.swing.GroupLayout(jPanel1);
+        jPanel1.setLayout(jPanel1Layout);
+        jPanel1Layout.setHorizontalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGap(72, 72, 72)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabel29)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jLabel30))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabel35)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jLabel36))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabel33)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jLabel34)))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 15, Short.MAX_VALUE)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addComponent(jLabel31)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addComponent(jLabel32))
+                    .addComponent(jLabel37))
+                .addGap(251, 251, 251))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, jPanel1Layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jLabel38, javax.swing.GroupLayout.PREFERRED_SIZE, 444, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(105, 105, 105))
+        );
+        jPanel1Layout.setVerticalGroup(
+            jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(jPanel1Layout.createSequentialGroup()
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGap(40, 40, 40)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel29, javax.swing.GroupLayout.PREFERRED_SIZE, 51, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel30, javax.swing.GroupLayout.PREFERRED_SIZE, 51, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addGroup(jPanel1Layout.createSequentialGroup()
+                        .addGap(45, 45, 45)
+                        .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                            .addComponent(jLabel31, javax.swing.GroupLayout.PREFERRED_SIZE, 51, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel32, javax.swing.GroupLayout.PREFERRED_SIZE, 51, javax.swing.GroupLayout.PREFERRED_SIZE))))
+                .addGap(39, 39, 39)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jLabel33, javax.swing.GroupLayout.PREFERRED_SIZE, 51, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel34, javax.swing.GroupLayout.PREFERRED_SIZE, 51, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(56, 56, 56)
+                .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(jPanel1Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                        .addComponent(jLabel35, javax.swing.GroupLayout.PREFERRED_SIZE, 51, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(jLabel36, javax.swing.GroupLayout.PREFERRED_SIZE, 51, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jLabel37, javax.swing.GroupLayout.PREFERRED_SIZE, 51, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(18, 18, 18)
+                .addComponent(jLabel38, javax.swing.GroupLayout.PREFERRED_SIZE, 158, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap(19, Short.MAX_VALUE))
+        );
+
+        javax.swing.GroupLayout KetQuaThiPanelLayout = new javax.swing.GroupLayout(KetQuaThiPanel);
+        KetQuaThiPanel.setLayout(KetQuaThiPanelLayout);
+        KetQuaThiPanelLayout.setHorizontalGroup(
+            KetQuaThiPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(KetQuaThiPanelLayout.createSequentialGroup()
+                .addGroup(KetQuaThiPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(KetQuaThiPanelLayout.createSequentialGroup()
+                        .addGap(491, 491, 491)
+                        .addComponent(jLabel2))
+                    .addGroup(KetQuaThiPanelLayout.createSequentialGroup()
+                        .addGap(397, 397, 397)
+                        .addComponent(jLabel27)
+                        .addGap(18, 18, 18)
+                        .addComponent(jLabel22, javax.swing.GroupLayout.PREFERRED_SIZE, 261, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(KetQuaThiPanelLayout.createSequentialGroup()
+                        .addGap(280, 280, 280)
+                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(KetQuaThiPanelLayout.createSequentialGroup()
+                        .addGap(125, 125, 125)
+                        .addComponent(jLabel23)
+                        .addGap(18, 18, 18)
+                        .addComponent(jLabel24, javax.swing.GroupLayout.PREFERRED_SIZE, 283, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addGap(171, 171, 171)
+                        .addComponent(jLabel21)
+                        .addGap(18, 18, 18)
+                        .addComponent(jLabel28, javax.swing.GroupLayout.PREFERRED_SIZE, 261, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addContainerGap(171, Short.MAX_VALUE))
+        );
+        KetQuaThiPanelLayout.setVerticalGroup(
+            KetQuaThiPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(KetQuaThiPanelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addComponent(jLabel2, javax.swing.GroupLayout.PREFERRED_SIZE, 81, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addGroup(KetQuaThiPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(KetQuaThiPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                        .addComponent(jLabel24, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jLabel23, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(KetQuaThiPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                        .addComponent(jLabel21, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jLabel28, javax.swing.GroupLayout.PREFERRED_SIZE, 48, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                .addGap(53, 53, 53)
+                .addGroup(KetQuaThiPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(jLabel27, javax.swing.GroupLayout.DEFAULT_SIZE, 60, Short.MAX_VALUE)
+                    .addComponent(jLabel22, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addGap(37, 37, 37)
+                .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(59, 59, 59))
+        );
+
+        contentPanel.add(KetQuaThiPanel, "card6");
+
         javax.swing.GroupLayout XemKQThiPanelLayout = new javax.swing.GroupLayout(XemKQThiPanel);
         XemKQThiPanel.setLayout(XemKQThiPanelLayout);
         XemKQThiPanelLayout.setHorizontalGroup(
             XemKQThiPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 100, Short.MAX_VALUE)
+            .addGap(0, 1274, Short.MAX_VALUE)
         );
         XemKQThiPanelLayout.setVerticalGroup(
             XemKQThiPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 100, Short.MAX_VALUE)
+            .addGap(0, 854, Short.MAX_VALUE)
         );
 
         contentPanel.add(XemKQThiPanel, "card5");
@@ -817,13 +1094,16 @@ public class UserFrame extends javax.swing.JFrame {
 
     private void UserMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_UserMouseClicked
         contentPanel.removeAll();
-        contentPanel.add(TaskTheTestPanel, "card3");
+        contentPanel.add(UserChooseExamPanel, "card3");
         contentPanel.revalidate();
         contentPanel.repaint();
     }//GEN-LAST:event_UserMouseClicked
 
     private void TopicMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_TopicMouseClicked
-               // TODO add your handling code here:
+        contentPanel.removeAll();
+        contentPanel.add(XemKQThiPanel, "card5");
+        contentPanel.revalidate();
+        contentPanel.repaint();      // TODO add your handling code here:
     }//GEN-LAST:event_TopicMouseClicked
 
     private void TestMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_TestMouseClicked
@@ -832,47 +1112,272 @@ public class UserFrame extends javax.swing.JFrame {
 
     private void jTextArea1MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTextArea1MouseClicked
         resetBackgrounds();
-        jTextArea1.setBackground(Color.green);
-        
+    jTextArea1.setBackground(Color.green);
+    
+    // Lưu đáp án vào selectedAnswers
+    if (currentQuestionIndex < selectedAnswers.size()) {
+        selectedAnswers.set(currentQuestionIndex, 0); // 0 tương ứng với đáp án A
+    } else {
+        selectedAnswers.add(0);
+    }
+    
+    // Cập nhật màu sắc của ô vuông
+    updateSquareColors();
         // TODO add your handling code here:
     }//GEN-LAST:event_jTextArea1MouseClicked
 
     private void jTextArea3MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTextArea3MouseClicked
         resetBackgrounds();
-        jTextArea3.setBackground(Color.green);
+    jTextArea3.setBackground(Color.green);
+    
+    if (currentQuestionIndex < selectedAnswers.size()) {
+        selectedAnswers.set(currentQuestionIndex, 1); // 1 tương ứng với đáp án B
+    } else {
+        selectedAnswers.add(1);
+    }
+    
+    updateSquareColors();
         // TODO add your handling code here:
     }//GEN-LAST:event_jTextArea3MouseClicked
 
     private void jTextArea4MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTextArea4MouseClicked
         resetBackgrounds();
-        jTextArea4.setBackground(Color.green);
+    jTextArea4.setBackground(Color.green);
+    
+    if (currentQuestionIndex < selectedAnswers.size()) {
+        selectedAnswers.set(currentQuestionIndex, 2); // 2 tương ứng với đáp án C
+    } else {
+        selectedAnswers.add(2);
+    }
+    
+    updateSquareColors();
 // TODO add your handling code here:
     }//GEN-LAST:event_jTextArea4MouseClicked
 
     private void jTextArea5MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTextArea5MouseClicked
         resetBackgrounds();
-        jTextArea5.setBackground(Color.green);// TODO add your handling code here:
+    jTextArea5.setBackground(Color.green);
+    
+    if (currentQuestionIndex < selectedAnswers.size()) {
+        selectedAnswers.set(currentQuestionIndex, 3); // 3 tương ứng với đáp án D
+    } else {
+        selectedAnswers.add(3);
+    }
+    
+    updateSquareColors();// TODO add your handling code here:
     }//GEN-LAST:event_jTextArea5MouseClicked
 
     private void jTextArea6MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jTextArea6MouseClicked
         resetBackgrounds();
-        jTextArea6.setBackground(Color.green);// TODO add your handling code here:
+    jTextArea6.setBackground(Color.green);
+    
+    if (currentQuestionIndex < selectedAnswers.size()) {
+        selectedAnswers.set(currentQuestionIndex, 4); // 4 tương ứng với đáp án E
+    } else {
+        selectedAnswers.add(4);
+    }
+    
+    updateSquareColors();// TODO add your handling code here:
     }//GEN-LAST:event_jTextArea6MouseClicked
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
-        // TODO add your handling code here:
+        if (currentQuestionIndex > 0) {
+        currentQuestionIndex--;
+        displayQuestion(currentQuestionIndex);
+    }// TODO add your handling code here:
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jButton3ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton3ActionPerformed
-        // TODO add your handling code here:
+        if (currentQuestionIndex < numberOfSquares - 1) {
+        currentQuestionIndex++;
+        displayQuestion(currentQuestionIndex);
+    }// TODO add your handling code here:
     }//GEN-LAST:event_jButton3ActionPerformed
+    
+    // Phương thức lấy chỉ số đáp án được chọn
+private int getSelectedAnswer() {
+    if (jTextArea1.getBackground() == Color.green) return 0;
+    if (jTextArea3.getBackground() == Color.green) return 1;
+    if (jTextArea4.getBackground() == Color.green) return 2;
+    if (jTextArea5.getBackground() == Color.green) return 3;
+    if (jTextArea6.getBackground() == Color.green) return 4;
+    return -1; // Không có đáp án nào được chọn
+}
 
+private void logAnswer(int questionIndex, int selectedAnswer) {
+    Connection conn = null;
+    PreparedStatement pstmt = null;
+    try {
+        conn = JDBCUtil.getConnection();
+        if (conn == null) {
+            System.err.println("Không thể kết nối đến cơ sở dữ liệu!");
+            return;
+        }
+
+        String exCode = ((String) jComboBox2.getSelectedItem()).split(" - ")[0];
+        String logContent = "User selected answer " + (selectedAnswer >= 0 ? (char)('A' + selectedAnswer) : "none") + 
+                           " for question " + (questionIndex + 1);
+        String insertSql = "INSERT INTO logs (logContent, logUserID, logExCode, logDate) VALUES (?, ?, ?, NOW())";
+        
+        pstmt = conn.prepareStatement(insertSql);
+        pstmt.setString(1, logContent);
+        pstmt.setInt(2, getCurrentUserID()); // Giả định có phương thức lấy userID
+        pstmt.setString(3, exCode);
+        pstmt.executeUpdate();
+
+        System.out.println("Log ghi thành công cho câu hỏi " + (questionIndex + 1));
+    } catch (Exception e) {
+        e.printStackTrace();
+        JOptionPane.showMessageDialog(this, "Lỗi khi ghi log: " + e.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
+    } finally {
+        // Đóng PreparedStatement trước, sau đó đóng Connection
+        if (pstmt != null) {
+            try {
+                pstmt.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        JDBCUtil.closeConnection(conn);
+    }
+}
+
+private int getCurrentUserID() {
+    Connection conn = null;
+    PreparedStatement pstmt = null;
+    ResultSet rs = null;
+    int userID = -1;
+    try {
+        conn = JDBCUtil.getConnection();
+        if (conn != null) {
+            String sql = "SELECT userID FROM users WHERE userName = ?";
+            pstmt = conn.prepareStatement(sql);
+            pstmt.setString(1, name.getText().trim()); // Lấy username từ label name
+            rs = pstmt.executeQuery();
+            if (rs.next()) {
+                userID = rs.getInt("userID");
+            }
+        }
+    } catch (Exception e) {
+        e.printStackTrace();
+        JOptionPane.showMessageDialog(this, "Lỗi khi lấy userID: " + e.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
+    } finally {
+        if (rs != null) {
+            try { rs.close(); } catch (Exception e) { e.printStackTrace(); }
+        }
+        if (pstmt != null) {
+            try { pstmt.close(); } catch (Exception e) { e.printStackTrace(); }
+        }
+        JDBCUtil.closeConnection(conn);
+    }
+    return userID;
+}
     private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
-        // TODO add your handling code here:
+        timer.stop();
+
+    // Kiểm tra xem tất cả câu hỏi đã được chọn đáp án chưa
+    boolean allAnswered = true;
+    for (int answer : selectedAnswers) {
+        if (answer == -1) {
+            allAnswered = false;
+            break;
+        }
+    }
+
+    if (!allAnswered) {
+        JOptionPane.showMessageDialog(this, "Vui lòng chọn đáp án cho tất cả các câu hỏi trước khi nộp bài!", "Cảnh báo", JOptionPane.WARNING_MESSAGE);
+        return;
+    }
+
+    JOptionPane.showMessageDialog(this, "Bài thi đã được nộp!");
+
+    // Lấy topicID từ jComboBox1
+    TopicBUS topicBUS = new TopicBUS();
+    String topicName = (String) jComboBox1.getSelectedItem();
+    TopicDTO topic = topicBUS.getTopicByTitle(topicName);
+    if (topic != null) {
+        topicID = topic.getTpID();
+    } else {
+        JOptionPane.showMessageDialog(this, "Không tìm thấy chủ đề!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+        return;
+    }
+
+    // Tính điểm tối đa và điểm đạt được
+    calculateMaxScore();
+    calculateScore();
+
+    // Tính phần trăm hoàn thành
+    double percentage = (maxScore > 0) ? (double) totalScore / maxScore * 100 : 0;
+    String percentageText = String.format("%.1f%%", percentage);
+
+    // Lấy thông tin đề thi
+    String selectedExamDisplayName = (String) jComboBox2.getSelectedItem();
+    String selectedExamOrder = selectedExamDisplayName.replace("Đề ", "");
+    TestBUS testBUS = new TestBUS();
+    ExamBUS examBUS = new ExamBUS();
+    ArrayList<TestDTO> tests = testBUS.getTestsByTopicID(topicID);
+    String exCode = null;
+    for (TestDTO test : tests) {
+        ArrayList<ExamDTO> exams = examBUS.getExamsByTestCode(test.getTestCode());
+        for (ExamDTO exam : exams) {
+            if (exam.getExOrder().equals(selectedExamOrder)) {
+                exCode = exam.getExCode();
+                break;
+            }
+        }
+        if (exCode != null) break;
+    }
+
+    // Chuẩn bị chuỗi rs_answers để lưu maxScore
+    StringBuilder rsAnswersBuilder = new StringBuilder();
+    for (int answer : selectedAnswers) {
+        rsAnswersBuilder.append(answer).append(",");
+    }
+    rsAnswersBuilder.append("maxScore=").append(maxScore); // Thêm maxScore vào rs_answers
+
+    // Chuyển đổi Timestamp thành LocalDateTime
+    LocalDateTime rsDate = LocalDateTime.now();
+
+    // Lưu kết quả vào bảng results
+    ResultDTO result = new ResultDTO(
+        0, // rs_num (sẽ tự động tăng nếu database hỗ trợ)
+        userID,
+        exCode,
+        rsAnswersBuilder.toString(), // Lưu danh sách đáp án và maxScore
+        totalScore, // Lưu totalScore vào rs_mark
+        rsDate
+    );
+    ResultBUS resultBUS = new ResultBUS();
+    resultBUS.addResult(result);
+
+    // Giảm số lượt làm bài
+    remainingAttempts--;
+    jLabel19.setText(String.valueOf(remainingAttempts));
+
+    // Cập nhật số lượt làm bài trong cơ sở dữ liệu (nếu cần)
+    updateTestLimitInDatabase();
+
+    // Kiểm tra số lượt làm bài
+    if (remainingAttempts <= 0) {
+        JOptionPane.showMessageDialog(this, "Số lượt làm bài đã hết! Không thể làm bài nữa.");
+    }
+
+    // Hiển thị thông tin vào KetQuaThiPanel
+    jLabel24.setText(topicName != null ? topicName : "Không xác định");
+    jLabel28.setText(tests.get(0).getTestTitle() != null ? tests.get(0).getTestTitle() : "Không xác định");
+    jLabel22.setText(selectedExamDisplayName != null ? selectedExamDisplayName : "Không xác định");
+    jLabel30.setText(totalScore + "/" + maxScore); // Hiển thị "7/15"
+    jLabel32.setText(percentageText); // Hiển thị "46,7%"
+
+    // Chuyển sang panel KetQuaThiPanel
+    contentPanel.removeAll();
+    contentPanel.add(KetQuaThiPanel, "card7");
+    contentPanel.revalidate();
+    contentPanel.repaint();// TODO add your handling code here:
     }//GEN-LAST:event_jButton4ActionPerformed
 
     private void jComboBox1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBox1ActionPerformed
-        // TODO add your handling code here:
+        loadTests();// TODO add your handling code here:
     }//GEN-LAST:event_jComboBox1ActionPerformed
 
     private void jComboBox2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBox2ActionPerformed
@@ -880,41 +1385,155 @@ public class UserFrame extends javax.swing.JFrame {
     }//GEN-LAST:event_jComboBox2ActionPerformed
 
     private void jButton5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton5ActionPerformed
-        // TODO add your handling code here:
+        // Lấy chủ đề và đề thi đã chọn
+    String selectedTopic = (String) jComboBox1.getSelectedItem();
+    String selectedExamDisplayName = (String) jComboBox2.getSelectedItem(); // Giờ chỉ là "Đề A"
+    if (selectedTopic == null || selectedExamDisplayName == null) {
+        JOptionPane.showMessageDialog(this, "Vui lòng chọn chủ đề và đề thi!");
+        return;
+    }
+
+    // Lấy TopicDTO bằng tên chủ đề
+    TopicDTO topic = topicBUS.getTopicByTitle(selectedTopic);
+    if (topic == null) {
+        JOptionPane.showMessageDialog(this, "Không tìm thấy chủ đề!");
+        return;
+    }
+
+    // Lấy danh sách đề thi từ test để tìm exCode
+    String selectedExamOrder = selectedExamDisplayName.replace("Đề ", ""); // Lấy "A" từ "Đề A"
+    ArrayList<TestDTO> tests = testBUS.getTestsByTopicID(topic.getTpID());
+    String exCode = null;
+    for (TestDTO test : tests) {
+        ArrayList<ExamDTO> exams = examBUS.getExamsByTestCode(test.getTestCode());
+        for (ExamDTO exam : exams) {
+            if (exam.getExOrder().equals(selectedExamOrder)) {
+                exCode = exam.getExCode();
+                break;
+            }
+        }
+        if (exCode != null) break;
+    }
+    if (exCode == null) {
+        JOptionPane.showMessageDialog(this, "Không tìm thấy đề thi!");
+        return;
+    }
+
+    ExamDTO selectedExamDTO = examBUS.getExamByExCode(exCode);
+    if (selectedExamDTO == null) {
+        JOptionPane.showMessageDialog(this, "Không tìm thấy đề thi!");
+        return;
+    }
+
+    // Lấy testCode từ ExamDTO
+    String testCode = selectedExamDTO.getTestCode();
+    TestDTO selectedTest = testBUS.getTestByCode(testCode);
+    if (selectedTest == null) {
+        JOptionPane.showMessageDialog(this, "Không tìm thấy bài thi!");
+        return;
+    }
+
+    // Lấy thời gian làm bài và số lượt làm bài
+    minutes = selectedTest.getTestTime();
+    timeLabel.setText(minutes + ":00");
+    remainingAttempts = selectedTest.getTestLimit();
+
+    // Cập nhật hiển thị
+    jLabel17.setText(String.valueOf(minutes));
+    jLabel19.setText(String.valueOf(remainingAttempts));
+
+    // Kiểm tra số lượt làm bài còn lại
+    if (remainingAttempts <= 0) {
+        JOptionPane.showMessageDialog(this, "Số lượt làm bài đã hết! Không thể làm bài nữa.");
+        return;
+    }
+
+    // Lấy số lượng câu hỏi từ exQuesIDs
+    String exQuesIDs = selectedExamDTO.getExQuesIDs();
+    if (exQuesIDs == null || exQuesIDs.isEmpty()) {
+        JOptionPane.showMessageDialog(this, "Đề thi không có câu hỏi!");
+        return;
+    }
+    numberOfSquares = exQuesIDs.split(",").length;
+
+    // Hiển thị tên đề thi (chỉ lấy phần "Đề A")
+    jLabel13.setText(selectedExamDisplayName); // Hiển thị "Đề A" vào jLabel13
+
+    // Tạo các ô vuông dựa trên số lượng câu hỏi
+    createSquares();
+
+    // Lấy dữ liệu câu hỏi và đáp án
+    initializeQuestions(exQuesIDs);
+    if (questions == null || questions.isEmpty()) {
+        JOptionPane.showMessageDialog(this, "Không thể tải câu hỏi!");
+        return;
+    }
+    displayQuestion(0);
+
+    // Chuyển sang panel làm bài thi và bắt đầu timer
+    contentPanel.removeAll();
+    contentPanel.add(TaskTheTestPanel, "card6");
+    contentPanel.revalidate();
+    contentPanel.repaint();
+
+    // Bắt đầu timer
+    startTimer();// TODO add your handling code here:
     }//GEN-LAST:event_jButton5ActionPerformed
 
     private void formWindowOpened(java.awt.event.WindowEvent evt) {//GEN-FIRST:event_formWindowOpened
         this.setLocationRelativeTo(null);        // TODO add your handling code here:
     }//GEN-LAST:event_formWindowOpened
+
+    private void UserMouseEntered(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_UserMouseEntered
+        // TODO add your handling code here:
+    }//GEN-LAST:event_UserMouseEntered
     private void resetBackgrounds() {
-        jTextArea1.setBackground(Color.WHITE);
-        jTextArea3.setBackground(Color.WHITE);
-        jTextArea4.setBackground(Color.WHITE);
-        jTextArea5.setBackground(Color.WHITE);
-        jTextArea6.setBackground(Color.WHITE);
+    jTextArea1.setBackground(Color.WHITE);
+    jTextArea3.setBackground(Color.WHITE);
+    jTextArea4.setBackground(Color.WHITE);
+    jTextArea5.setBackground(Color.WHITE);
+    jTextArea6.setBackground(Color.WHITE);
+
+    // Nếu không chọn đáp án nào, đặt selectedAnswers[currentQuestionIndex] thành -1
+    if (currentQuestionIndex < selectedAnswers.size()) {
+        selectedAnswers.set(currentQuestionIndex, -1);
+        updateSquareColors();
     }
+}
     private void createSquares() {
-        int squareSize = 60; // Kích thước cố định cho mỗi ô vuông (80x80)
-        int rows = (numberOfSquares + 3) / 4; // Tính số hàng cần (mỗi hàng 4 ô tối đa)
-        
-        // Đặt kích thước tối đa cho panel để không lấp đầy frame
-        int panelWidth = 4 * (squareSize + 10) + 2; // 4 ô + khoảng cách ngang + padding 1px mỗi bên
-        int panelHeight = rows * (squareSize + 10) + 2; // Số hàng * kích thước ô + khoảng cách + padding
-        jPanel14.setPreferredSize(new Dimension(Math.min(panelWidth, 280), Math.min(panelHeight, 593)));
-        
-        for (int i = 1; i <= numberOfSquares; i++) {
-            JLabel square = new JLabel(String.valueOf(i), SwingConstants.CENTER);
-            square.setOpaque(true); // Cho phép vẽ màu nền
-            square.setBackground(Color.WHITE); // Màu nền ô vuông
-            square.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2)); // Viền đen dày 2px
-            square.setPreferredSize(new Dimension(squareSize, squareSize)); // Kích thước vuông cố định
-            square.setFont(new Font("Arial", Font.BOLD, 24)); // Font lớn hơn cho số
-            
-            jPanel14.add(square);
-        }
-        
-        pack(); // Tự động điều chỉnh frame, nhưng giữ kích thước cố định của frame
+    jPanel14.removeAll();
+    squareLabels.clear();
+    int squareSize = 60;
+    int rows = (numberOfSquares + 3) / 4;
+    int panelWidth = 4 * (squareSize + 10) + 2;
+    int panelHeight = rows * (squareSize + 10) + 2;
+    jPanel14.setPreferredSize(new Dimension(Math.min(panelWidth, 280), Math.min(panelHeight, 593)));
+
+    for (int i = 1; i <= numberOfSquares; i++) {
+        JLabel square = new JLabel(String.valueOf(i), SwingConstants.CENTER);
+        square.setOpaque(true);
+        square.setBackground(Color.white);
+        square.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
+        square.setPreferredSize(new Dimension(squareSize, squareSize));
+        square.setFont(new Font("Arial", Font.BOLD, 24));
+
+        final int index = i - 1;
+        square.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                currentQuestionIndex = index;
+                displayQuestion(currentQuestionIndex);
+            }
+        });
+
+        jPanel14.add(square);
+        squareLabels.add(square);
     }
+
+    jPanel14.revalidate();
+    jPanel14.repaint();
+    pack();
+}
     private void setupTimer() {
         timer = new Timer(1000, new ActionListener() { // Cập nhật mỗi 1 giây (1000ms)
             @Override
@@ -934,20 +1553,247 @@ public class UserFrame extends javax.swing.JFrame {
         if (minutes == 0 && seconds == 0) {
             timer.stop();
             timeLabel.setText("0:00");
-            JOptionPane.showMessageDialog(this, "Timer đã kết thúc!");
+            JOptionPane.showMessageDialog(this, "Hết thời gian! Bài thi sẽ tự động nộp.");
+            jButton4ActionPerformed(null); // Tự động nộp bài khi hết giờ
             return;
         }
-        
+
         seconds--;
         if (seconds < 0) {
             seconds = 59;
             minutes--;
         }
-        
-        // Định dạng thời gian (MM:SS)
+
         String time = String.format("%d:%02d", minutes, seconds);
         timeLabel.setText(time);
     }
+    
+    private void loadTopics() {
+        jComboBox1.removeAllItems();
+        ArrayList<TopicDTO> topics = topicBUS.getAllActiveTopics();
+        for (TopicDTO topic : topics) {
+            jComboBox1.addItem(topic.getTpTitle());
+        }
+    }
+
+    private void loadTests() {
+    String selectedTopicTitle = (String) jComboBox1.getSelectedItem();
+    if (selectedTopicTitle == null) return;
+
+    TopicDTO selectedTopic = topicBUS.getTopicByTitle(selectedTopicTitle);
+    if (selectedTopic == null) return;
+
+    DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
+    model.setRowCount(0);
+    ArrayList<TestDTO> tests = testBUS.getTestsByTopicID(selectedTopic.getTpID());
+    for (TestDTO test : tests) {
+        model.addRow(new Object[]{
+            test.getTestTitle(),
+            test.getTestLimit(),
+            test.getTestTime() + " phút"
+        });
+    }
+
+    // Cập nhật jComboBox2 với chỉ phần "Đề X"
+    jComboBox2.removeAllItems();
+    for (TestDTO test : tests) {
+        ArrayList<ExamDTO> exams = examBUS.getExamsByTestCode(test.getTestCode());
+        for (ExamDTO exam : exams) {
+            String fullExamName = exam.getExCode() + " - Đề " + exam.getExOrder(); // Ví dụ: "Test2A - Đề A"
+            String examDisplayName = "Đề " + exam.getExOrder(); // Chỉ lấy "Đề A"
+            jComboBox2.addItem(examDisplayName);
+        }
+    }
+
+    // Thêm sự kiện ListSelectionListener cho jTable1
+    jTable1.getSelectionModel().addListSelectionListener(e -> {
+        if (!e.getValueIsAdjusting()) { // Tránh sự kiện bị gọi nhiều lần
+            int selectedRow = jTable1.getSelectedRow();
+            if (selectedRow >= 0) {
+                String testTitle = (String) jTable1.getValueAt(selectedRow, 0);
+                TestDTO selectedTest = testBUS.getTestByTitle(testTitle);
+                if (selectedTest != null) {
+                    // Hiển thị thời gian làm bài và số lượt làm bài
+                    jLabel16.setText("Thời gian làm bài:");
+                    jLabel17.setText(String.valueOf(selectedTest.getTestTime()));
+                    jLabel18.setText("phút");
+                    jLabel20.setText("Số lượt làm bài:");
+                    jLabel19.setText(String.valueOf(selectedTest.getTestLimit()));
+                }
+            }
+        }
+    });
+}
+
+    private void initializeQuestions(String exQuesIDs) {
+    questions = new ArrayList<>();
+    answers = new ArrayList<>();
+    selectedAnswers.clear(); // Đặt lại danh sách đáp án
+
+    String[] quesIDs = exQuesIDs.split(",");
+    for (String quesID : quesIDs) {
+        try {
+            int qID = Integer.parseInt(quesID.trim());
+            QuestionDTO question = questionBUS.getQuestionByID(qID);
+            if (question == null) continue;
+
+            List<AnswerDTO> questionAnswers = answerBUS.getAnswersByQuestionID(qID);
+            if (questionAnswers == null || questionAnswers.isEmpty()) continue;
+
+            questions.add(question);
+            answers.add(questionAnswers);
+            selectedAnswers.add(-1); // Khởi tạo với -1 (chưa chọn)
+        } catch (NumberFormatException e) {
+            System.err.println("Invalid question ID: " + quesID);
+        }
+    }
+}
+
+    private void displayQuestion(int index) {
+    if (questions == null || index < 0 || index >= questions.size()) return;
+
+    QuestionDTO question = questions.get(index);
+    List<AnswerDTO> questionAnswers = answers.get(index);
+
+    // Hiển thị câu hỏi ở jTextArea2
+    jTextArea2.setText("Câu " + (index + 1) + ": " + question.getQContent());
+    jTextArea2.setEditable(false);
+
+    // Đặt lại các đáp án
+    resetBackgrounds();
+    jTextArea1.setText("");
+    jTextArea3.setText("");
+    jTextArea4.setText("");
+    jTextArea5.setText("");
+    jTextArea6.setText("");
+
+    // Lấy đáp án đã chọn (nếu có)
+    int selectedAnswerIndex = -1;
+    if (index < selectedAnswers.size()) {
+        selectedAnswerIndex = selectedAnswers.get(index);
+    }
+
+    // Hiển thị các đáp án
+    for (int i = 0; i < Math.min(questionAnswers.size(), 5); i++) {
+        AnswerDTO answer = questionAnswers.get(i);
+        String optionLabel = (char) ('A' + i) + ". " + answer.getAwContent();
+        switch (i) {
+            case 0:
+                jTextArea1.setText(optionLabel);
+                if (selectedAnswerIndex == 0) jTextArea1.setBackground(Color.green);
+                break;
+            case 1:
+                jTextArea3.setText(optionLabel);
+                if (selectedAnswerIndex == 1) jTextArea3.setBackground(Color.green);
+                break;
+            case 2:
+                jTextArea4.setText(optionLabel);
+                if (selectedAnswerIndex == 2) jTextArea4.setBackground(Color.green);
+                break;
+            case 3:
+                jTextArea5.setText(optionLabel);
+                if (selectedAnswerIndex == 3) jTextArea5.setBackground(Color.green);
+                break;
+            case 4:
+                jTextArea6.setText(optionLabel);
+                if (selectedAnswerIndex == 4) jTextArea6.setBackground(Color.green);
+                break;
+        }
+    }
+
+    // Không cần gọi updateSquareColors ở đây, vì nó đã được gọi trong resetBackgrounds hoặc khi chọn đáp án
+}   
+    private void updateTestLimitInDatabase() {
+    Connection conn = null;
+    PreparedStatement pstmt = null;
+    try {
+        conn = JDBCUtil.getConnection();
+        if (conn != null) {
+            String exCode = ((String) jComboBox2.getSelectedItem()).split(" - ")[0];
+            ExamDTO examDTO = examBUS.getExamByExCode(exCode);
+            if (examDTO != null) {
+                String testCode = examDTO.getTestCode();
+                String updateSql = "UPDATE test SET testLimit = ? WHERE testCode = ?";
+                pstmt = conn.prepareStatement(updateSql);
+                pstmt.setInt(1, remainingAttempts);
+                pstmt.setString(2, testCode);
+                int rowsAffected = pstmt.executeUpdate();
+                if (rowsAffected > 0) {
+                    System.out.println("Cập nhật số lượt làm bài thành công.");
+                }
+            }
+        }
+    } catch (Exception e) {
+        e.printStackTrace();
+        JOptionPane.showMessageDialog(this, "Lỗi khi cập nhật số lượt làm bài: " + e.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
+    } finally {
+        if (pstmt != null) {
+            try { pstmt.close(); } catch (Exception e) { e.printStackTrace(); }
+        }
+        JDBCUtil.closeConnection(conn);
+    }
+}
+    
+    private void updateSquareColors() {
+    for (int i = 0; i < squareLabels.size(); i++) {
+        if (i < selectedAnswers.size() && selectedAnswers.get(i) >= 0) {
+            squareLabels.get(i).setBackground(Color.green); // Đã trả lời
+        } else {
+            squareLabels.get(i).setBackground(Color.white); // Chưa trả lời
+        }
+    }
+}
+    
+    // Tính điểm tối đa của bài thi
+private void calculateMaxScore() {
+    maxScore = 0; // Khởi tạo
+    QuestionBUS questionBUS = new QuestionBUS();
+    ArrayList<QuestionDTO> questions = questionBUS.getQuestionsByTopic(topicID); // Lấy tất cả câu hỏi của chủ đề
+    for (QuestionDTO question : questions) {
+        switch (question.getLevel().toLowerCase()) {
+            case "easy":
+                maxScore += 1;
+                break;
+            case "medium":
+                maxScore += 2;
+                break;
+            case "hard":
+                maxScore += 3;
+                break;
+            default:
+                maxScore += 0; // Giá trị mặc định nếu level không hợp lệ
+        }
+    }
+}
+
+private void calculateScore() {
+    totalScore = 0; // Khởi tạo
+    QuestionBUS questionBUS = new QuestionBUS();
+    ArrayList<QuestionDTO> questions = questionBUS.getQuestionsByTopic(topicID); // Lấy tất cả câu hỏi của chủ đề
+    for (int i = 0; i < selectedAnswers.size(); i++) {
+        int userAnswer = selectedAnswers.get(i);
+        List<AnswerDTO> answers = questionBUS.getAnswersByQuestionID(questions.get(i).getQID());
+        for (AnswerDTO answer : answers) {
+            if (answer.getIsRight() == 1 && answer.getAwID() == userAnswer) {
+                // Cộng điểm dựa trên mức độ khó của câu hỏi
+                switch (questions.get(i).getLevel().toLowerCase()) {
+                    case "easy":
+                        totalScore += 1;
+                        break;
+                    case "medium":
+                        totalScore += 2;
+                        break;
+                    case "hard":
+                        totalScore += 3;
+                        break;
+                    default:
+                        totalScore += 0; // Giá trị mặc định nếu level không hợp lệ
+                }
+                break; // Thoát khi tìm thấy đáp án đúng
+            }
+        }
+    }
+}
     /**
      * @param args the command line arguments
      */
@@ -984,6 +1830,7 @@ public class UserFrame extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel HomePanel;
+    private javax.swing.JPanel KetQuaThiPanel;
     private javax.swing.JPanel MenuPanel;
     private javax.swing.JPanel TaskTheTestPanel;
     private javax.swing.JPanel Test;
@@ -1006,15 +1853,38 @@ public class UserFrame extends javax.swing.JFrame {
     private javax.swing.JLabel jLabel13;
     private javax.swing.JLabel jLabel14;
     private javax.swing.JLabel jLabel15;
+    private javax.swing.JLabel jLabel16;
+    private javax.swing.JLabel jLabel17;
+    private javax.swing.JLabel jLabel18;
+    private javax.swing.JLabel jLabel19;
+    private javax.swing.JLabel jLabel2;
+    private javax.swing.JLabel jLabel20;
+    private javax.swing.JLabel jLabel21;
+    private javax.swing.JLabel jLabel22;
+    private javax.swing.JLabel jLabel23;
+    private javax.swing.JLabel jLabel24;
     private javax.swing.JLabel jLabel25;
     private javax.swing.JLabel jLabel26;
+    private javax.swing.JLabel jLabel27;
+    private javax.swing.JLabel jLabel28;
+    private javax.swing.JLabel jLabel29;
     private javax.swing.JLabel jLabel3;
+    private javax.swing.JLabel jLabel30;
+    private javax.swing.JLabel jLabel31;
+    private javax.swing.JLabel jLabel32;
+    private javax.swing.JLabel jLabel33;
+    private javax.swing.JLabel jLabel34;
+    private javax.swing.JLabel jLabel35;
+    private javax.swing.JLabel jLabel36;
+    private javax.swing.JLabel jLabel37;
+    private javax.swing.JLabel jLabel38;
     private javax.swing.JLabel jLabel4;
     private javax.swing.JLabel jLabel5;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
     private javax.swing.JLabel jLabel9;
+    private javax.swing.JPanel jPanel1;
     private javax.swing.JPanel jPanel10;
     private javax.swing.JPanel jPanel11;
     private javax.swing.JPanel jPanel12;

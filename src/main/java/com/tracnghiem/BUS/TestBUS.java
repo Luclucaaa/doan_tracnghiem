@@ -38,4 +38,27 @@ public class TestBUS {
     public boolean deleteTest(String testCode) {
         return testDAO.delete(testCode);
     }
+    public ArrayList<TestDTO> getTestsByTopicID(int tpID) {
+    ArrayList<TestDTO> allTests = testDAO.selectAll();
+    ArrayList<TestDTO> result = new ArrayList<>();
+    for (TestDTO test : allTests) {
+        if (test.getTpID() == tpID) {
+            result.add(test);
+}
+    }
+    return result;
+}
+    // Thêm phương thức getTestByTitle
+    public TestDTO getTestByTitle(String title) {
+        if (title == null || title.trim().isEmpty()) {
+            return null;
+        }
+        ArrayList<TestDTO> allTests = testDAO.selectAll();
+        for (TestDTO test : allTests) {
+            if (test.getTestTitle() != null && test.getTestTitle().trim().equalsIgnoreCase(title.trim())) {
+                return test;
+            }
+        }
+        return null; // Trả về null nếu không tìm thấy
+    }
 }

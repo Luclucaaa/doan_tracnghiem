@@ -74,6 +74,15 @@ public class TestDialog extends javax.swing.JDialog {
     setLocationRelativeTo(null);
 }
     
+    public void setAddButtonListener(ActionListener listener) {
+        // Xóa các ActionListener cũ (nếu có)
+        for (ActionListener al : jButton3.getActionListeners()) {
+            jButton3.removeActionListener(al);
+        }
+        // Gán ActionListener mới
+        jButton3.addActionListener(listener);
+    }
+    
     public void setTestCode(String testCode) {
         jTextField4.setText(testCode);
     }
@@ -154,6 +163,7 @@ public class TestDialog extends javax.swing.JDialog {
     }
     updateQuestionCount(); // Cập nhật lại số lượng câu hỏi trên giao diện
 }
+    
     private void updateQuestionCount() {
     DefaultTableModel model = (DefaultTableModel) jTable2.getModel();
     int easy = 0, medium = 0, diff = 0;
@@ -167,7 +177,8 @@ public class TestDialog extends javax.swing.JDialog {
     }
     jLabel18.setText(String.valueOf(easy));
     jLabel20.setText(String.valueOf(medium));
-    jLabel23.setText(String.valueOf(diff));
+        jLabel19.setText(String.valueOf(diff));
+        jLabel23.setText(String.valueOf(easy + medium + diff));
 }
 
     public void configureUpdateButton(TestDTO test, TestBUS testBUS, Main main) {
@@ -182,14 +193,16 @@ public class TestDialog extends javax.swing.JDialog {
             try {
                 // Cập nhật thông tin bài thi
                 test.setTestTitle(getTestTitle());
-                test.setTpID(getTopicID());
+                    test.setTpID(getTpID());
                 test.setTestTime(getTestTime());
                 test.setTestLimit(getTestLimit());
-                Date testDate = getTestDate();
-                if (testDate == null) {
+                    String testDateStr = getTestDate();
+                    if (testDateStr == null || testDateStr.isEmpty()) {
                     JOptionPane.showMessageDialog(null, "Vui lòng chọn ngày tạo!");
                     return;
                 }
+                    SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+                    Date testDate = sdf.parse(testDateStr);
                 test.setTestDate(new java.sql.Date(testDate.getTime()));
 
                 // Lấy số lượng câu hỏi từ giao diện
@@ -322,6 +335,14 @@ public class TestDialog extends javax.swing.JDialog {
         }
     });
 }
+    
+    public int getNumExams() {
+        try {
+            return Integer.parseInt(jTextField1.getText().trim());
+        } catch (NumberFormatException e) {
+            return 0;
+        }
+    }
     // Tải danh sách chủ đề vào jComboBox1
     private void loadTopics() {
         ArrayList<TopicDTO> topics = topicBUS.getAllActiveTopics();
@@ -340,7 +361,7 @@ public class TestDialog extends javax.swing.JDialog {
         return jTextField2.getText().trim();
     }
 
-    public int getTopicID() {
+    public int getTpID() {
         String selectedTopic = (String) jComboBox1.getSelectedItem();
         if (selectedTopic != null) {
             String[] parts = selectedTopic.split("\\(");
@@ -366,8 +387,13 @@ public class TestDialog extends javax.swing.JDialog {
         }
     }
 
-    public Date getTestDate() {
-        return jDateChooser1.getDate();
+    public String getTestDate() {
+        Date date = jDateChooser1.getDate();
+        if (date == null) {
+            return "";
+    }
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+        return sdf.format(date);
     }
 
     public int getNumEasy() {
@@ -393,13 +419,59 @@ public class TestDialog extends javax.swing.JDialog {
             return 0;
         }
     }
+    
+    
 
-    public int getNumExams() {
-        try {
-            return Integer.parseInt(jTextField1.getText().trim());
-        } catch (NumberFormatException e) {
-            return 0;
+    public int getTestStatus() {
+        // Giả định trạng thái mặc định là 1 (hoạt động)
+        return 1;
+    }
+
+    private void loadQuestions() {
+        ArrayList<QuestionDTO> questions = questionBUS.getAllQuestions();
+        DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
+        model.setColumnIdentifiers(new String[]{"Mã câu hỏi", "Nội dung", "Chủ đề", "Mức độ"});
+        model.setRowCount(0);
+
+        TopicBUS topicBUS = new TopicBUS();
+        String selectedLevel = (String) jComboBox3.getSelectedItem();
+        int selectedTopicID = getTpID(); // Lấy tpID từ jComboBox1
+
+        for (QuestionDTO q : questions) {
+            TopicDTO topic = topicBUS.getTopicByID(String.valueOf(q.getTopicID()));
+            String level = q.getLevel();
+            int questionTopicID = q.getTopicID();
+
+            boolean matchTopic = (selectedTopicID == -1 || questionTopicID == selectedTopicID);
+            boolean matchLevel = "Tất cả".equals(selectedLevel) || level.equalsIgnoreCase(selectedLevel) ||
+                                (selectedLevel.equals("Dễ") && level.equalsIgnoreCase("easy")) ||
+                                (selectedLevel.equals("Trung bình") && level.equalsIgnoreCase("medium")) ||
+                                (selectedLevel.equals("Khó") && level.equalsIgnoreCase("diff"));
+
+            if (matchTopic && matchLevel) {
+                model.addRow(new Object[]{
+                    q.getQID(),
+                    q.getQContent(),
+                    topic != null ? topic.getTpTitle() : "Không xác định",
+                    level
+                });
+            }
         }
+    }
+    
+    private void updateQuestionCount(String level, int delta) {
+        int easy = Integer.parseInt(jLabel18.getText().isEmpty() ? "0" : jLabel18.getText());
+        int medium = Integer.parseInt(jLabel20.getText().isEmpty() ? "0" : jLabel20.getText());
+        int diff = Integer.parseInt(jLabel19.getText().isEmpty() ? "0" : jLabel19.getText());
+
+        if (level.equalsIgnoreCase("easy")) easy += delta;
+        else if (level.equalsIgnoreCase("medium")) medium += delta;
+        else if (level.equalsIgnoreCase("diff")) diff += delta;
+
+        jLabel18.setText(String.valueOf(easy));
+        jLabel20.setText(String.valueOf(medium));
+        jLabel19.setText(String.valueOf(diff));
+        jLabel23.setText(String.valueOf(easy + medium + diff));
     }
     /**
      * This method is called from within the constructor to initialize the form.
@@ -877,10 +949,10 @@ public class TestDialog extends javax.swing.JDialog {
         try {
         String testCode = getTestCode();
         String testTitle = getTestTitle();
-        int topicID = getTopicID();
+            int topicID = getTpID();
         int testTime = getTestTime();
         int testLimit = getTestLimit();
-        Date testDate = getTestDate();
+            String testDateStr = getTestDate();
         int numEasy = getNumEasy();
         int numMedium = getNumMedium();
         int numDiff = getNumDiff();
@@ -907,7 +979,7 @@ public class TestDialog extends javax.swing.JDialog {
             JOptionPane.showMessageDialog(this, "Số lượt làm bài không hợp lệ!");
             return;
         }
-        if (testDate == null) {
+            if (testDateStr.isEmpty()) {
             JOptionPane.showMessageDialog(this, "Vui lòng chọn ngày tạo!");
             return;
         }
@@ -924,7 +996,7 @@ public class TestDialog extends javax.swing.JDialog {
         QuestionBUS questionBUS = new QuestionBUS();
         ArrayList<Integer> easyQuestions = questionBUS.getQuestionsByDifficulty(topicID, "easy", numEasy);
         ArrayList<Integer> mediumQuestions = questionBUS.getQuestionsByDifficulty(topicID, "medium", numMedium);
-        ArrayList<Integer> diffQuestions = questionBUS.getQuestionsByDifficulty(topicID, "difficult", numDiff);
+            ArrayList<Integer> diffQuestions = questionBUS.getQuestionsByDifficulty(topicID, "diff", numDiff);
 
         // Kết hợp danh sách câu hỏi
         ArrayList<Integer> allQuestions = new ArrayList<>();
@@ -965,6 +1037,8 @@ public class TestDialog extends javax.swing.JDialog {
         test.setTpID(topicID);
         test.setTestTime(testTime);
         test.setTestLimit(testLimit);
+            SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+            Date testDate = sdf.parse(testDateStr);
         test.setTestDate(new java.sql.Date(testDate.getTime()));
         test.setNum_easy(numEasy);
         test.setNum_medium(numMedium);
@@ -974,7 +1048,6 @@ public class TestDialog extends javax.swing.JDialog {
         if (testBUS.addTest(test)) {
             JOptionPane.showMessageDialog(this, "Thêm bài thi và đề thi thành công!");
             dispose();
-            
         } else {
             JOptionPane.showMessageDialog(this, "Thêm bài thi thất bại!");
         }
@@ -988,52 +1061,7 @@ public class TestDialog extends javax.swing.JDialog {
         loadQuestions();// TODO add your handling code here:
     }//GEN-LAST:event_jComboBox1ActionPerformed
     
-    private void loadQuestions() {
-    ArrayList<QuestionDTO> questions = questionBUS.getAllQuestions();
-    DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
-    model.setColumnIdentifiers(new String[]{"Mã câu hỏi", "Nội dung", "Chủ đề", "Mức độ"});
-    model.setRowCount(0);
 
-    TopicBUS topicBUS = new TopicBUS();
-    String selectedLevel = (String) jComboBox3.getSelectedItem();
-    int selectedTopicID = getTopicID(); // Lấy tpID từ jComboBox1
-
-    for (QuestionDTO q : questions) {
-        TopicDTO topic = topicBUS.getTopicByID(String.valueOf(q.getTopicID()));
-        String level = q.getLevel();
-        int questionTopicID = q.getTopicID();
-
-        boolean matchTopic = (selectedTopicID == -1 || questionTopicID == selectedTopicID);
-        boolean matchLevel = "Tất cả".equals(selectedLevel) || level.equalsIgnoreCase(selectedLevel) ||
-                            (selectedLevel.equals("Dễ") && level.equalsIgnoreCase("easy")) ||
-                            (selectedLevel.equals("Trung bình") && level.equalsIgnoreCase("medium")) ||
-                            (selectedLevel.equals("Khó") && level.equalsIgnoreCase("diff"));
-
-        if (matchTopic && matchLevel) {
-            model.addRow(new Object[]{
-                q.getQID(),
-                q.getQContent(),
-                topic != null ? topic.getTpTitle() : "Không xác định",
-                level
-            });
-        }
-    }
-}
-    
-    private void updateQuestionCount(String level, int delta) {
-    int easy = Integer.parseInt(jLabel18.getText().isEmpty() ? "0" : jLabel18.getText());
-    int medium = Integer.parseInt(jLabel20.getText().isEmpty() ? "0" : jLabel20.getText());
-    int diff = Integer.parseInt(jLabel19.getText().isEmpty() ? "0" : jLabel19.getText());
-
-    if (level.equalsIgnoreCase("easy")) easy += delta;
-    else if (level.equalsIgnoreCase("medium")) medium += delta;
-    else if (level.equalsIgnoreCase("diff")) diff += delta;
-
-    jLabel18.setText(String.valueOf(easy));
-    jLabel20.setText(String.valueOf(medium));
-    jLabel19.setText(String.valueOf(diff));
-    jLabel23.setText(String.valueOf(easy + medium + diff));
-}
     /**
      * @param args the command line arguments
      */

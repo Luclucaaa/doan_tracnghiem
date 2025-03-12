@@ -11,39 +11,39 @@ import java.time.LocalDateTime;
  * @author THELUC
  */
 public class ResultDTO {
-    private int rsID;
+    private int rs_num;
     private int userID;
     private String exCode;
-    private String rsAnswer;
-    private double rsMark;
-    private LocalDateTime rsDate;
+    private String rs_answers;
+    private double rs_mark;
+    private LocalDateTime rs_date;
 
-    public ResultDTO(int userID, String exCode, String rsAnswer, double rsMark, LocalDateTime rsDate) {
+    public ResultDTO(int userID, String exCode, String rs_answers, double rs_mark, LocalDateTime rs_date) {
         this.userID = userID;
         this.exCode = exCode;
-        this.rsAnswer = rsAnswer;
-        this.rsMark = rsMark;
-        this.rsDate = rsDate;
+        this.rs_answers = rs_answers;
+        this.rs_mark = rs_mark;
+        this.rs_date = rs_date;
     }
 
-    public ResultDTO(int rsID, int userID, String exCode, String rsAnswer, double rsMark, LocalDateTime rsDate) {
-        this.rsID = rsID;
+    public ResultDTO(int rs_num, int userID, String exCode, String rs_answers, double rs_mark, LocalDateTime rs_date) {
+        this.rs_num = rs_num;
         this.userID = userID;
         this.exCode = exCode;
-        this.rsAnswer = rsAnswer;
-        this.rsMark = rsMark;
-        this.rsDate = rsDate;
+        this.rs_answers = rs_answers;
+        this.rs_mark = rs_mark;
+        this.rs_date = rs_date;
     }
 
     public ResultDTO() {
     }
-
-    public int getRsID() {
-        return rsID;
+    
+    public int getRs_num() {
+        return rs_num;
     }
 
-    public void setRsID(int rsID) {
-        this.rsID = rsID;
+    public void setRs_num(int rs_num) {
+        this.rs_num = rs_num;
     }
 
     public int getUserID() {
@@ -62,32 +62,34 @@ public class ResultDTO {
         this.exCode = exCode;
     }
 
-    public String getRsAnswer() {
-        return rsAnswer;
+    public String getRs_answers() {
+        return rs_answers;
     }
 
-    public void setRsAnswer(String rsAnswer) {
-        this.rsAnswer = rsAnswer;
+    public void setRs_answers(String rs_answers) {
+        this.rs_answers = rs_answers;
     }
 
-    public double getRsMark() {
-        return rsMark;
+    public double getRs_mark() {
+        return rs_mark;
     }
 
-    public void setRsMark(double rsMark) {
-        this.rsMark = rsMark;
+    public void setRs_mark(double rs_mark) {
+        this.rs_mark = rs_mark;
     }
 
-    public LocalDateTime getRsDate() {
-        return rsDate;
+    public LocalDateTime getRs_date() {
+        return rs_date;
     }
 
-    public void setRsDate(LocalDateTime rsDate) {
-        this.rsDate = rsDate;
+    public void setRs_date(LocalDateTime rs_date) {
+        this.rs_date = rs_date;
     }
 
     @Override
     public String toString() {
-        return "ResultDTO{" + "rsID=" + rsID + ", userID=" + userID + ", exCode=" + exCode + ", rsAnswer=" + rsAnswer + ", rsMark=" + rsMark + ", rsDate=" + rsDate + '}';
+        return "ResultDTO{" + "rs_num=" + rs_num + ", userID=" + userID + ", exCode=" + exCode + ", rs_answers=" + rs_answers + ", rs_mark=" + rs_mark + ", rs_date=" + rs_date + '}';
     }
+
+    
 }

@@ -20,14 +20,14 @@ public class ResultDAO implements InterfaceDAO<ResultDTO>{
     }
      @Override
     public boolean insert(ResultDTO result) {
-        String sql = "INSERT INTO result(userID, exCode, rsAnswer, rsMark, rsDate) VALUES(?,?,?,?,?)";
+        String sql = "INSERT INTO result(userID, exCode, rs_answers, rs_mark, rs_date) VALUES(?,?,?,?,?)";
         try (Connection conn = JDBCUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, result.getUserID());
             ps.setString(2, result.getExCode());
-            ps.setString(3, result.getRsAnswer());
-            ps.setDouble(4, result.getRsMark());
-            ps.setTimestamp(5, Timestamp.valueOf(result.getRsDate()));
+            ps.setString(3, result.getRs_answers());
+            ps.setDouble(4, result.getRs_mark());
+            ps.setTimestamp(5, Timestamp.valueOf(result.getRs_date()));
             return ps.executeUpdate() > 0;
         } catch (SQLException ex) {
             ex.printStackTrace();
@@ -37,15 +37,15 @@ public class ResultDAO implements InterfaceDAO<ResultDTO>{
 
     @Override
     public boolean update(ResultDTO result) {
-        String sql = "UPDATE result SET userID=?, exCode=?, rsAnswer=?, rsMark=?, rsDate=? WHERE rsID=?";
+        String sql = "UPDATE result SET userID=?, exCode=?, rs_answers=?, rs_mark=?, rs_date=? WHERE rs_num=?";
         try (Connection conn = JDBCUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, result.getUserID());
             ps.setString(2, result.getExCode());
-            ps.setString(3, result.getRsAnswer());
-            ps.setDouble(4, result.getRsMark());
-            ps.setTimestamp(5, Timestamp.valueOf(result.getRsDate()));
-            ps.setInt(6, result.getRsID());
+            ps.setString(3, result.getRs_answers());
+            ps.setDouble(4, result.getRs_mark());
+            ps.setTimestamp(5, Timestamp.valueOf(result.getRs_date()));
+            ps.setInt(6, result.getUserID());
             return ps.executeUpdate() > 0;
         } catch (SQLException ex) {
             ex.printStackTrace();
@@ -62,12 +62,12 @@ public class ResultDAO implements InterfaceDAO<ResultDTO>{
              ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 result.add(new ResultDTO(
-                    rs.getInt("rsID"),
+                    rs.getInt("re_num"),
                     rs.getInt("userID"),
                     rs.getString("exCode"),
-                    rs.getString("rsAnswer"),
-                    rs.getDouble("rsMark"),
-                    rs.getTimestamp("rsDate").toLocalDateTime()
+                    rs.getString("rs_answers"),
+                    rs.getDouble("rs_mark"),
+                    rs.getTimestamp("rs_date").toLocalDateTime()
                 ));
             }
         } catch (SQLException ex) {
@@ -79,19 +79,19 @@ public class ResultDAO implements InterfaceDAO<ResultDTO>{
     @Override
     public ResultDTO selectByID(String id) {
         ResultDTO result = null;
-        String sql = "SELECT * FROM result WHERE rsID=?";
+        String sql = "SELECT * FROM result WHERE re_num=?";
         try (Connection conn = JDBCUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, Integer.parseInt(id));
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     result = new ResultDTO(
-                        rs.getInt("rsID"),
+                        rs.getInt("rs_num"),
                         rs.getInt("userID"),
                         rs.getString("exCode"),
-                        rs.getString("rsAnswer"),
-                        rs.getDouble("rsMark"),
-                        rs.getTimestamp("rsDate").toLocalDateTime()
+                        rs.getString("rs_answers"),
+                        rs.getDouble("rs_mark"),
+                        rs.getTimestamp("rs_date").toLocalDateTime()
                     );
                 }
             }
@@ -109,12 +109,12 @@ public class ResultDAO implements InterfaceDAO<ResultDTO>{
         try (ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 result.add(new ResultDTO(
-                    rs.getInt("rsID"),
+                    rs.getInt("rs_num"),
                     rs.getInt("userID"),
                     rs.getString("exCode"),
-                    rs.getString("rsAnswer"),
-                    rs.getDouble("rsMark"),
-                    rs.getTimestamp("rsDate").toLocalDateTime()
+                    rs.getString("rs_answers"),
+                    rs.getDouble("rs_mark"),
+                    rs.getTimestamp("rs_date").toLocalDateTime()
                 ));
             }
         }
@@ -134,12 +134,12 @@ public ArrayList<ResultDTO> selectByExCode(String exCode) {
         try (ResultSet rs = ps.executeQuery()) {
             while (rs.next()) {
                 result.add(new ResultDTO(
-                    rs.getInt("rsID"),
+                    rs.getInt("rs_num"),
                     rs.getInt("userID"),
                     rs.getString("exCode"),
-                    rs.getString("rsAnswer"),
-                    rs.getDouble("rsMark"),
-                    rs.getTimestamp("rsDate").toLocalDateTime()
+                    rs.getString("rs_answers"),
+                    rs.getDouble("rs_mark"),
+                    rs.getTimestamp("rs_date").toLocalDateTime()
                 ));
             }
         }
@@ -154,8 +154,8 @@ public Map<String, int[]> getStatisticsByExCode(String exCodeFilter) {
     Map<String, int[]> statistics = new HashMap<>();
     String sql = "SELECT exCode, " +
                  "COUNT(*) as total, " +
-                 "SUM(CASE WHEN rsMark >= 50 THEN 1 ELSE 0 END) as passed, " +
-                 "SUM(CASE WHEN rsMark < 50 THEN 1 ELSE 0 END) as failed " +
+                 "SUM(CASE WHEN rs_mark >= 50 THEN 1 ELSE 0 END) as passed, " +
+                 "SUM(CASE WHEN rs_mark < 50 THEN 1 ELSE 0 END) as failed " +
                  "FROM result " +
                  (exCodeFilter.isEmpty() ? "" : "WHERE exCode LIKE ?") +
                  " GROUP BY exCode";
@@ -181,7 +181,7 @@ public Map<String, int[]> getStatisticsByExCode(String exCodeFilter) {
 
     @Override
     public boolean delete(String id) {
-        String sql = "DELETE FROM result WHERE rsID=?";
+        String sql = "DELETE FROM result WHERE rs_num=?";
         try (Connection conn = JDBCUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql)) {
             ps.setInt(1, Integer.parseInt(id));

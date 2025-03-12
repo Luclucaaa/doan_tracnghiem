@@ -41,4 +41,16 @@ public class TopicBUS {
     public int getIDbyTopic(String topicName) {
         return topicDAO.getIDbyTopic(topicName);
     }
+    public TopicDTO getTopicByTitle(String title) {
+        if (title == null || title.trim().isEmpty()) {
+            return null;
+        }
+        ArrayList<TopicDTO> allTopics = topicDAO.selectAll();
+        for (TopicDTO topic : allTopics) {
+            if (topic.getTpTitle() != null && topic.getTpTitle().trim().equalsIgnoreCase(title.trim())) {
+                return topic;
+            }
+        }
+        return null; // Trả về null nếu không tìm thấy
+    }
 }

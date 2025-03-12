@@ -24,7 +24,7 @@ public class UserBUS {
     public boolean addUser(UserDTO user) {
         return userDAO.insert(user);
     }
-
+    
     public boolean updateUser(UserDTO user) {
         return userDAO.update(user);
     }
@@ -51,7 +51,6 @@ public class UserBUS {
     }
     return null;
 }
-
     public boolean isUsernameExists(String username) {
         ArrayList<UserDTO> users = userDAO.selectAll();
         for (UserDTO user : users) {
@@ -61,6 +60,12 @@ public class UserBUS {
         }
         return false;
     }
+    public UserDTO getUserByUsername(String username) {
+    return userDAO.getUserByUsername(username);
+}
+    public boolean updateUserInfo(UserDTO user) {
+    return userDAO.updateUserInfo(user);
+}
 
     public boolean isEmailExists(String email) {
         ArrayList<UserDTO> users = userDAO.selectAll();
@@ -84,5 +89,6 @@ public class UserBUS {
     } catch (Exception e) {
         throw new RuntimeException(e);
     }
+   
 }
 }

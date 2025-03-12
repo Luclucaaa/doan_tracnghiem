@@ -39,7 +39,7 @@ public class ExamBUS {
         return examDAO.selectAll();
     }
 
-    public ExamDTO getExamByCode(String exCode) {
+    public ExamDTO getExamByExCode(String exCode) {
         return examDAO.selectByID(exCode);
     }
 
