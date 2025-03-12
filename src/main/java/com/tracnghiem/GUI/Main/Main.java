@@ -2185,7 +2185,6 @@ public class Main extends javax.swing.JFrame {
     DefaultTableModel model = (DefaultTableModel) jTable4.getModel();
     model.setRowCount(0); // Xóa dữ liệu cũ
 
-    DecimalFormat formatter = new DecimalFormat("000");
     TopicBUS topicBUS = new TopicBUS();
 
     for (TestDTO test : testList) {
@@ -2199,7 +2198,7 @@ public class Main extends javax.swing.JFrame {
             test.getNum_easy(),
             test.getNum_medium(),
             test.getNum_diff(),
-            test.getTestLimit(),
+            test.getTestLimit(), // Hiển thị giới hạn tối đa ban đầu
             test.getTestTime(),
             new SimpleDateFormat("dd/MM/yyyy").format(test.getTestDate()),
             test.getTestStatus() == 1 ? "Active" : "Hidden"

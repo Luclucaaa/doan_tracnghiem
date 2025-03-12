@@ -61,4 +61,27 @@ public class TestBUS {
         }
         return null; // Trả về null nếu không tìm thấy
     }
+    // Thêm phương thức lấy số lượt làm bài còn lại của người dùng cho bài thi
+    public int getUserRemainingAttempts(int userID, String testCode) {
+        int remainingAttempts = testDAO.getUserRemainingAttempts(userID, testCode);
+        if (remainingAttempts == -1) { // Chưa có bản ghi trong user_test_limits
+            TestDTO test = getTestByCode(testCode);
+            if (test != null) {
+                remainingAttempts = test.getTestLimit(); // Lấy từ testLimit ban đầu
+                testDAO.insertUserTestLimit(userID, testCode, remainingAttempts); // Thêm bản ghi mới
+            } else {
+                return 0; // Bài thi không tồn tại
+            }
+        }
+        return remainingAttempts;
+    }
+
+    // Thêm phương thức giảm số lượt làm bài còn lại
+    public boolean decreaseUserRemainingAttempts(int userID, String testCode) {
+        int currentAttempts = getUserRemainingAttempts(userID, testCode);
+        if (currentAttempts > 0) {
+            return testDAO.updateUserRemainingAttempts(userID, testCode, currentAttempts - 1);
+        }
+        return false; // Không còn lượt làm bài
+    }
 }

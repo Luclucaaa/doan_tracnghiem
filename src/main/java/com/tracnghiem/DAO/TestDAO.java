@@ -149,6 +149,54 @@ public TestDTO selectByID(String id) {
             return false;
         }
     }
+    
+    // Thêm phương thức lấy số lượt làm bài còn lại từ user_test_limits
+    public int getUserRemainingAttempts(int userID, String testCode) {
+        String sql = "SELECT remainingAttempts FROM user_test_limits WHERE userID = ? AND testCode = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, userID);
+            pstmt.setString(2, testCode);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                return rs.getInt("remainingAttempts");
+            }
+            return -1; // Chưa có bản ghi
+        } catch (SQLException e) {
+            System.err.println("Lỗi khi lấy số lượt làm bài còn lại: " + e.getMessage());
+            e.printStackTrace();
+            return -1;
+        }
+    }
+
+    // Thêm phương thức chèn bản ghi mới vào user_test_limits
+    public void insertUserTestLimit(int userID, String testCode, int remainingAttempts) {
+        String sql = "INSERT INTO user_test_limits (userID, testCode, remainingAttempts) VALUES (?, ?, ?)";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, userID);
+            pstmt.setString(2, testCode);
+            pstmt.setInt(3, remainingAttempts);
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            System.err.println("Lỗi khi chèn bản ghi vào user_test_limits: " + e.getMessage());
+            e.printStackTrace();
+        }
+    }
+
+    // Thêm phương thức cập nhật số lượt làm bài còn lại
+    public boolean updateUserRemainingAttempts(int userID, String testCode, int newAttempts) {
+        String sql = "UPDATE user_test_limits SET remainingAttempts = ? WHERE userID = ? AND testCode = ?";
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, newAttempts);
+            pstmt.setInt(2, userID);
+            pstmt.setString(3, testCode);
+            int rowsAffected = pstmt.executeUpdate();
+            return rowsAffected > 0;
+        } catch (SQLException e) {
+            System.err.println("Lỗi khi cập nhật số lượt làm bài: " + e.getMessage());
+            e.printStackTrace();
+            return false;
+        }
+    }
 
     // Đóng kết nối khi không cần thiết (tùy chọn)
     public void closeConnection() {

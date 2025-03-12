@@ -26,6 +26,7 @@ import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Image;
 import java.awt.Point;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -37,9 +38,12 @@ import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
+import javax.swing.ImageIcon;
 import javax.swing.JCheckBox;
 import javax.swing.JLabel;
 import javax.swing.JOptionPane;
@@ -75,6 +79,7 @@ public class UserFrame extends javax.swing.JFrame {
     private int maxScore;
     private int userID; // Biến lưu ID người dùng
     private int topicID; // Biến lưu ID chủ đề
+    private long startTime;
     /**
      * Creates new form UserFrame
      */
@@ -87,7 +92,12 @@ public class UserFrame extends javax.swing.JFrame {
         examBUS = new ExamBUS();
         questionBUS = new QuestionBUS();
         answerBUS = new AnswerBUS();
-
+        
+        // Lấy userID từ username
+        userID = getCurrentUserID(); // Gọi phương thức đã có để lấy userID
+        if (userID == -1) {
+            JOptionPane.showMessageDialog(this, "Không thể xác định người dùng!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+        }
         // Tải dữ liệu cho panel chọn đề thi
         loadTopics();
         loadTests();
@@ -118,7 +128,6 @@ public class UserFrame extends javax.swing.JFrame {
         name = new javax.swing.JLabel();
         jLabel25 = new javax.swing.JLabel();
         jLabel1 = new javax.swing.JLabel();
-        jLabel26 = new javax.swing.JLabel();
         jButton2 = new javax.swing.JButton();
         jPanel3 = new javax.swing.JPanel();
         User = new javax.swing.JPanel();
@@ -250,9 +259,6 @@ public class UserFrame extends javax.swing.JFrame {
         jLabel1.setBackground(new java.awt.Color(204, 204, 204));
         jLabel1.setOpaque(true);
 
-        jLabel26.setBackground(new java.awt.Color(204, 204, 204));
-        jLabel26.setOpaque(true);
-
         jButton2.setBackground(new java.awt.Color(204, 51, 0));
         jButton2.setFont(new java.awt.Font("Segoe UI", 0, 16)); // NOI18N
         jButton2.setForeground(new java.awt.Color(255, 255, 255));
@@ -376,8 +382,7 @@ public class UserFrame extends javax.swing.JFrame {
             .addComponent(jPanel2, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addComponent(jLabel1, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
             .addGroup(MenuPanelLayout.createSequentialGroup()
-                .addComponent(jLabel26, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addGap(0, 0, Short.MAX_VALUE)
                 .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 178, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(41, 41, 41))
             .addGroup(MenuPanelLayout.createSequentialGroup()
@@ -394,15 +399,9 @@ public class UserFrame extends javax.swing.JFrame {
                 .addComponent(jLabel1, javax.swing.GroupLayout.PREFERRED_SIZE, 2, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(jPanel3, javax.swing.GroupLayout.PREFERRED_SIZE, 328, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGroup(MenuPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(MenuPanelLayout.createSequentialGroup()
-                        .addGap(253, 253, 253)
-                        .addComponent(jLabel26)
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addGroup(MenuPanelLayout.createSequentialGroup()
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addContainerGap())))
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(jButton2, javax.swing.GroupLayout.PREFERRED_SIZE, 36, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addContainerGap())
         );
 
         contentPanel.setLayout(new java.awt.CardLayout());
@@ -548,13 +547,11 @@ public class UserFrame extends javax.swing.JFrame {
                     .addComponent(jLabel14, javax.swing.GroupLayout.PREFERRED_SIZE, 44, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 32, Short.MAX_VALUE)
                 .addGroup(UserChooseExamPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addGroup(UserChooseExamPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(jLabel16, javax.swing.GroupLayout.PREFERRED_SIZE, 44, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(jLabel17, javax.swing.GroupLayout.PREFERRED_SIZE, 44, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(jLabel17, javax.swing.GroupLayout.PREFERRED_SIZE, 44, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel16, javax.swing.GroupLayout.PREFERRED_SIZE, 44, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(jLabel18, javax.swing.GroupLayout.PREFERRED_SIZE, 44, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addGroup(UserChooseExamPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(jLabel20, javax.swing.GroupLayout.PREFERRED_SIZE, 44, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addComponent(jLabel19, javax.swing.GroupLayout.PREFERRED_SIZE, 44, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                    .addComponent(jLabel19, javax.swing.GroupLayout.PREFERRED_SIZE, 44, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jLabel20, javax.swing.GroupLayout.PREFERRED_SIZE, 44, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addGap(54, 54, 54)
                 .addComponent(jButton5, javax.swing.GroupLayout.PREFERRED_SIZE, 51, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(58, 58, 58))
@@ -1018,9 +1015,6 @@ public class UserFrame extends javax.swing.JFrame {
                         .addGap(18, 18, 18)
                         .addComponent(jLabel22, javax.swing.GroupLayout.PREFERRED_SIZE, 261, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addGroup(KetQuaThiPanelLayout.createSequentialGroup()
-                        .addGap(280, 280, 280)
-                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addGroup(KetQuaThiPanelLayout.createSequentialGroup()
                         .addGap(125, 125, 125)
                         .addComponent(jLabel23)
                         .addGap(18, 18, 18)
@@ -1028,7 +1022,10 @@ public class UserFrame extends javax.swing.JFrame {
                         .addGap(171, 171, 171)
                         .addComponent(jLabel21)
                         .addGap(18, 18, 18)
-                        .addComponent(jLabel28, javax.swing.GroupLayout.PREFERRED_SIZE, 261, javax.swing.GroupLayout.PREFERRED_SIZE)))
+                        .addComponent(jLabel28, javax.swing.GroupLayout.PREFERRED_SIZE, 261, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addGroup(KetQuaThiPanelLayout.createSequentialGroup()
+                        .addGap(166, 166, 166)
+                        .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap(171, Short.MAX_VALUE))
         );
         KetQuaThiPanelLayout.setVerticalGroup(
@@ -1048,9 +1045,9 @@ public class UserFrame extends javax.swing.JFrame {
                 .addGroup(KetQuaThiPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel27, javax.swing.GroupLayout.DEFAULT_SIZE, 60, Short.MAX_VALUE)
                     .addComponent(jLabel22, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                .addGap(37, 37, 37)
+                .addGap(36, 36, 36)
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addGap(59, 59, 59))
+                .addGap(60, 60, 60))
         );
 
         contentPanel.add(KetQuaThiPanel, "card6");
@@ -1275,7 +1272,6 @@ private int getCurrentUserID() {
     private void jButton4ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton4ActionPerformed
         timer.stop();
 
-    // Kiểm tra xem tất cả câu hỏi đã được chọn đáp án chưa
     boolean allAnswered = true;
     for (int answer : selectedAnswers) {
         if (answer == -1) {
@@ -1291,7 +1287,6 @@ private int getCurrentUserID() {
 
     JOptionPane.showMessageDialog(this, "Bài thi đã được nộp!");
 
-    // Lấy topicID từ jComboBox1
     TopicBUS topicBUS = new TopicBUS();
     String topicName = (String) jComboBox1.getSelectedItem();
     TopicDTO topic = topicBUS.getTopicByTitle(topicName);
@@ -1302,74 +1297,91 @@ private int getCurrentUserID() {
         return;
     }
 
-    // Tính điểm tối đa và điểm đạt được
     calculateMaxScore();
     calculateScore();
 
-    // Tính phần trăm hoàn thành
+    // Tính số câu trả lời đúng
+    int correctAnswers = 0;
+    int totalQuestions = selectedAnswers.size(); // Tổng số câu hỏi
+    for (int i = 0; i < selectedAnswers.size(); i++) {
+        int userAnswerIndex = selectedAnswers.get(i);
+        if (userAnswerIndex != -1) {
+            List<AnswerDTO> questionAnswers = answers.get(i);
+            if (questionAnswers.get(userAnswerIndex).getIsRight() == 1) {
+                correctAnswers++;
+            }
+        }
+    }
+    System.out.println("Number of correct answers: " + correctAnswers + "/" + totalQuestions);
+
     double percentage = (maxScore > 0) ? (double) totalScore / maxScore * 100 : 0;
     String percentageText = String.format("%.1f%%", percentage);
 
-    // Lấy thông tin đề thi
     String selectedExamDisplayName = (String) jComboBox2.getSelectedItem();
     String selectedExamOrder = selectedExamDisplayName.replace("Đề ", "");
     TestBUS testBUS = new TestBUS();
     ExamBUS examBUS = new ExamBUS();
     ArrayList<TestDTO> tests = testBUS.getTestsByTopicID(topicID);
     String exCode = null;
+    String testCode = null;
     for (TestDTO test : tests) {
         ArrayList<ExamDTO> exams = examBUS.getExamsByTestCode(test.getTestCode());
         for (ExamDTO exam : exams) {
             if (exam.getExOrder().equals(selectedExamOrder)) {
                 exCode = exam.getExCode();
+                testCode = test.getTestCode();
                 break;
             }
         }
         if (exCode != null) break;
     }
 
-    // Chuẩn bị chuỗi rs_answers để lưu maxScore
     StringBuilder rsAnswersBuilder = new StringBuilder();
     for (int answer : selectedAnswers) {
         rsAnswersBuilder.append(answer).append(",");
     }
-    rsAnswersBuilder.append("maxScore=").append(maxScore); // Thêm maxScore vào rs_answers
+    rsAnswersBuilder.append("maxScore=").append(maxScore);
 
-    // Chuyển đổi Timestamp thành LocalDateTime
     LocalDateTime rsDate = LocalDateTime.now();
 
-    // Lưu kết quả vào bảng results
     ResultDTO result = new ResultDTO(
-        0, // rs_num (sẽ tự động tăng nếu database hỗ trợ)
-        userID,
-        exCode,
-        rsAnswersBuilder.toString(), // Lưu danh sách đáp án và maxScore
-        totalScore, // Lưu totalScore vào rs_mark
-        rsDate
+        0, userID, exCode, rsAnswersBuilder.toString(), totalScore, rsDate
     );
     ResultBUS resultBUS = new ResultBUS();
     resultBUS.addResult(result);
 
-    // Giảm số lượt làm bài
-    remainingAttempts--;
-    jLabel19.setText(String.valueOf(remainingAttempts));
+    if (testBUS.decreaseUserRemainingAttempts(userID, testCode)) {
+        remainingAttempts = testBUS.getUserRemainingAttempts(userID, testCode);
+        jLabel19.setText(String.valueOf(remainingAttempts));
+    } else {
+        JOptionPane.showMessageDialog(this, "Lỗi khi cập nhật số lượt làm bài!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+    }
 
-    // Cập nhật số lượt làm bài trong cơ sở dữ liệu (nếu cần)
-    updateTestLimitInDatabase();
-
-    // Kiểm tra số lượt làm bài
     if (remainingAttempts <= 0) {
         JOptionPane.showMessageDialog(this, "Số lượt làm bài đã hết! Không thể làm bài nữa.");
     }
 
-    // Hiển thị thông tin vào KetQuaThiPanel
+    // Tính thời gian làm bài
+    long endTime = System.currentTimeMillis();
+    long timeTakenMillis = endTime - startTime; // Thời gian làm bài (mili giây)
+    long seconds = timeTakenMillis / 1000;
+    long minutesTaken = seconds / 60;
+    long remainingSeconds = seconds % 60;
+    String timeTakenText = (minutesTaken > 0 ? minutesTaken + " phút " : "") + remainingSeconds + " giây";
+    if (minutesTaken == 0 && remainingSeconds == 0) {
+        timeTakenText = "Ít hơn 1 giây";
+    }
+
+    // Cập nhật giao diện
     jLabel24.setText(topicName != null ? topicName : "Không xác định");
     jLabel28.setText(tests.get(0).getTestTitle() != null ? tests.get(0).getTestTitle() : "Không xác định");
     jLabel22.setText(selectedExamDisplayName != null ? selectedExamDisplayName : "Không xác định");
-    jLabel30.setText(totalScore + "/" + maxScore); // Hiển thị "7/15"
-    jLabel32.setText(percentageText); // Hiển thị "46,7%"
+    jLabel30.setText(totalScore + "/" + maxScore);
+    jLabel32.setText(percentageText);
+    jLabel36.setText(timeTakenText); // Hiển thị thời gian làm bài
+    jLabel34.setText(correctAnswers + "/" + totalQuestions); // Hiển thị "số đúng/tổng số"
 
-    // Chuyển sang panel KetQuaThiPanel
+    
     contentPanel.removeAll();
     contentPanel.add(KetQuaThiPanel, "card7");
     contentPanel.revalidate();
@@ -1385,36 +1397,35 @@ private int getCurrentUserID() {
     }//GEN-LAST:event_jComboBox2ActionPerformed
 
     private void jButton5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton5ActionPerformed
-        // Lấy chủ đề và đề thi đã chọn
-    String selectedTopic = (String) jComboBox1.getSelectedItem();
-    String selectedExamDisplayName = (String) jComboBox2.getSelectedItem(); // Giờ chỉ là "Đề A"
+        String selectedTopic = (String) jComboBox1.getSelectedItem();
+    String selectedExamDisplayName = (String) jComboBox2.getSelectedItem();
     if (selectedTopic == null || selectedExamDisplayName == null) {
         JOptionPane.showMessageDialog(this, "Vui lòng chọn chủ đề và đề thi!");
         return;
     }
 
-    // Lấy TopicDTO bằng tên chủ đề
     TopicDTO topic = topicBUS.getTopicByTitle(selectedTopic);
     if (topic == null) {
         JOptionPane.showMessageDialog(this, "Không tìm thấy chủ đề!");
         return;
     }
 
-    // Lấy danh sách đề thi từ test để tìm exCode
-    String selectedExamOrder = selectedExamDisplayName.replace("Đề ", ""); // Lấy "A" từ "Đề A"
+    String selectedExamOrder = selectedExamDisplayName.replace("Đề ", "");
     ArrayList<TestDTO> tests = testBUS.getTestsByTopicID(topic.getTpID());
     String exCode = null;
+    String testCode = null;
     for (TestDTO test : tests) {
         ArrayList<ExamDTO> exams = examBUS.getExamsByTestCode(test.getTestCode());
         for (ExamDTO exam : exams) {
             if (exam.getExOrder().equals(selectedExamOrder)) {
                 exCode = exam.getExCode();
+                testCode = test.getTestCode();
                 break;
             }
         }
         if (exCode != null) break;
     }
-    if (exCode == null) {
+    if (exCode == null || testCode == null) {
         JOptionPane.showMessageDialog(this, "Không tìm thấy đề thi!");
         return;
     }
@@ -1425,58 +1436,48 @@ private int getCurrentUserID() {
         return;
     }
 
-    // Lấy testCode từ ExamDTO
-    String testCode = selectedExamDTO.getTestCode();
     TestDTO selectedTest = testBUS.getTestByCode(testCode);
     if (selectedTest == null) {
         JOptionPane.showMessageDialog(this, "Không tìm thấy bài thi!");
         return;
     }
 
-    // Lấy thời gian làm bài và số lượt làm bài
-    minutes = selectedTest.getTestTime();
-    timeLabel.setText(minutes + ":00");
-    remainingAttempts = selectedTest.getTestLimit();
-
-    // Cập nhật hiển thị
-    jLabel17.setText(String.valueOf(minutes));
-    jLabel19.setText(String.valueOf(remainingAttempts));
-
-    // Kiểm tra số lượt làm bài còn lại
+    remainingAttempts = testBUS.getUserRemainingAttempts(userID, testCode);
     if (remainingAttempts <= 0) {
         JOptionPane.showMessageDialog(this, "Số lượt làm bài đã hết! Không thể làm bài nữa.");
         return;
     }
 
-    // Lấy số lượng câu hỏi từ exQuesIDs
+    minutes = selectedTest.getTestTime();
+    timeLabel.setText(minutes + ":00");
+    // Ghi lại thời gian bắt đầu
+    startTime = System.currentTimeMillis();
+    jLabel17.setText(String.valueOf(minutes));
+    jLabel19.setText(String.valueOf(remainingAttempts));
+
     String exQuesIDs = selectedExamDTO.getExQuesIDs();
+    System.out.println("Selected exam exCode: " + exCode + " | exQuesIDs: " + exQuesIDs);
     if (exQuesIDs == null || exQuesIDs.isEmpty()) {
         JOptionPane.showMessageDialog(this, "Đề thi không có câu hỏi!");
         return;
     }
     numberOfSquares = exQuesIDs.split(",").length;
 
-    // Hiển thị tên đề thi (chỉ lấy phần "Đề A")
-    jLabel13.setText(selectedExamDisplayName); // Hiển thị "Đề A" vào jLabel13
-
-    // Tạo các ô vuông dựa trên số lượng câu hỏi
+    jLabel13.setText(selectedExamDisplayName);
     createSquares();
 
-    // Lấy dữ liệu câu hỏi và đáp án
     initializeQuestions(exQuesIDs);
     if (questions == null || questions.isEmpty()) {
         JOptionPane.showMessageDialog(this, "Không thể tải câu hỏi!");
         return;
     }
     displayQuestion(0);
-
-    // Chuyển sang panel làm bài thi và bắt đầu timer
+    
     contentPanel.removeAll();
     contentPanel.add(TaskTheTestPanel, "card6");
     contentPanel.revalidate();
     contentPanel.repaint();
 
-    // Bắt đầu timer
     startTimer();// TODO add your handling code here:
     }//GEN-LAST:event_jButton5ActionPerformed
 
@@ -1576,7 +1577,7 @@ private int getCurrentUserID() {
         }
     }
 
-    private void loadTests() {
+        private void loadTests() {
     String selectedTopicTitle = (String) jComboBox1.getSelectedItem();
     if (selectedTopicTitle == null) return;
 
@@ -1587,9 +1588,11 @@ private int getCurrentUserID() {
     model.setRowCount(0);
     ArrayList<TestDTO> tests = testBUS.getTestsByTopicID(selectedTopic.getTpID());
     for (TestDTO test : tests) {
+        // Lấy số lượt làm bài còn lại của người dùng từ user_test_limits
+        int userRemainingAttempts = testBUS.getUserRemainingAttempts(userID, test.getTestCode());
         model.addRow(new Object[]{
             test.getTestTitle(),
-            test.getTestLimit(),
+            userRemainingAttempts, // Hiển thị số lượt còn lại của người dùng
             test.getTestTime() + " phút"
         });
     }
@@ -1599,7 +1602,6 @@ private int getCurrentUserID() {
     for (TestDTO test : tests) {
         ArrayList<ExamDTO> exams = examBUS.getExamsByTestCode(test.getTestCode());
         for (ExamDTO exam : exams) {
-            String fullExamName = exam.getExCode() + " - Đề " + exam.getExOrder(); // Ví dụ: "Test2A - Đề A"
             String examDisplayName = "Đề " + exam.getExOrder(); // Chỉ lấy "Đề A"
             jComboBox2.addItem(examDisplayName);
         }
@@ -1607,18 +1609,19 @@ private int getCurrentUserID() {
 
     // Thêm sự kiện ListSelectionListener cho jTable1
     jTable1.getSelectionModel().addListSelectionListener(e -> {
-        if (!e.getValueIsAdjusting()) { // Tránh sự kiện bị gọi nhiều lần
+        if (!e.getValueIsAdjusting()) {
             int selectedRow = jTable1.getSelectedRow();
             if (selectedRow >= 0) {
                 String testTitle = (String) jTable1.getValueAt(selectedRow, 0);
                 TestDTO selectedTest = testBUS.getTestByTitle(testTitle);
                 if (selectedTest != null) {
-                    // Hiển thị thời gian làm bài và số lượt làm bài
+                    // Hiển thị thời gian làm bài và số lượt làm bài từ user_test_limits
+                    int userRemainingAttempts = testBUS.getUserRemainingAttempts(userID, selectedTest.getTestCode());
                     jLabel16.setText("Thời gian làm bài:");
                     jLabel17.setText(String.valueOf(selectedTest.getTestTime()));
                     jLabel18.setText("phút");
                     jLabel20.setText("Số lượt làm bài:");
-                    jLabel19.setText(String.valueOf(selectedTest.getTestLimit()));
+                    jLabel19.setText(String.valueOf(userRemainingAttempts));
                 }
             }
         }
@@ -1628,81 +1631,114 @@ private int getCurrentUserID() {
     private void initializeQuestions(String exQuesIDs) {
     questions = new ArrayList<>();
     answers = new ArrayList<>();
-    selectedAnswers.clear(); // Đặt lại danh sách đáp án
+    selectedAnswers.clear();
+
+    if (exQuesIDs == null || exQuesIDs.trim().isEmpty()) {
+        System.err.println("exQuesIDs is null or empty!");
+        JOptionPane.showMessageDialog(this, "Danh sách câu hỏi (exQuesIDs) trống!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+        return;
+    }
 
     String[] quesIDs = exQuesIDs.split(",");
+    System.out.println("exQuesIDs: " + exQuesIDs + " | Number of question IDs: " + quesIDs.length);
+
     for (String quesID : quesIDs) {
         try {
             int qID = Integer.parseInt(quesID.trim());
+            System.out.println("Processing question ID: " + qID);
+
             QuestionDTO question = questionBUS.getQuestionByID(qID);
-            if (question == null) continue;
+            if (question == null) {
+                System.err.println("Question not found for ID: " + qID);
+                continue;
+            }
 
             List<AnswerDTO> questionAnswers = answerBUS.getAnswersByQuestionID(qID);
-            if (questionAnswers == null || questionAnswers.isEmpty()) continue;
+            if (questionAnswers == null || questionAnswers.isEmpty()) {
+                System.err.println("No answers found for question ID: " + qID);
+                continue;
+            }
 
             questions.add(question);
             answers.add(questionAnswers);
-            selectedAnswers.add(-1); // Khởi tạo với -1 (chưa chọn)
+            selectedAnswers.add(-1);
+            System.out.println("Added question ID: " + qID + " with " + questionAnswers.size() + " answers");
         } catch (NumberFormatException e) {
-            System.err.println("Invalid question ID: " + quesID);
+            System.err.println("Invalid question ID format: " + quesID);
         }
+    }
+
+    if (questions.isEmpty()) {
+        System.err.println("No valid questions loaded!");
+        JOptionPane.showMessageDialog(this, "Không tìm thấy câu hỏi hợp lệ trong danh sách!", "Lỗi", JOptionPane.ERROR_MESSAGE);
     }
 }
 
-    private void displayQuestion(int index) {
-    if (questions == null || index < 0 || index >= questions.size()) return;
-
-    QuestionDTO question = questions.get(index);
-    List<AnswerDTO> questionAnswers = answers.get(index);
-
-    // Hiển thị câu hỏi ở jTextArea2
-    jTextArea2.setText("Câu " + (index + 1) + ": " + question.getQContent());
-    jTextArea2.setEditable(false);
-
-    // Đặt lại các đáp án
-    resetBackgrounds();
-    jTextArea1.setText("");
-    jTextArea3.setText("");
-    jTextArea4.setText("");
-    jTextArea5.setText("");
-    jTextArea6.setText("");
-
-    // Lấy đáp án đã chọn (nếu có)
-    int selectedAnswerIndex = -1;
-    if (index < selectedAnswers.size()) {
-        selectedAnswerIndex = selectedAnswers.get(index);
+    private void displayQuestion(int questionIndex) {
+    if (questionIndex < 0 || questionIndex >= questions.size()) {
+        return;
     }
 
-    // Hiển thị các đáp án
-    for (int i = 0; i < Math.min(questionAnswers.size(), 5); i++) {
-        AnswerDTO answer = questionAnswers.get(i);
-        String optionLabel = (char) ('A' + i) + ". " + answer.getAwContent();
-        switch (i) {
-            case 0:
-                jTextArea1.setText(optionLabel);
-                if (selectedAnswerIndex == 0) jTextArea1.setBackground(Color.green);
-                break;
-            case 1:
-                jTextArea3.setText(optionLabel);
-                if (selectedAnswerIndex == 1) jTextArea3.setBackground(Color.green);
-                break;
-            case 2:
-                jTextArea4.setText(optionLabel);
-                if (selectedAnswerIndex == 2) jTextArea4.setBackground(Color.green);
-                break;
-            case 3:
-                jTextArea5.setText(optionLabel);
-                if (selectedAnswerIndex == 3) jTextArea5.setBackground(Color.green);
-                break;
-            case 4:
-                jTextArea6.setText(optionLabel);
-                if (selectedAnswerIndex == 4) jTextArea6.setBackground(Color.green);
-                break;
+    QuestionDTO currentQuestion = questions.get(questionIndex);
+    jLabel1.setText(currentQuestion.getQContent()); // Hiển thị nội dung câu hỏi
+
+    // Hiển thị hình ảnh câu hỏi nếu có
+    if (currentQuestion.getQPicture()!= null && !currentQuestion.getQPicture().isEmpty()) {
+        try {
+            ImageIcon imageIcon = new ImageIcon(currentQuestion.getQPicture());
+            Image image = imageIcon.getImage().getScaledInstance(300, 200, Image.SCALE_SMOOTH); // Điều chỉnh kích thước
+            //jLabelImageQuestion.setIcon(new ImageIcon(image)); // Giả sử jLabelImageQuestion là label cho hình ảnh câu hỏi
+        } catch (Exception e) {
+            System.err.println("Error loading question image: " + e.getMessage());
+            //jLabelImageQuestion.setText("Không thể tải hình ảnh!");
         }
+    } else {
+        //jLabelImageQuestion.setIcon(null); // Ẩn label nếu không có hình ảnh
     }
 
-    // Không cần gọi updateSquareColors ở đây, vì nó đã được gọi trong resetBackgrounds hoặc khi chọn đáp án
-}   
+    // Xóa các đáp án cũ
+    //answerPanel.removeAll();
+    //answerPanel.revalidate();
+    //answerPanel.repaint();
+
+    List<AnswerDTO> currentAnswers = answers.get(questionIndex);
+    for (int i = 0; i < currentAnswers.size(); i++) {
+        AnswerDTO answer = currentAnswers.get(i);
+        JLabel answerLabel = new JLabel("<html>" + (char)('A' + i) + ". " + answer.getAwContent() + "</html>");
+        answerLabel.setOpaque(true);
+        answerLabel.setBackground(Color.WHITE);
+        answerLabel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+
+        // Hiển thị hình ảnh đáp án nếu có
+        if (answer.getAwPictures() != null && !answer.getAwPictures().isEmpty()) {
+            try {
+                ImageIcon imageIcon = new ImageIcon(answer.getAwPictures());
+                Image image = imageIcon.getImage().getScaledInstance(100, 100, Image.SCALE_SMOOTH); // Điều chỉnh kích thước
+                JLabel imageLabel = new JLabel(new ImageIcon(image));
+                //answerPanel.add(imageLabel); // Thêm hình ảnh dưới nội dung đáp án
+            } catch (Exception e) {
+                System.err.println("Error loading answer image for awID " + answer.getAwID() + ": " + e.getMessage());
+            }
+        }
+
+        final int index = i;
+        answerLabel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                selectedAnswers.set(questionIndex, index);
+                updateSquareColors();
+                displayQuestion(questionIndex); // Cập nhật lại để làm mới giao diện
+            }
+        });
+        //answerPanel.add(answerLabel);
+    }
+
+    //answerPanel.revalidate();
+    //answerPanel.repaint();
+
+    // Cập nhật ô vuông
+    updateSquareColors();
+}
     private void updateTestLimitInDatabase() {
     Connection conn = null;
     PreparedStatement pstmt = null;
@@ -1744,55 +1780,46 @@ private int getCurrentUserID() {
     }
 }
     
-    // Tính điểm tối đa của bài thi
-private void calculateMaxScore() {
-    maxScore = 0; // Khởi tạo
-    QuestionBUS questionBUS = new QuestionBUS();
-    ArrayList<QuestionDTO> questions = questionBUS.getQuestionsByTopic(topicID); // Lấy tất cả câu hỏi của chủ đề
-    for (QuestionDTO question : questions) {
-        switch (question.getLevel().toLowerCase()) {
-            case "easy":
+    private void calculateMaxScore() {
+    maxScore = 0;
+    // Sử dụng HashSet để loại bỏ câu hỏi trùng lặp
+    Set<Integer> uniqueQIDs = new HashSet<>();
+    for (int i = 0; i < questions.size(); i++) {
+        QuestionDTO question = questions.get(i);
+        if (!uniqueQIDs.contains(question.getQID())) {
+            if ("easy".equals(question.getLevel())) {
                 maxScore += 1;
-                break;
-            case "medium":
+            } else if ("medium".equals(question.getLevel())) {
                 maxScore += 2;
-                break;
-            case "hard":
+            } else if ("diff".equals(question.getLevel())) {
                 maxScore += 3;
-                break;
-            default:
-                maxScore += 0; // Giá trị mặc định nếu level không hợp lệ
+            }
+            uniqueQIDs.add(question.getQID());
         }
     }
+    System.out.println("Max score calculated: " + maxScore);
 }
 
 private void calculateScore() {
-    totalScore = 0; // Khởi tạo
-    QuestionBUS questionBUS = new QuestionBUS();
-    ArrayList<QuestionDTO> questions = questionBUS.getQuestionsByTopic(topicID); // Lấy tất cả câu hỏi của chủ đề
+    totalScore = 0;
     for (int i = 0; i < selectedAnswers.size(); i++) {
-        int userAnswer = selectedAnswers.get(i);
-        List<AnswerDTO> answers = questionBUS.getAnswersByQuestionID(questions.get(i).getQID());
-        for (AnswerDTO answer : answers) {
-            if (answer.getIsRight() == 1 && answer.getAwID() == userAnswer) {
-                // Cộng điểm dựa trên mức độ khó của câu hỏi
-                switch (questions.get(i).getLevel().toLowerCase()) {
-                    case "easy":
-                        totalScore += 1;
-                        break;
-                    case "medium":
-                        totalScore += 2;
-                        break;
-                    case "hard":
-                        totalScore += 3;
-                        break;
-                    default:
-                        totalScore += 0; // Giá trị mặc định nếu level không hợp lệ
+        int userAnswerIndex = selectedAnswers.get(i);
+        if (userAnswerIndex != -1) { // Người dùng đã chọn đáp án
+            List<AnswerDTO> questionAnswers = answers.get(i);
+            AnswerDTO selectedAnswer = questionAnswers.get(userAnswerIndex);
+            if (selectedAnswer.getIsRight() == 1) {
+                QuestionDTO question = questions.get(i);
+                if ("easy".equals(question.getLevel())) {
+                    totalScore += 1;
+                } else if ("medium".equals(question.getLevel())) {
+                    totalScore += 2;
+                } else if ("diff".equals(question.getLevel())) {
+                    totalScore += 3;
                 }
-                break; // Thoát khi tìm thấy đáp án đúng
             }
         }
     }
+    System.out.println("Total score calculated: " + totalScore);
 }
     /**
      * @param args the command line arguments
@@ -1864,7 +1891,6 @@ private void calculateScore() {
     private javax.swing.JLabel jLabel23;
     private javax.swing.JLabel jLabel24;
     private javax.swing.JLabel jLabel25;
-    private javax.swing.JLabel jLabel26;
     private javax.swing.JLabel jLabel27;
     private javax.swing.JLabel jLabel28;
     private javax.swing.JLabel jLabel29;

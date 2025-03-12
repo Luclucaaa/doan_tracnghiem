@@ -7,6 +7,7 @@ package com.tracnghiem.BUS;
 import com.tracnghiem.DAO.AnswerDAO;
 import com.tracnghiem.DTO.AnswerDTO;
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  *
@@ -37,17 +38,17 @@ public class AnswerBUS {
 
     public AnswerDTO getAnswerByID(String answerID) {
         return answerDAO.selectByID(answerID);
-    }
-
-    public ArrayList<AnswerDTO> getAnswersByQuestionID(int questionID) {
-        ArrayList<AnswerDTO> allAnswers = answerDAO.selectAll();
-        ArrayList<AnswerDTO> result = new ArrayList<>();
-
-        for (AnswerDTO answer : allAnswers) {
-            if (answer.getQID() == questionID) {
-                result.add(answer);
-            }
+    }   
+    
+    public List<AnswerDTO> getAnswersByQuestionID(int qID) {
+        try {
+            List<AnswerDTO> answers = answerDAO.selectByQuestionID(qID);
+            System.out.println("Answers retrieved for qID " + qID + ": " + (answers != null ? answers.size() : "null"));
+            return answers;
+        } catch (Exception e) {
+            System.err.println("Error retrieving answers for qID " + qID + ": " + e.getMessage());
+            e.printStackTrace();
+            return null;
         }
-        return result;
     }
 }
