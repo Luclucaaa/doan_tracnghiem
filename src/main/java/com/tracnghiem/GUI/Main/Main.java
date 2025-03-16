@@ -12,6 +12,7 @@ import com.tracnghiem.BUS.TestBUS;
 import com.tracnghiem.BUS.UserBUS;
 import com.tracnghiem.DTO.UserDTO;
 import com.tracnghiem.BUS.TopicBUS;
+import com.tracnghiem.DAO.ExamDAO;
 import com.tracnghiem.DTO.AnswerDTO;
 import com.tracnghiem.DTO.ExamDTO;
 import com.tracnghiem.DTO.QuestionDTO;
@@ -25,6 +26,7 @@ import com.tracnghiem.GUI.Dialog.SuaTopicDialog;
 import com.tracnghiem.GUI.Dialog.SuaUserDialog;
 import com.tracnghiem.GUI.Dialog.TestDialog;
 import com.tracnghiem.GUI.Dialog.TopicDialog;
+import com.tracnghiem.config.ExamExporter;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.Timestamp;
@@ -154,6 +156,7 @@ public class Main extends javax.swing.JFrame {
         cz6 = new javax.swing.JButton();
         jTextField3 = new javax.swing.JTextField();
         jLabel19 = new javax.swing.JLabel();
+        cz11 = new javax.swing.JButton();
         jScrollPane3 = new javax.swing.JScrollPane();
         jTable3 = new javax.swing.JTable();
         QuestionPanel = new javax.swing.JPanel();
@@ -920,6 +923,17 @@ public class Main extends javax.swing.JFrame {
 
         jLabel19.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icon/search.png"))); // NOI18N
 
+        cz11.setFont(new java.awt.Font("Segoe UI", 1, 15)); // NOI18N
+        cz11.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icon/word.png"))); // NOI18N
+        cz11.setText("Export");
+        cz11.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        cz11.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        cz11.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cz11ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel8Layout = new javax.swing.GroupLayout(jPanel8);
         jPanel8.setLayout(jPanel8Layout);
         jPanel8Layout.setHorizontalGroup(
@@ -931,6 +945,8 @@ public class Main extends javax.swing.JFrame {
                 .addComponent(cz6, javax.swing.GroupLayout.PREFERRED_SIZE, 88, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(cz5, javax.swing.GroupLayout.PREFERRED_SIZE, 91, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addComponent(cz11, javax.swing.GroupLayout.PREFERRED_SIZE, 91, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(jTextField3, javax.swing.GroupLayout.PREFERRED_SIZE, 372, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -946,7 +962,8 @@ public class Main extends javax.swing.JFrame {
                         .addGroup(jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(cz4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(cz6, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                            .addComponent(cz5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                            .addComponent(cz5, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(cz11, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
                     .addGroup(jPanel8Layout.createSequentialGroup()
                         .addGap(24, 24, 24)
                         .addGroup(jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
@@ -1117,8 +1134,6 @@ public class Main extends javax.swing.JFrame {
                     .addComponent(cz10, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
-
-        cz10.getAccessibleContext().setAccessibleName("Excel");
 
         jTable5.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -2147,6 +2162,39 @@ public class Main extends javax.swing.JFrame {
             }
         }        
     }//GEN-LAST:event_cz10ActionPerformed
+
+    private void cz11ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cz11ActionPerformed
+        // Lấy dòng được chọn trong bảng
+        int selectedRow = jTable3.getSelectedRow();
+        if (selectedRow == -1) {
+            JOptionPane.showMessageDialog(this, "Vui lòng chọn một đề thi để xuất file.");
+            return;
+        }
+
+        // Lấy mã đề thi từ dòng được chọn
+        String exCode = (String) jTable3.getValueAt(selectedRow, 0);
+
+        // Mở hộp thoại chọn đường dẫn lưu file
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setDialogTitle("Chọn đường dẫn lưu file");
+        int userSelection = fileChooser.showSaveDialog(this);
+
+        if (userSelection == JFileChooser.APPROVE_OPTION) {
+            String outputFilePath = fileChooser.getSelectedFile().getAbsolutePath() + ".docx";
+
+            // Lấy dữ liệu bài thi từ database
+            ExamDAO examDAO = ExamDAO.getInstance();
+            ExamDTO exam = examDAO.selectByID(exCode);
+
+            if (exam != null) {
+                // Xuất file .docx
+                ExamExporter.exportExamToDocx(exam, outputFilePath);
+                JOptionPane.showMessageDialog(this, "Xuất file thành công: " + outputFilePath);
+            } else {
+                JOptionPane.showMessageDialog(this, "Không tìm thấy bài thi với mã đề thi đã cho.");
+            }
+        }
+    }//GEN-LAST:event_cz11ActionPerformed
     
    private void loadTopics() {
     TopicBUS topicBUS = new TopicBUS();
@@ -2449,6 +2497,7 @@ private void createRandomExams(String testCode, int tpID, int numEasy, int numMe
     private javax.swing.JButton cz;
     private javax.swing.JButton cz1;
     private javax.swing.JButton cz10;
+    private javax.swing.JButton cz11;
     private javax.swing.JButton cz16;
     private javax.swing.JButton cz17;
     private javax.swing.JButton cz18;

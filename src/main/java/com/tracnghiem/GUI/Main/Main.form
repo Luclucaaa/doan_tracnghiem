@@ -1283,6 +1283,8 @@
                           <Component id="cz6" min="-2" pref="88" max="-2" attributes="0"/>
                           <EmptySpace type="separate" max="-2" attributes="0"/>
                           <Component id="cz5" min="-2" pref="91" max="-2" attributes="0"/>
+                          <EmptySpace type="separate" max="-2" attributes="0"/>
+                          <Component id="cz11" min="-2" pref="91" max="-2" attributes="0"/>
                           <EmptySpace max="32767" attributes="0"/>
                           <Component id="jTextField3" min="-2" pref="372" max="-2" attributes="0"/>
                           <EmptySpace max="-2" attributes="0"/>
@@ -1301,6 +1303,7 @@
                                       <Component id="cz4" max="32767" attributes="0"/>
                                       <Component id="cz6" max="32767" attributes="0"/>
                                       <Component id="cz5" max="32767" attributes="0"/>
+                                      <Component id="cz11" alignment="1" max="32767" attributes="0"/>
                                   </Group>
                               </Group>
                               <Group type="102" alignment="0" attributes="0">
@@ -1373,6 +1376,22 @@
                       <Image iconType="3" name="/icon/search.png"/>
                     </Property>
                   </Properties>
+                </Component>
+                <Component class="javax.swing.JButton" name="cz11">
+                  <Properties>
+                    <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+                      <Font name="Segoe UI" size="15" style="1"/>
+                    </Property>
+                    <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+                      <Image iconType="3" name="/icon/word.png"/>
+                    </Property>
+                    <Property name="text" type="java.lang.String" value="Export"/>
+                    <Property name="horizontalTextPosition" type="int" value="0"/>
+                    <Property name="verticalTextPosition" type="int" value="3"/>
+                  </Properties>
+                  <Events>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="cz11ActionPerformed"/>
+                  </Events>
                 </Component>
               </SubComponents>
             </Container>
@@ -1629,9 +1648,6 @@
                     <Property name="label" type="java.lang.String" value="Excel"/>
                     <Property name="verticalTextPosition" type="int" value="3"/>
                   </Properties>
-                  <AccessibilityProperties>
-                    <Property name="AccessibleContext.accessibleName" type="java.lang.String" value="Excel"/>
-                  </AccessibilityProperties>
                   <Events>
                     <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="cz10ActionPerformed"/>
                   </Events>
