@@ -4,6 +4,7 @@
  */
 package com.tracnghiem.GUI.Main;
 
+import com.tracnghiem.config.ExcelImporter;
 import com.tracnghiem.BUS.ExamBUS;
 import com.tracnghiem.BUS.QuestionBUS;
 import com.tracnghiem.BUS.ResultBUS;
@@ -19,6 +20,7 @@ import com.tracnghiem.DTO.TestDTO;
 import com.tracnghiem.DTO.TopicDTO;
 import com.tracnghiem.GUI.Dialog.ExamDialog;
 import com.tracnghiem.GUI.Dialog.QuestionDialog;
+import com.tracnghiem.config.ExcelImporter;
 import com.tracnghiem.GUI.Dialog.SuaTopicDialog;
 import com.tracnghiem.GUI.Dialog.SuaUserDialog;
 import com.tracnghiem.GUI.Dialog.TestDialog;
@@ -35,6 +37,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
 
@@ -164,6 +167,7 @@ public class Main extends javax.swing.JFrame {
         jLabel28 = new javax.swing.JLabel();
         jTextField6 = new javax.swing.JTextField();
         jTextField11 = new javax.swing.JTextField();
+        cz10 = new javax.swing.JButton();
         jScrollPane5 = new javax.swing.JScrollPane();
         jTable5 = new javax.swing.JTable();
         ThongKePanel = new javax.swing.JPanel();
@@ -695,7 +699,7 @@ public class Main extends javax.swing.JFrame {
                         .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jLabel18, javax.swing.GroupLayout.PREFERRED_SIZE, 44, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                .addGap(0, 8, Short.MAX_VALUE))
+                .addGap(0, 7, Short.MAX_VALUE))
         );
 
         jTable2.setModel(new javax.swing.table.DefaultTableModel(
@@ -831,7 +835,7 @@ public class Main extends javax.swing.JFrame {
                         .addGroup(jPanel12Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel15)
                             .addComponent(jLabel16))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 7, Short.MAX_VALUE)
                         .addGroup(jPanel12Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(jLabel20, javax.swing.GroupLayout.DEFAULT_SIZE, 36, Short.MAX_VALUE)
                             .addComponent(jTextField7, javax.swing.GroupLayout.DEFAULT_SIZE, 36, Short.MAX_VALUE)
@@ -948,7 +952,7 @@ public class Main extends javax.swing.JFrame {
                         .addGroup(jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(jTextField3, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jLabel19, javax.swing.GroupLayout.PREFERRED_SIZE, 44, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                .addGap(0, 8, Short.MAX_VALUE))
+                .addGap(0, 7, Short.MAX_VALUE))
         );
 
         jTable3.setModel(new javax.swing.table.DefaultTableModel(
@@ -1051,6 +1055,17 @@ public class Main extends javax.swing.JFrame {
             }
         });
 
+        cz10.setFont(new java.awt.Font("Segoe UI", 1, 15)); // NOI18N
+        cz10.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icon/excel.png"))); // NOI18N
+        cz10.setHorizontalTextPosition(javax.swing.SwingConstants.CENTER);
+        cz10.setLabel("Excel");
+        cz10.setVerticalTextPosition(javax.swing.SwingConstants.BOTTOM);
+        cz10.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cz10ActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout jPanel9Layout = new javax.swing.GroupLayout(jPanel9);
         jPanel9.setLayout(jPanel9Layout);
         jPanel9Layout.setHorizontalGroup(
@@ -1062,7 +1077,9 @@ public class Main extends javax.swing.JFrame {
                 .addComponent(cz9, javax.swing.GroupLayout.PREFERRED_SIZE, 89, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addComponent(cz8, javax.swing.GroupLayout.PREFERRED_SIZE, 89, javax.swing.GroupLayout.PREFERRED_SIZE)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 182, Short.MAX_VALUE)
+                .addGap(18, 18, 18)
+                .addComponent(cz10, javax.swing.GroupLayout.PREFERRED_SIZE, 89, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 75, Short.MAX_VALUE)
                 .addGroup(jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jLabel28)
                     .addComponent(jTextField11, javax.swing.GroupLayout.PREFERRED_SIZE, 134, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -1096,9 +1113,12 @@ public class Main extends javax.swing.JFrame {
                 .addGroup(jPanel9Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(cz9, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(cz7, javax.swing.GroupLayout.DEFAULT_SIZE, 83, Short.MAX_VALUE)
-                    .addComponent(cz8, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(cz8, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(cz10, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
+
+        cz10.getAccessibleContext().setAccessibleName("Excel");
 
         jTable5.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
@@ -2108,6 +2128,25 @@ public class Main extends javax.swing.JFrame {
     });
     testDialog.setVisible(true);// TODO add your handling code here:
     }//GEN-LAST:event_cz16ActionPerformed
+
+    private void cz10ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cz10ActionPerformed
+        JFileChooser fileChooser = new JFileChooser();
+            int result = fileChooser.showOpenDialog(this);
+
+            if (result == JFileChooser.APPROVE_OPTION) {
+                String filePath = fileChooser.getSelectedFile().getAbsolutePath();
+               
+                // Gọi hàm import từ Excel
+                boolean isImported = ExcelImporter.importQuestionsWithAnswersFromExcel(filePath);
+
+                if (isImported) {
+                    JOptionPane.showMessageDialog(this, "Import câu hỏi thành công!", "Thành công", JOptionPane.INFORMATION_MESSAGE);
+                    loadQuestions(); // Tải lại dữ liệu sau khi import
+                 } else {
+                    JOptionPane.showMessageDialog(this, "Không thể import câu hỏi từ file Excel.", "Lỗi", JOptionPane.ERROR_MESSAGE);
+            }
+        }        
+    }//GEN-LAST:event_cz10ActionPerformed
     
    private void loadTopics() {
     TopicBUS topicBUS = new TopicBUS();
@@ -2409,6 +2448,7 @@ private void createRandomExams(String testCode, int tpID, int numEasy, int numMe
     private javax.swing.JPanel UserPanel;
     private javax.swing.JButton cz;
     private javax.swing.JButton cz1;
+    private javax.swing.JButton cz10;
     private javax.swing.JButton cz16;
     private javax.swing.JButton cz17;
     private javax.swing.JButton cz18;

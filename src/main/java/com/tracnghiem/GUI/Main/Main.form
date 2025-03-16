@@ -842,7 +842,7 @@
                                   </Group>
                               </Group>
                           </Group>
-                          <EmptySpace min="0" pref="8" max="32767" attributes="0"/>
+                          <EmptySpace min="0" pref="7" max="32767" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
@@ -1047,7 +1047,7 @@
                                       <Component id="jLabel15" alignment="3" min="-2" max="-2" attributes="0"/>
                                       <Component id="jLabel16" alignment="3" min="-2" max="-2" attributes="0"/>
                                   </Group>
-                                  <EmptySpace max="32767" attributes="0"/>
+                                  <EmptySpace pref="7" max="32767" attributes="0"/>
                                   <Group type="103" groupAlignment="0" max="-2" attributes="0">
                                       <Component id="jLabel20" pref="36" max="32767" attributes="0"/>
                                       <Component id="jTextField7" pref="36" max="32767" attributes="0"/>
@@ -1311,7 +1311,7 @@
                                   </Group>
                               </Group>
                           </Group>
-                          <EmptySpace min="0" pref="8" max="32767" attributes="0"/>
+                          <EmptySpace min="0" pref="7" max="32767" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
@@ -1476,7 +1476,9 @@
                           <Component id="cz9" min="-2" pref="89" max="-2" attributes="0"/>
                           <EmptySpace type="separate" max="-2" attributes="0"/>
                           <Component id="cz8" min="-2" pref="89" max="-2" attributes="0"/>
-                          <EmptySpace pref="182" max="32767" attributes="0"/>
+                          <EmptySpace type="separate" max="-2" attributes="0"/>
+                          <Component id="cz10" min="-2" pref="89" max="-2" attributes="0"/>
+                          <EmptySpace pref="75" max="32767" attributes="0"/>
                           <Group type="103" groupAlignment="0" attributes="0">
                               <Component id="jLabel28" alignment="0" min="-2" max="-2" attributes="0"/>
                               <Component id="jTextField11" alignment="0" min="-2" pref="134" max="-2" attributes="0"/>
@@ -1520,6 +1522,7 @@
                               <Component id="cz9" max="32767" attributes="0"/>
                               <Component id="cz7" pref="83" max="32767" attributes="0"/>
                               <Component id="cz8" alignment="0" max="32767" attributes="0"/>
+                              <Component id="cz10" alignment="1" max="32767" attributes="0"/>
                           </Group>
                           <EmptySpace max="-2" attributes="0"/>
                       </Group>
@@ -1612,6 +1615,25 @@
                   <Events>
                     <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="jTextField11ActionPerformed"/>
                     <EventHandler event="keyReleased" listener="java.awt.event.KeyListener" parameters="java.awt.event.KeyEvent" handler="jTextField11KeyReleased"/>
+                  </Events>
+                </Component>
+                <Component class="javax.swing.JButton" name="cz10">
+                  <Properties>
+                    <Property name="font" type="java.awt.Font" editor="org.netbeans.beaninfo.editors.FontEditor">
+                      <Font name="Segoe UI" size="15" style="1"/>
+                    </Property>
+                    <Property name="icon" type="javax.swing.Icon" editor="org.netbeans.modules.form.editors2.IconEditor">
+                      <Image iconType="3" name="/icon/excel.png"/>
+                    </Property>
+                    <Property name="horizontalTextPosition" type="int" value="0"/>
+                    <Property name="label" type="java.lang.String" value="Excel"/>
+                    <Property name="verticalTextPosition" type="int" value="3"/>
+                  </Properties>
+                  <AccessibilityProperties>
+                    <Property name="AccessibleContext.accessibleName" type="java.lang.String" value="Excel"/>
+                  </AccessibilityProperties>
+                  <Events>
+                    <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="cz10ActionPerformed"/>
                   </Events>
                 </Component>
               </SubComponents>

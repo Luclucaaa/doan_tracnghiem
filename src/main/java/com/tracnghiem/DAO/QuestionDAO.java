@@ -201,6 +201,27 @@ public class QuestionDAO implements InterfaceDAO<QuestionDTO> {
         return -1;
     }
 
+    public boolean isTopicExists(int topicID) {
+        if (conn == null) {
+            System.err.println("Không thể thực hiện isTopicExists: Kết nối database là null!");
+            return false;
+        }
+
+        String sql = "SELECT COUNT(*) FROM topics WHERE tpID = ?";
+        try (PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, topicID); // Thiết lập giá trị tham số tpID
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    // Nếu COUNT(*) > 0, tức là topicID tồn tại
+                    return rs.getInt(1) > 0;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+     return false;
+    }
+    
     public void closeConnection() {
         JDBCUtil.closeConnection(conn);
     }

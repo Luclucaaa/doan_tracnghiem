@@ -168,6 +168,11 @@ public class ExamDialog extends javax.swing.JDialog {
         jButton5.setBackground(new java.awt.Color(0, 255, 51));
         jButton5.setFont(new java.awt.Font("Segoe UI", 0, 16)); // NOI18N
         jButton5.setText("Thêm mới");
+        jButton5.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton5ActionPerformed(evt);
+            }
+        });
 
         jButton6.setBackground(new java.awt.Color(255, 102, 102));
         jButton6.setFont(new java.awt.Font("Segoe UI", 0, 16)); // NOI18N
@@ -298,6 +303,10 @@ public class ExamDialog extends javax.swing.JDialog {
     private void jTextField11ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jTextField11ActionPerformed
         // TODO add your handling code here:
     }//GEN-LAST:event_jTextField11ActionPerformed
+
+    private void jButton5ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton5ActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_jButton5ActionPerformed
 
     /**
      * @param args the command line arguments
