@@ -6,7 +6,9 @@ package com.tracnghiem.BUS;
 
 import com.tracnghiem.DAO.ResultDAO;
 import com.tracnghiem.DTO.ResultDTO;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -48,7 +50,29 @@ public class ResultBUS {
         return resultDAO.selectByExCode(exCode);
     }
 
+    
+    public int getLastInsertedID(int userID, String exCode, LocalDateTime rsDate) {
+    return resultDAO.getLastInsertedID(userID, exCode, rsDate);
+}
     public Map<String, int[]> getStatisticsByExCode(String exCodeFilter) {
-        return resultDAO.getStatisticsByExCode(exCodeFilter);
+        ArrayList<ResultDTO> results = getAllResults();
+        Map<String, int[]> stats = new HashMap<>();
+
+        for (ResultDTO result : results) {
+            String exCode = result.getExCode();
+            if (!exCodeFilter.isEmpty() && !exCode.startsWith(exCodeFilter)) {
+                continue; // Lọc theo exCode nếu có
+            }
+
+            stats.putIfAbsent(exCode, new int[]{0, 0, 0}); // [số lần thi, đạt, không đạt]
+            int[] stat = stats.get(exCode);
+            stat[0]++; // Tăng số lần thi
+            if (result.getRs_mark() >= 5) {
+                stat[1]++; // Tăng số người đạt
+            } else {
+                stat[2]++; // Tăng số người không đạt
+            }
+        }
+        return stats;
     }
 }

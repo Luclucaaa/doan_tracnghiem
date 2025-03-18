@@ -33,6 +33,20 @@ public class JDBCUtil {
         }
         return result;
     }
+    public static String hashPassword(String password) {
+    try {
+        java.security.MessageDigest md = java.security.MessageDigest.getInstance("MD5");
+        byte[] array = md.digest(password.getBytes());
+        StringBuilder sb = new StringBuilder();
+        for (byte b : array) {
+            sb.append(String.format("%02x", b));
+        }
+        return sb.toString();
+    } catch (Exception e) {
+        e.printStackTrace();
+        return null;
+    }
+}
 
     public static void closeConnection(Connection c) {
         try {

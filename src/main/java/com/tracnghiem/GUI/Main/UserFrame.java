@@ -18,6 +18,8 @@ import com.tracnghiem.DTO.QuestionDTO;
 import com.tracnghiem.DTO.AnswerDTO;
 import com.tracnghiem.DTO.ResultDTO;
 import com.tracnghiem.DTO.UserDTO;
+import com.tracnghiem.GUI.Dialog.ResetPassDialog;
+import com.tracnghiem.GUI.Dialog.SuaThongTinDialog;
 import com.tracnghiem.GUI.Dialog.SuaUserDialog;
 import com.tracnghiem.config.JDBCUtil;
 import java.awt.Color;
@@ -32,14 +34,21 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Timestamp;
+import java.text.DecimalFormat;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import javax.swing.BorderFactory;
 import javax.swing.Icon;
@@ -53,6 +62,8 @@ import javax.swing.Timer;
 import javax.swing.UIManager;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.text.DefaultCaret;
+import org.json.JSONObject;
+import org.json.JSONArray;
 
 
 /**
@@ -80,38 +91,48 @@ public class UserFrame extends javax.swing.JFrame {
     private int userID; // Biến lưu ID người dùng
     private int topicID; // Biến lưu ID chủ đề
     private long startTime;
+    private String timeTakenText;
+    private HashMap<Integer, String> timeTakenMap; // Lưu thời gian làm bài cho từng bài thi (rs_num -> timeTakenText)
+    private Main mainFrame; // Thêm tham chiếu đến Main
+    private String username;
     /**
      * Creates new form UserFrame
      */
-    public UserFrame(String username){ 
-        initComponents();    
-        name.setText(username);
-        // Khởi tạo BUS
-        testBUS = new TestBUS();
-        topicBUS = new TopicBUS();
-        examBUS = new ExamBUS();
-        questionBUS = new QuestionBUS();
-        answerBUS = new AnswerBUS();
-        
-        // Lấy userID từ username
-        userID = getCurrentUserID(); // Gọi phương thức đã có để lấy userID
-        if (userID == -1) {
-            JOptionPane.showMessageDialog(this, "Không thể xác định người dùng!", "Lỗi", JOptionPane.ERROR_MESSAGE);
-        }
-        // Tải dữ liệu cho panel chọn đề thi
-        loadTopics();
-        loadTests();
-
-        // Khởi tạo timer nhưng chưa chạy, sẽ chạy khi làm bài
-        setupTimer();
-        
-        // Khởi tạo danh sách để lưu đáp án và ô vuông
-        selectedAnswers = new ArrayList<>();
-        squareLabels = new ArrayList<>();
-        
-        // Khởi tạo số lượt làm bài
-        remainingAttempts = 0;
+    
+    // Thêm phương thức này để Main.java có thể truy cập timeTakenMap
+    public HashMap<Integer, String> getTimeTakenMap() {
+        return timeTakenMap;
     }
+    
+    public UserFrame(String username, Main mainFrame) { // Thêm tham chiếu mainFrame
+    this.username = username; // Lưu username vào biến instance
+    this.mainFrame = mainFrame; // Gán mainFrame
+    initComponents();
+    name.setText(username);
+    // Khởi tạo BUS
+    testBUS = new TestBUS();
+    topicBUS = new TopicBUS();
+    examBUS = new ExamBUS();
+    questionBUS = new QuestionBUS();
+    answerBUS = new AnswerBUS();
+    timeTakenMap = new HashMap<>();
+    loadTimeTakenMapFromFile();
+
+    userID = getCurrentUserID();
+    System.out.println("UserFrame - username: " + username + ", userID: " + userID); // Thêm log
+    if (userID <= 0) { // Kiểm tra cả 0 và -1
+        JOptionPane.showMessageDialog(this, "Không thể xác định người dùng với username: " + username, "Lỗi", JOptionPane.ERROR_MESSAGE);
+        dispose(); // Đóng UserFrame nếu userID không hợp lệ
+        return;
+    }
+    loadTopics();
+    loadTests();
+    setupTimer();
+    selectedAnswers = new ArrayList<>();
+    squareLabels = new ArrayList<>();
+    remainingAttempts = 0;
+    initializeXemKQThiPanel();
+}
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -164,6 +185,7 @@ public class UserFrame extends javax.swing.JFrame {
         jPanel8 = new javax.swing.JPanel();
         jPanel10 = new javax.swing.JPanel();
         jLabel26 = new javax.swing.JLabel();
+        imageLabel = new javax.swing.JLabel();
         jPanel5 = new javax.swing.JPanel();
         jPanel12 = new javax.swing.JPanel();
         jLabel39 = new javax.swing.JLabel();
@@ -202,6 +224,25 @@ public class UserFrame extends javax.swing.JFrame {
         jLabel36 = new javax.swing.JLabel();
         jLabel38 = new javax.swing.JLabel();
         XemKQThiPanel = new javax.swing.JPanel();
+        jPanel4 = new javax.swing.JPanel();
+        jLabel37 = new javax.swing.JLabel();
+        jScrollPane2 = new javax.swing.JScrollPane();
+        jTable2 = new javax.swing.JTable();
+        jLabel44 = new javax.swing.JLabel();
+        jComboBox3 = new javax.swing.JComboBox<>();
+        jLabel45 = new javax.swing.JLabel();
+        jComboBox4 = new javax.swing.JComboBox<>();
+        jTextField2 = new javax.swing.JTextField();
+        jLabel46 = new javax.swing.JLabel();
+        InformationPanel = new javax.swing.JPanel();
+        jLabel47 = new javax.swing.JLabel();
+        jLabel48 = new javax.swing.JLabel();
+        jLabel49 = new javax.swing.JLabel();
+        jLabel50 = new javax.swing.JLabel();
+        jLabel52 = new javax.swing.JLabel();
+        jLabel53 = new javax.swing.JLabel();
+        jButton6 = new javax.swing.JButton();
+        jButton7 = new javax.swing.JButton();
 
         javax.swing.GroupLayout jPanel11Layout = new javax.swing.GroupLayout(jPanel11);
         jPanel11.setLayout(jPanel11Layout);
@@ -405,9 +446,9 @@ public class UserFrame extends javax.swing.JFrame {
         HomePanel.setLayout(HomePanelLayout);
         HomePanelLayout.setHorizontalGroup(
             HomePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 1274, Short.MAX_VALUE)
+            .addGap(0, 1255, Short.MAX_VALUE)
             .addGroup(HomePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                .addComponent(jLabel15, javax.swing.GroupLayout.DEFAULT_SIZE, 1274, Short.MAX_VALUE))
+                .addComponent(jLabel15, javax.swing.GroupLayout.DEFAULT_SIZE, 1255, Short.MAX_VALUE))
         );
         HomePanelLayout.setVerticalGroup(
             HomePanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -481,7 +522,7 @@ public class UserFrame extends javax.swing.JFrame {
         UserChooseExamPanelLayout.setHorizontalGroup(
             UserChooseExamPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, UserChooseExamPanelLayout.createSequentialGroup()
-                .addGap(0, 32, Short.MAX_VALUE)
+                .addGap(0, 13, Short.MAX_VALUE)
                 .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 1242, javax.swing.GroupLayout.PREFERRED_SIZE))
             .addGroup(UserChooseExamPanelLayout.createSequentialGroup()
                 .addGroup(UserChooseExamPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -572,23 +613,12 @@ public class UserFrame extends javax.swing.JFrame {
                 .addComponent(jLabel13, javax.swing.GroupLayout.PREFERRED_SIZE, 45, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
 
+        jPanel10.setPreferredSize(new java.awt.Dimension(958, 179));
         jPanel10.setBorder(javax.swing.BorderFactory.createLineBorder(new java.awt.Color(0, 0, 0)));
+        jPanel10.add(jLabel26);
 
-        jLabel26.setBackground(new java.awt.Color(255, 255, 255));
-        jLabel26.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
-        jLabel26.setVerticalAlignment(javax.swing.SwingConstants.TOP);
-        jLabel26.setHorizontalTextPosition(javax.swing.SwingConstants.LEADING);
-
-        javax.swing.GroupLayout jPanel10Layout = new javax.swing.GroupLayout(jPanel10);
-        jPanel10.setLayout(jPanel10Layout);
-        jPanel10Layout.setHorizontalGroup(
-            jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jLabel26, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-        );
-        jPanel10Layout.setVerticalGroup(
-            jPanel10Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addComponent(jLabel26, javax.swing.GroupLayout.DEFAULT_SIZE, 192, Short.MAX_VALUE)
-        );
+        imageLabel.setPreferredSize(new java.awt.Dimension(200, 165));
+        jPanel10.add(imageLabel);
 
         jPanel5.setLayout(new java.awt.GridLayout(5, 1));
 
@@ -762,7 +792,7 @@ public class UserFrame extends javax.swing.JFrame {
         jPanel8Layout.setVerticalGroup(
             jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(jPanel8Layout.createSequentialGroup()
-                .addComponent(jPanel10, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jPanel10, javax.swing.GroupLayout.PREFERRED_SIZE, 179, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(jPanel5, javax.swing.GroupLayout.PREFERRED_SIZE, 487, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
@@ -994,7 +1024,7 @@ public class UserFrame extends javax.swing.JFrame {
                     .addGroup(KetQuaThiPanelLayout.createSequentialGroup()
                         .addGap(166, 166, 166)
                         .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
-                .addContainerGap(171, Short.MAX_VALUE))
+                .addContainerGap(152, Short.MAX_VALUE))
         );
         KetQuaThiPanelLayout.setVerticalGroup(
             KetQuaThiPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -1011,7 +1041,7 @@ public class UserFrame extends javax.swing.JFrame {
                         .addComponent(jLabel28, javax.swing.GroupLayout.PREFERRED_SIZE, 48, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addGap(53, 53, 53)
                 .addGroup(KetQuaThiPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jLabel27, javax.swing.GroupLayout.DEFAULT_SIZE, 60, Short.MAX_VALUE)
+                    .addComponent(jLabel27, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                     .addComponent(jLabel22, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addGap(36, 36, 36)
                 .addComponent(jPanel1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -1020,18 +1050,189 @@ public class UserFrame extends javax.swing.JFrame {
 
         contentPanel.add(KetQuaThiPanel, "card6");
 
+        jPanel4.setBackground(new java.awt.Color(51, 255, 0));
+
+        jLabel37.setFont(new java.awt.Font("Segoe UI", 1, 36)); // NOI18N
+        jLabel37.setText("KẾT QUẢ THI");
+
+        javax.swing.GroupLayout jPanel4Layout = new javax.swing.GroupLayout(jPanel4);
+        jPanel4.setLayout(jPanel4Layout);
+        jPanel4Layout.setHorizontalGroup(
+            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 0, Short.MAX_VALUE)
+            .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jPanel4Layout.createSequentialGroup()
+                    .addGap(0, 0, Short.MAX_VALUE)
+                    .addComponent(jLabel37)
+                    .addGap(0, 0, Short.MAX_VALUE)))
+        );
+        jPanel4Layout.setVerticalGroup(
+            jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGap(0, 90, Short.MAX_VALUE)
+            .addGroup(jPanel4Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                .addGroup(jPanel4Layout.createSequentialGroup()
+                    .addGap(0, 0, Short.MAX_VALUE)
+                    .addComponent(jLabel37)
+                    .addGap(0, 21, Short.MAX_VALUE)))
+        );
+
+        jTable2.setModel(new javax.swing.table.DefaultTableModel(
+            new Object [][] {
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null}
+            },
+            new String [] {
+                "Bài thi", "Đề thi", "Chủ đề", "Thời gian làm", "Điểm số", "Phần trăm ", "Số câu đúng"
+            }
+        ));
+        jScrollPane2.setViewportView(jTable2);
+
+        jLabel44.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        jLabel44.setText("Tên chủ đề");
+
+        jComboBox3.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+
+        jLabel45.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+        jLabel45.setText("Tên bài thi");
+
+        jComboBox4.setFont(new java.awt.Font("Segoe UI", 0, 18)); // NOI18N
+
+        jTextField2.setFont(new java.awt.Font("Segoe UI", 0, 15)); // NOI18N
+        jTextField2.addKeyListener(new java.awt.event.KeyAdapter() {
+            public void keyReleased(java.awt.event.KeyEvent evt) {
+                jTextField2KeyReleased(evt);
+            }
+        });
+
+        jLabel46.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icon/search.png"))); // NOI18N
+
         javax.swing.GroupLayout XemKQThiPanelLayout = new javax.swing.GroupLayout(XemKQThiPanel);
         XemKQThiPanel.setLayout(XemKQThiPanelLayout);
         XemKQThiPanelLayout.setHorizontalGroup(
             XemKQThiPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 1274, Short.MAX_VALUE)
+            .addComponent(jPanel4, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+            .addGroup(XemKQThiPanelLayout.createSequentialGroup()
+                .addGap(17, 17, 17)
+                .addComponent(jLabel44, javax.swing.GroupLayout.PREFERRED_SIZE, 94, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jComboBox3, javax.swing.GroupLayout.PREFERRED_SIZE, 258, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(66, 66, 66)
+                .addComponent(jLabel45, javax.swing.GroupLayout.PREFERRED_SIZE, 94, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jComboBox4, javax.swing.GroupLayout.PREFERRED_SIZE, 258, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 126, Short.MAX_VALUE)
+                .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, 296, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(jLabel46)
+                .addGap(17, 17, 17))
+            .addComponent(jScrollPane2)
         );
         XemKQThiPanelLayout.setVerticalGroup(
             XemKQThiPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGap(0, 854, Short.MAX_VALUE)
+            .addGroup(XemKQThiPanelLayout.createSequentialGroup()
+                .addComponent(jPanel4, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addGap(18, 18, 18)
+                .addGroup(XemKQThiPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(XemKQThiPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                        .addComponent(jLabel46, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(jComboBox3)
+                        .addComponent(jLabel44, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addGroup(XemKQThiPanelLayout.createSequentialGroup()
+                            .addGap(0, 0, Short.MAX_VALUE)
+                            .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addComponent(jLabel45, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addComponent(jComboBox4, javax.swing.GroupLayout.PREFERRED_SIZE, 44, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(35, 35, 35)
+                .addComponent(jScrollPane2, javax.swing.GroupLayout.PREFERRED_SIZE, 667, javax.swing.GroupLayout.PREFERRED_SIZE))
         );
 
         contentPanel.add(XemKQThiPanel, "card5");
+
+        jLabel47.setFont(new java.awt.Font("Segoe UI", 0, 48)); // NOI18N
+        jLabel47.setIcon(new javax.swing.ImageIcon(getClass().getResource("/icon/nguoidung1.png"))); // NOI18N
+
+        jLabel48.setFont(new java.awt.Font("Segoe UI", 0, 90)); // NOI18N
+
+        jLabel49.setFont(new java.awt.Font("Segoe UI", 0, 48)); // NOI18N
+        jLabel49.setText("Tên đầy đủ:");
+
+        jLabel50.setFont(new java.awt.Font("Segoe UI", 0, 48)); // NOI18N
+        jLabel50.setText("Email:");
+
+        jLabel52.setFont(new java.awt.Font("Segoe UI", 0, 48)); // NOI18N
+
+        jLabel53.setFont(new java.awt.Font("Segoe UI", 0, 48)); // NOI18N
+
+        jButton6.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
+        jButton6.setText("Thay đổi mật khẩu");
+        jButton6.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton6ActionPerformed(evt);
+            }
+        });
+
+        jButton7.setFont(new java.awt.Font("Segoe UI", 0, 24)); // NOI18N
+        jButton7.setText("Thay đổi thông tin cá nhân");
+        jButton7.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                jButton7ActionPerformed(evt);
+            }
+        });
+
+        javax.swing.GroupLayout InformationPanelLayout = new javax.swing.GroupLayout(InformationPanel);
+        InformationPanel.setLayout(InformationPanelLayout);
+        InformationPanelLayout.setHorizontalGroup(
+            InformationPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(InformationPanelLayout.createSequentialGroup()
+                .addGroup(InformationPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(InformationPanelLayout.createSequentialGroup()
+                        .addContainerGap()
+                        .addComponent(jLabel47, javax.swing.GroupLayout.PREFERRED_SIZE, 236, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(jLabel48, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(InformationPanelLayout.createSequentialGroup()
+                        .addGap(35, 35, 35)
+                        .addGroup(InformationPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(jLabel50)
+                            .addComponent(jLabel49))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addGroup(InformationPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING, false)
+                            .addComponent(jLabel52, javax.swing.GroupLayout.DEFAULT_SIZE, 673, Short.MAX_VALUE)
+                            .addComponent(jLabel53, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                .addContainerGap())
+            .addGroup(InformationPanelLayout.createSequentialGroup()
+                .addGap(190, 190, 190)
+                .addComponent(jButton7)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 304, Short.MAX_VALUE)
+                .addComponent(jButton6)
+                .addGap(232, 232, 232))
+        );
+        InformationPanelLayout.setVerticalGroup(
+            InformationPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+            .addGroup(InformationPanelLayout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(InformationPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                    .addGroup(InformationPanelLayout.createSequentialGroup()
+                        .addGroup(InformationPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                            .addComponent(jLabel47, javax.swing.GroupLayout.PREFERRED_SIZE, 217, javax.swing.GroupLayout.PREFERRED_SIZE)
+                            .addComponent(jLabel48, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                        .addGap(76, 76, 76)
+                        .addGroup(InformationPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jLabel49)
+                            .addComponent(jLabel52, javax.swing.GroupLayout.PREFERRED_SIZE, 64, javax.swing.GroupLayout.PREFERRED_SIZE))
+                        .addGap(81, 81, 81)
+                        .addComponent(jLabel50))
+                    .addComponent(jLabel53, javax.swing.GroupLayout.PREFERRED_SIZE, 64, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addGap(110, 110, 110)
+                .addGroup(InformationPanelLayout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
+                    .addComponent(jButton6, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)
+                    .addComponent(jButton7, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE))
+                .addContainerGap(166, Short.MAX_VALUE))
+        );
+
+        contentPanel.add(InformationPanel, "card7");
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
@@ -1066,13 +1267,18 @@ public class UserFrame extends javax.swing.JFrame {
 
     private void TopicMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_TopicMouseClicked
         contentPanel.removeAll();
-        contentPanel.add(XemKQThiPanel, "card5");
-        contentPanel.revalidate();
-        contentPanel.repaint();      // TODO add your handling code here:
+    contentPanel.add(XemKQThiPanel, "card5");
+    loadResultsForXemKQThiPanel(); // Làm mới dữ liệu
+    contentPanel.revalidate();
+    contentPanel.repaint();      // TODO add your handling code here:
     }//GEN-LAST:event_TopicMouseClicked
 
     private void TestMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_TestMouseClicked
-        
+        loadUserInfo(); // Tải thông tin người dùng
+    contentPanel.removeAll();
+    contentPanel.add(InformationPanel, "card7");
+    contentPanel.revalidate();
+    contentPanel.repaint();
     }//GEN-LAST:event_TestMouseClicked
 
     private void jButton1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton1ActionPerformed
@@ -1149,22 +1355,22 @@ private int getCurrentUserID() {
         if (conn != null) {
             String sql = "SELECT userID FROM users WHERE userName = ?";
             pstmt = conn.prepareStatement(sql);
-            pstmt.setString(1, name.getText().trim()); // Lấy username từ label name
+            pstmt.setString(1, username.trim()); // Sử dụng biến instance username
             rs = pstmt.executeQuery();
             if (rs.next()) {
                 userID = rs.getInt("userID");
+            } else {
+                System.out.println("No user found for username: " + username);
             }
+        } else {
+            System.out.println("Database connection failed.");
         }
     } catch (Exception e) {
         e.printStackTrace();
         JOptionPane.showMessageDialog(this, "Lỗi khi lấy userID: " + e.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
     } finally {
-        if (rs != null) {
-            try { rs.close(); } catch (Exception e) { e.printStackTrace(); }
-        }
-        if (pstmt != null) {
-            try { pstmt.close(); } catch (Exception e) { e.printStackTrace(); }
-        }
+        if (rs != null) try { rs.close(); } catch (Exception e) { e.printStackTrace(); }
+        if (pstmt != null) try { pstmt.close(); } catch (Exception e) { e.printStackTrace(); }
         JDBCUtil.closeConnection(conn);
     }
     return userID;
@@ -1200,9 +1406,8 @@ private int getCurrentUserID() {
     calculateMaxScore();
     calculateScore();
 
-    // Tính số câu trả lời đúng
     int correctAnswers = 0;
-    int totalQuestions = selectedAnswers.size(); // Tổng số câu hỏi
+    int totalQuestions = selectedAnswers.size();
     for (int i = 0; i < selectedAnswers.size(); i++) {
         int userAnswerIndex = selectedAnswers.get(i);
         if (userAnswerIndex != -1) {
@@ -1227,6 +1432,7 @@ private int getCurrentUserID() {
     for (TestDTO test : tests) {
         ArrayList<ExamDTO> exams = examBUS.getExamsByTestCode(test.getTestCode());
         for (ExamDTO exam : exams) {
+            System.out.println("Checking exam: exOrder=" + exam.getExOrder() + ", exCode=" + exam.getExCode());
             if (exam.getExOrder().equals(selectedExamOrder)) {
                 exCode = exam.getExCode();
                 testCode = test.getTestCode();
@@ -1235,20 +1441,44 @@ private int getCurrentUserID() {
         }
         if (exCode != null) break;
     }
+    System.out.println("Final exCode: " + exCode + ", testCode: " + testCode);
 
     StringBuilder rsAnswersBuilder = new StringBuilder();
-    for (int answer : selectedAnswers) {
-        rsAnswersBuilder.append(answer).append(",");
+    rsAnswersBuilder.append("{\"answers\":[");
+    for (int i = 0; i < selectedAnswers.size(); i++) {
+        int answerIndex = selectedAnswers.get(i);
+        rsAnswersBuilder.append(answerIndex);
+        if (i < selectedAnswers.size() - 1) {
+            rsAnswersBuilder.append(",");
+        }
     }
-    rsAnswersBuilder.append("maxScore=").append(maxScore);
+    rsAnswersBuilder.append("],\"maxScore\":").append(maxScore).append("}");
+    System.out.println("rs_answers JSON: " + rsAnswersBuilder.toString());
 
     LocalDateTime rsDate = LocalDateTime.now();
 
-    ResultDTO result = new ResultDTO(
-        0, userID, exCode, rsAnswersBuilder.toString(), totalScore, rsDate
-    );
+    ResultDTO result = new ResultDTO(0, userID, exCode, rsAnswersBuilder.toString(), (double) totalScore, rsDate);
     ResultBUS resultBUS = new ResultBUS();
-    resultBUS.addResult(result);
+    boolean success = resultBUS.addResult(result);
+    if (success) {
+        int rsNum = resultBUS.getLastInsertedID(userID, exCode, rsDate);
+if (rsNum != -1) {
+    long endTime = System.currentTimeMillis();
+    long timeTakenMillis = endTime - startTime;
+    long seconds = timeTakenMillis / 1000;
+    long minutesTaken = seconds / 60;
+    long remainingSeconds = seconds % 60;
+    this.timeTakenText = (minutesTaken > 0 ? minutesTaken + " phút " : "") + remainingSeconds + " giây";
+    if (minutesTaken == 0 && remainingSeconds == 0) {
+        this.timeTakenText = "Ít hơn 1 giây";
+    }
+    timeTakenMap.put(rsNum, this.timeTakenText);
+    System.out.println("Saved timeTakenText for rs_num " + rsNum + ": " + this.timeTakenText);
+    saveTimeTakenMapToFile();
+}
+    } else {
+        System.err.println("Failed to add result to database.");
+    }
 
     if (testBUS.decreaseUserRemainingAttempts(userID, testCode)) {
         remainingAttempts = testBUS.getUserRemainingAttempts(userID, testCode);
@@ -1259,11 +1489,10 @@ private int getCurrentUserID() {
 
     if (remainingAttempts <= 0) {
         JOptionPane.showMessageDialog(this, "Số lượt làm bài đã hết! Không thể làm bài nữa.");
-    }
-
-    // Tính thời gian làm bài
+    }   
+    
     long endTime = System.currentTimeMillis();
-    long timeTakenMillis = endTime - startTime; // Thời gian làm bài (mili giây)
+    long timeTakenMillis = endTime - startTime;
     long seconds = timeTakenMillis / 1000;
     long minutesTaken = seconds / 60;
     long remainingSeconds = seconds % 60;
@@ -1272,20 +1501,24 @@ private int getCurrentUserID() {
         timeTakenText = "Ít hơn 1 giây";
     }
 
-    // Cập nhật giao diện
     jLabel24.setText(topicName != null ? topicName : "Không xác định");
     jLabel28.setText(tests.get(0).getTestTitle() != null ? tests.get(0).getTestTitle() : "Không xác định");
     jLabel22.setText(selectedExamDisplayName != null ? selectedExamDisplayName : "Không xác định");
     jLabel30.setText(totalScore + "/" + maxScore);
     jLabel32.setText(percentageText);
-    jLabel36.setText(timeTakenText); // Hiển thị thời gian làm bài
-    jLabel34.setText(correctAnswers + "/" + totalQuestions); // Hiển thị "số đúng/tổng số"
+    this.timeTakenText = (minutesTaken > 0 ? minutesTaken + " phút " : "") + remainingSeconds + " giây";
+    jLabel36.setText(this.timeTakenText);
+    jLabel34.setText(correctAnswers + "/" + totalQuestions);
 
-    
+    loadResultsForXemKQThiPanel();
     contentPanel.removeAll();
     contentPanel.add(KetQuaThiPanel, "card7");
     contentPanel.revalidate();
-    contentPanel.repaint();// TODO add your handling code here:
+    contentPanel.repaint();
+    
+    if (mainFrame != null) {
+    //mainFrame.refreshThongKeData(); // Cập nhật thống kê trong Main
+}// TODO add your handling code here:
     }//GEN-LAST:event_jButton4ActionPerformed
 
     private void jComboBox1ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jComboBox1ActionPerformed
@@ -1390,7 +1623,7 @@ private int getCurrentUserID() {
     }//GEN-LAST:event_UserMouseEntered
 
     private void jLabel39MouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_jLabel39MouseClicked
-        resetBackgrounds();
+        resetBackgrounds(); // Reset màu nền trước khi chọn mới
     jLabel39.setBackground(Color.GREEN);
     if (currentQuestionIndex < selectedAnswers.size()) {
         selectedAnswers.set(currentQuestionIndex, 0); // Đáp án A
@@ -1405,7 +1638,7 @@ private int getCurrentUserID() {
         resetBackgrounds();
     jLabel40.setBackground(Color.GREEN);
     if (currentQuestionIndex < selectedAnswers.size()) {
-        selectedAnswers.set(currentQuestionIndex, 1);
+        selectedAnswers.set(currentQuestionIndex, 1); // Đáp án B
     } else {
         selectedAnswers.add(1);
     }
@@ -1448,17 +1681,58 @@ private int getCurrentUserID() {
     updateSquareColors();
     logAnswer(currentQuestionIndex, 4);// TODO add your handling code here:
     }//GEN-LAST:event_jLabel43MouseClicked
+
+    private void jTextField2KeyReleased(java.awt.event.KeyEvent evt) {//GEN-FIRST:event_jTextField2KeyReleased
+        String searchText = jTextField2.getText().trim().toLowerCase();
+        TopicBUS topicBUS = new TopicBUS();
+        ArrayList<TopicDTO> topics = topicBUS.getAllActiveTopics();
+
+        DefaultTableModel model = (DefaultTableModel) jTable2.getModel();
+        model.setRowCount(0); // Xóa dữ liệu cũ trong bảng
+
+        DecimalFormat formatter = new DecimalFormat("000");
+
+        for (TopicDTO topic : topics) {
+            if (topic.getTpTitle().toLowerCase().contains(searchText)) {
+                String formattedTpID = formatter.format(topic.getTpID());
+                model.addRow(new Object[]{
+                    formattedTpID,
+                    topic.getTpTitle(),
+                    topic.getTpParent(), // Dùng tpParent làm ví dụ, bạn có thể thay bằng mô tả thực tế
+                    topic.getTpStatus() == 1 ? "Active" : "Hidden"
+                });
+            }
+        }        // TODO add your handling code here:
+    }//GEN-LAST:event_jTextField2KeyReleased
+
+    private void jButton7ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton7ActionPerformed
+        System.out.println("UserFrame - userID before opening dialog: " + userID); // Thêm log
+    SuaThongTinDialog suaThongTinDialog = new SuaThongTinDialog(this, true, userID);
+    suaThongTinDialog.setLocationRelativeTo(this);
+    suaThongTinDialog.setUserInfo(jLabel48.getText(), jLabel52.getText(), jLabel53.getText());
+    suaThongTinDialog.setVisible(true);
+    loadUserInfo(); // Làm mới thông tin trong UserFrame
+    if (mainFrame != null) {
+        mainFrame.loadUserTable(); // Làm mới bảng trong Main
+    }// TODO add your handling code here:
+    }//GEN-LAST:event_jButton7ActionPerformed
+
+    private void jButton6ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton6ActionPerformed
+    ResetPassDialog resetPassDialog = new ResetPassDialog(this, true, userID);
+    resetPassDialog.setLocationRelativeTo(this);
+    resetPassDialog.setVisible(true);
+    loadUserInfo(); // Làm mới thông tin trong UserFrame
+    if (mainFrame != null) {
+        mainFrame.loadUserTable(); // Làm mới bảng trong Main
+    }// TODO add your handling code here:
+    }//GEN-LAST:event_jButton6ActionPerformed
     private void resetBackgrounds() {
     jLabel39.setBackground(Color.WHITE);
     jLabel40.setBackground(Color.WHITE);
     jLabel41.setBackground(Color.WHITE);
     jLabel42.setBackground(Color.WHITE);
     jLabel43.setBackground(Color.WHITE);
-
-    if (currentQuestionIndex < selectedAnswers.size()) {
-        selectedAnswers.set(currentQuestionIndex, -1);
-        updateSquareColors();
-    }
+    // Không đặt lại selectedAnswers ở đây
 }
     private void createSquares() {
     jPanel14.removeAll();
@@ -1472,7 +1746,7 @@ private int getCurrentUserID() {
     for (int i = 1; i <= numberOfSquares; i++) {
         JLabel square = new JLabel(String.valueOf(i), SwingConstants.CENTER);
         square.setOpaque(true);
-        square.setBackground(Color.white);
+        square.setBackground(Color.WHITE);
         square.setBorder(BorderFactory.createLineBorder(Color.BLACK, 2));
         square.setPreferredSize(new Dimension(squareSize, squareSize));
         square.setFont(new Font("Arial", Font.BOLD, 24));
@@ -1482,7 +1756,8 @@ private int getCurrentUserID() {
             @Override
             public void mouseClicked(MouseEvent e) {
                 currentQuestionIndex = index;
-                displayQuestion(currentQuestionIndex);
+                displayQuestion(currentQuestionIndex); // Hiển thị câu hỏi với trạng thái đã chọn
+                updateSquareColors();
             }
         });
 
@@ -1636,6 +1911,151 @@ private int getCurrentUserID() {
         updateSquareColors();
     }
 }
+    
+    private void initializeXemKQThiPanel() {
+    // Tải danh sách chủ đề vào jComboBox3
+    jComboBox3.removeAllItems();
+    jComboBox3.addItem("Tất cả"); // Thêm lựa chọn "Tất cả"
+    ArrayList<TopicDTO> topics = topicBUS.getAllActiveTopics();
+    for (TopicDTO topic : topics) {
+        jComboBox3.addItem(topic.getTpTitle());
+    }
+
+    // Tải danh sách bài thi vào jComboBox4
+    jComboBox4.removeAllItems();
+    jComboBox4.addItem("Tất cả"); // Thêm lựa chọn "Tất cả"
+    ArrayList<TestDTO> tests = testBUS.getAllTests();
+    for (TestDTO test : tests) {
+        jComboBox4.addItem(test.getTestTitle());
+    }
+
+    // Thêm sự kiện cho jComboBox3 và jComboBox4
+    jComboBox3.addActionListener(e -> loadResultsForXemKQThiPanel());
+    jComboBox4.addActionListener(e -> loadResultsForXemKQThiPanel());
+
+    // Tải dữ liệu ban đầu
+    loadResultsForXemKQThiPanel();
+}
+
+private void loadResultsForXemKQThiPanel() {
+    ResultBUS resultBUS = new ResultBUS();
+    DefaultTableModel model = (DefaultTableModel) jTable2.getModel();
+    model.setRowCount(0); // Xóa dữ liệu cũ
+
+    String selectedTopic = (String) jComboBox3.getSelectedItem();
+    String selectedTest = (String) jComboBox4.getSelectedItem();
+
+    ArrayList<ResultDTO> results = resultBUS.getResultsByUserID(userID);
+    System.out.println("Number of results for userID " + userID + ": " + (results != null ? results.size() : 0));
+    if (results == null || results.isEmpty()) {
+        System.out.println("No results found for userID: " + userID);
+        return;
+    }
+
+    for (ResultDTO result : results) {
+        System.out.println("Processing result: " + result.toString());
+
+        ExamDTO exam = examBUS.getExamByExCode(result.getExCode());
+        if (exam == null) {
+            System.out.println("Exam not found for exCode: " + result.getExCode());
+            continue;
+        }
+
+        TestDTO test = testBUS.getTestByCode(exam.getTestCode());
+        if (test == null) {
+            System.out.println("Test not found for testCode: " + exam.getTestCode());
+            continue;
+        }
+
+        TopicDTO topic = topicBUS.getTopicByID(String.valueOf(test.getTpID()));
+        if (topic == null) {
+            System.out.println("Topic not found for tpID: " + test.getTpID());
+            continue;
+        }
+
+        // Lọc theo chủ đề và bài thi nếu không chọn "Tất cả"
+        if (!"Tất cả".equals(selectedTopic) && !selectedTopic.equals(topic.getTpTitle())) {
+            continue;
+        }
+        if (!"Tất cả".equals(selectedTest) && !selectedTest.equals(test.getTestTitle())) {
+            continue;
+        }
+
+        // Phân tích rs_answers bằng JSON
+        int correctAnswers = 0;
+        int totalQuestions = 0;
+        int maxScore = 0;
+        ArrayList<Integer> userAnswers = new ArrayList<>();
+
+        try {
+            JSONObject json = new JSONObject(result.getRs_answers());
+            JSONArray answersArray = json.getJSONArray("answers");
+            maxScore = json.getInt("maxScore");
+
+            totalQuestions = answersArray.length();
+            for (int i = 0; i < totalQuestions; i++) {
+                userAnswers.add(answersArray.getInt(i));
+            }
+        } catch (Exception e) {
+            System.err.println("Error parsing rs_answers: " + result.getRs_answers());
+            e.printStackTrace();
+            continue;
+        }
+
+        // Tải danh sách câu hỏi để kiểm tra đáp án đúng
+        String exQuesIDs = exam.getExQuesIDs();
+        ArrayList<QuestionDTO> questions = new ArrayList<>();
+        ArrayList<List<AnswerDTO>> answers = new ArrayList<>();
+        if (exQuesIDs != null && !exQuesIDs.trim().isEmpty()) {
+            String[] quesIDs = exQuesIDs.split(",");
+            for (String quesID : quesIDs) {
+                try {
+                    int qID = Integer.parseInt(quesID.trim());
+                    QuestionDTO question = questionBUS.getQuestionByID(qID);
+                    if (question != null) {
+                        List<AnswerDTO> questionAnswers = answerBUS.getAnswersByQuestionID(qID);
+                        if (questionAnswers != null && !questionAnswers.isEmpty()) {
+                            questions.add(question);
+                            answers.add(questionAnswers);
+                        }
+                    }
+                } catch (NumberFormatException e) {
+                    System.err.println("Invalid question ID format: " + quesID);
+                }
+            }
+        }
+
+        // Tính số câu trả lời đúng
+        for (int i = 0; i < userAnswers.size(); i++) {
+            int answerIndex = userAnswers.get(i);
+            if (i < answers.size() && answerIndex >= 0 && answerIndex < answers.get(i).size()) {
+                if (answers.get(i).get(answerIndex).getIsRight() == 1) {
+                    correctAnswers++;
+                }
+            }
+        }
+
+        double percentage = maxScore > 0 ? (double) result.getRs_mark() / maxScore * 100 : 0;
+        String percentageText = String.format("%.1f%%", percentage);
+
+        // Lấy thời gian làm bài từ timeTakenMap
+        String timeTakenForThisResult = timeTakenMap.getOrDefault(result.getRs_num(), "Không xác định");
+        System.out.println("Time taken for rs_num " + result.getRs_num() + ": " + timeTakenForThisResult);
+
+        model.addRow(new Object[]{
+            test.getTestTitle(),
+            "Đề " + exam.getExOrder(),
+            topic.getTpTitle(),
+            timeTakenForThisResult,
+            String.valueOf(result.getRs_mark()) + "/" + maxScore,
+            percentageText,
+            correctAnswers + "/" + totalQuestions
+        });
+    }
+
+    jTable2.revalidate();
+    jTable2.repaint();
+}
 
     private void displayQuestion(int questionIndex) {
     if (questionIndex < 0 || questionIndex >= questions.size()) {
@@ -1643,49 +2063,43 @@ private int getCurrentUserID() {
     }
 
     QuestionDTO currentQuestion = questions.get(questionIndex);
-    // Hiển thị văn bản và hình ảnh câu hỏi trong jLabel26
-    StringBuilder questionContent = new StringBuilder("<html>");
-    questionContent.append(currentQuestion.getQContent()).append("<br>");
 
-    // Hiển thị hình ảnh nếu có
+    // Thêm "Câu [số thứ tự]:" vào nội dung câu hỏi
+    String questionText = "<html><b>Câu " + (questionIndex + 1) + ":</b> " + currentQuestion.getQContent() + "</html>";
+    jLabel26.setText(questionText);
+
+    // Hiển thị hình ảnh nếu có trong imageLabel
     if (currentQuestion.getQPicture() != null && !currentQuestion.getQPicture().isEmpty()) {
         try {
-            // Đọc hình ảnh và điều chỉnh kích thước
             ImageIcon imageIcon = new ImageIcon(currentQuestion.getQPicture());
-            Image image = imageIcon.getImage().getScaledInstance(300, 200, Image.SCALE_SMOOTH);
-            imageIcon = new ImageIcon(image);
-
-            // Chuyển hình ảnh thành URL để nhúng vào HTML
-            String imagePath = new java.io.File(currentQuestion.getQPicture()).toURI().toString();
-            questionContent.append("<img src='").append(imagePath).append("' width='300' height='200'><br>");
+            Image image = imageIcon.getImage().getScaledInstance(200, 150, Image.SCALE_SMOOTH);
+            imageLabel.setIcon(new ImageIcon(image));
         } catch (Exception e) {
             System.err.println("Error loading question image: " + e.getMessage());
-            questionContent.append("Không thể tải hình ảnh!<br>");
+            imageLabel.setIcon(null);
+            imageLabel.setText("Không thể tải hình ảnh!");
         }
+    } else {
+        imageLabel.setIcon(null);
+        imageLabel.setText("");
     }
 
-    questionContent.append("</html>");
-    jLabel26.setText(questionContent.toString());
-    jLabel26.setIcon(null); // Xóa icon nếu có từ trước
-
+    // Hiển thị đáp án (giữ nguyên phần còn lại)
     List<AnswerDTO> currentAnswers = answers.get(questionIndex);
     JLabel[] answerLabels = {jLabel39, jLabel40, jLabel41, jLabel42, jLabel43};
 
-    resetBackgrounds(); // Đặt lại màu nền trước khi hiển thị đáp án mới
+    resetBackgrounds();
 
-    // Xóa icon và text cũ của các label
     for (JLabel label : answerLabels) {
         label.setIcon(null);
         label.setText("");
     }
 
-    // Hiển thị tối đa 5 đáp án
     for (int i = 0; i < Math.min(currentAnswers.size(), 5); i++) {
         AnswerDTO answer = currentAnswers.get(i);
         JLabel answerLabel = answerLabels[i];
         answerLabel.setText("<html>" + (char)('A' + i) + ". " + answer.getAwContent() + "</html>");
 
-        // Hiển thị hình ảnh đáp án nếu có
         if (answer.getAwPictures() != null && !answer.getAwPictures().isEmpty()) {
             try {
                 ImageIcon imageIcon = new ImageIcon(answer.getAwPictures());
@@ -1697,8 +2111,7 @@ private int getCurrentUserID() {
         }
     }
 
-    // Cập nhật màu sắc nếu đã chọn trước đó
-    if (questionIndex < selectedAnswers.size() && selectedAnswers.get(questionIndex) >= 0) {
+    if (questionIndex < selectedAnswers.size() && selectedAnswers.get(questionIndex) != -1) {
         int selectedIndex = selectedAnswers.get(questionIndex);
         if (selectedIndex >= 0 && selectedIndex < answerLabels.length) {
             answerLabels[selectedIndex].setBackground(Color.GREEN);
@@ -1709,6 +2122,7 @@ private int getCurrentUserID() {
     jPanel5.repaint();
     jPanel10.revalidate();
     jPanel10.repaint();
+    updateSquareColors();
 }
     private void updateTestLimitInDatabase() {
     Connection conn = null;
@@ -1792,6 +2206,78 @@ private void calculateScore() {
     }
     System.out.println("Total score calculated: " + totalScore);
 }
+    private void saveTimeTakenMapToFile() {
+    try {
+        JSONObject json = new JSONObject();
+        for (Map.Entry<Integer, String> entry : timeTakenMap.entrySet()) {
+            if (entry.getValue() != null) {
+                json.put(String.valueOf(entry.getKey()), entry.getValue());
+            }
+        }
+        try (FileWriter file = new FileWriter("time_taken_map.json")) {
+            file.write(json.toString(4)); // Định dạng JSON đẹp hơn với indent 4
+            file.flush();
+            System.out.println("Successfully saved timeTakenMap to file: " + json.toString());
+        }
+    } catch (Exception e) {
+        e.printStackTrace();
+        System.err.println("Error saving timeTakenMap to file: " + e.getMessage());
+    }
+}
+    private void loadTimeTakenMapFromFile() {
+    try {
+        File file = new File("time_taken_map.json");
+        if (!file.exists()) {
+            System.out.println("time_taken_map.json does not exist. Creating new file...");
+            return;
+        }
+        StringBuilder content = new StringBuilder();
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                content.append(line);
+            }
+        }
+        if (content.length() == 0) {
+            System.out.println("time_taken_map.json is empty.");
+            return;
+        }
+        JSONObject json = new JSONObject(content.toString());
+        for (String key : json.keySet()) {
+            String value = json.optString(key, null);
+            if (value != null) {
+                timeTakenMap.put(Integer.parseInt(key), value);
+            }
+        }
+        System.out.println("Successfully loaded timeTakenMap from file: " + timeTakenMap.toString());
+    } catch (Exception e) {
+        e.printStackTrace();
+        System.err.println("Error loading timeTakenMap from file: " + e.getMessage());
+    }
+}
+    private void loadUserInfo() {
+    try (Connection conn = JDBCUtil.getConnection();
+         PreparedStatement pstmt = conn.prepareStatement("SELECT userName, userFullName, userEmail FROM users WHERE userID = ?")) {
+        pstmt.setInt(1, userID); // userID đã được lấy trong constructor
+        try (ResultSet rs = pstmt.executeQuery()) {
+            if (rs.next()) {
+                String username = rs.getString("userName");
+                String fullName = rs.getString("userFullName");
+                String email = rs.getString("userEmail");
+
+                // Gán thông tin vào các thành phần giao diện
+                jLabel48.setText(username); // Tên tài khoản
+                jLabel52.setText(fullName != null ? fullName : username); // Tên đầy đủ (nếu null thì dùng username)
+                jLabel53.setText(email); // Email
+            } else {
+                JOptionPane.showMessageDialog(this, "Không tìm thấy thông tin người dùng!", "Lỗi", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    } catch (Exception e) {
+        e.printStackTrace();
+        JOptionPane.showMessageDialog(this, "Lỗi khi tải thông tin: " + e.getMessage(), "Lỗi", JOptionPane.ERROR_MESSAGE);
+    }
+}
     /**
      * @param args the command line arguments
      */
@@ -1820,14 +2306,15 @@ private void calculateScore() {
         //</editor-fold>
         /* Create and display the form */
         java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new UserFrame("DefaultUser").setVisible(true);
-            }
+        public void run() {
+            new UserFrame("lucluc", null).setVisible(true); // Thử với username hợp lệ và mainFrame null
+        }
         });
     }
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JPanel HomePanel;
+    private javax.swing.JPanel InformationPanel;
     private javax.swing.JPanel KetQuaThiPanel;
     private javax.swing.JPanel MenuPanel;
     private javax.swing.JPanel TaskTheTestPanel;
@@ -1837,13 +2324,18 @@ private void calculateScore() {
     private javax.swing.JPanel UserChooseExamPanel;
     private javax.swing.JPanel XemKQThiPanel;
     private javax.swing.JPanel contentPanel;
+    private javax.swing.JLabel imageLabel;
     private javax.swing.JButton jButton1;
     private javax.swing.JButton jButton2;
     private javax.swing.JButton jButton3;
     private javax.swing.JButton jButton4;
     private javax.swing.JButton jButton5;
+    private javax.swing.JButton jButton6;
+    private javax.swing.JButton jButton7;
     private javax.swing.JComboBox<String> jComboBox1;
     private javax.swing.JComboBox<String> jComboBox2;
+    private javax.swing.JComboBox<String> jComboBox3;
+    private javax.swing.JComboBox<String> jComboBox4;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel10;
     private javax.swing.JLabel jLabel11;
@@ -1874,6 +2366,7 @@ private void calculateScore() {
     private javax.swing.JLabel jLabel34;
     private javax.swing.JLabel jLabel35;
     private javax.swing.JLabel jLabel36;
+    private javax.swing.JLabel jLabel37;
     private javax.swing.JLabel jLabel38;
     private javax.swing.JLabel jLabel39;
     private javax.swing.JLabel jLabel4;
@@ -1881,7 +2374,16 @@ private void calculateScore() {
     private javax.swing.JLabel jLabel41;
     private javax.swing.JLabel jLabel42;
     private javax.swing.JLabel jLabel43;
+    private javax.swing.JLabel jLabel44;
+    private javax.swing.JLabel jLabel45;
+    private javax.swing.JLabel jLabel46;
+    private javax.swing.JLabel jLabel47;
+    private javax.swing.JLabel jLabel48;
+    private javax.swing.JLabel jLabel49;
     private javax.swing.JLabel jLabel5;
+    private javax.swing.JLabel jLabel50;
+    private javax.swing.JLabel jLabel52;
+    private javax.swing.JLabel jLabel53;
     private javax.swing.JLabel jLabel6;
     private javax.swing.JLabel jLabel7;
     private javax.swing.JLabel jLabel8;
@@ -1899,12 +2401,16 @@ private void calculateScore() {
     private javax.swing.JPanel jPanel2;
     private javax.swing.JPanel jPanel20;
     private javax.swing.JPanel jPanel3;
+    private javax.swing.JPanel jPanel4;
     private javax.swing.JPanel jPanel5;
     private javax.swing.JPanel jPanel7;
     private javax.swing.JPanel jPanel8;
     private javax.swing.JPanel jPanel9;
     private javax.swing.JScrollPane jScrollPane1;
+    private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JTable jTable1;
+    private javax.swing.JTable jTable2;
+    private javax.swing.JTextField jTextField2;
     private javax.swing.JLabel name;
     private javax.swing.JLabel timeLabel;
     // End of variables declaration//GEN-END:variables

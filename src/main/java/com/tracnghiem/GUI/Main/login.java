@@ -209,7 +209,7 @@ public class login extends javax.swing.JFrame {
                                 mainFrame.setVisible(true);
                             } else {
                                 // Chuyển đến UserFrame (cho người dùng thường)
-                                UserFrame userFrame = new UserFrame(username); // Truyền username và số câu hỏi mặc định
+                                UserFrame userFrame = new UserFrame(username, null); // Truyền username và số câu hỏi mặc định
                                 userFrame.setVisible(true);
                             }
                             dispose(); // Đóng form login

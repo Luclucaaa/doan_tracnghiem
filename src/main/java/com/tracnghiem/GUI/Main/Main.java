@@ -4,6 +4,7 @@
  */
 package com.tracnghiem.GUI.Main;
 
+import com.tracnghiem.BUS.AnswerBUS;
 import com.tracnghiem.config.ExcelImporter;
 import com.tracnghiem.BUS.ExamBUS;
 import com.tracnghiem.BUS.QuestionBUS;
@@ -29,6 +30,9 @@ import com.tracnghiem.GUI.Dialog.TopicDialog;
 import com.tracnghiem.config.ExamExporter;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
 import java.sql.Timestamp;
 import java.text.DecimalFormat;
 import java.text.ParseException;
@@ -42,6 +46,8 @@ import java.util.stream.Collectors;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.table.DefaultTableModel;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 
 /**
@@ -60,6 +66,7 @@ public class Main extends javax.swing.JFrame {
     private TopicDialog topicDialogInstance = null;
     private TopicBUS topicBUS;
     private ResultBUS resultBUS;
+    private HashMap<Integer, String> timeTakenMap;
     public Main() {
         initComponents();
         questionDialog = new QuestionDialog(this, true);
@@ -74,6 +81,8 @@ public class Main extends javax.swing.JFrame {
         resultBUS = new ResultBUS();
         loadUserTable();
         loadTopics();
+        timeTakenMap = new HashMap<>();
+        loadTimeTakenMapFromFile();
         
     }
     
@@ -702,7 +711,7 @@ public class Main extends javax.swing.JFrame {
                         .addGroup(jPanel7Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(jTextField2, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jLabel18, javax.swing.GroupLayout.PREFERRED_SIZE, 44, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                .addGap(0, 7, Short.MAX_VALUE))
+                .addGap(0, 8, Short.MAX_VALUE))
         );
 
         jTable2.setModel(new javax.swing.table.DefaultTableModel(
@@ -838,7 +847,7 @@ public class Main extends javax.swing.JFrame {
                         .addGroup(jPanel12Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                             .addComponent(jLabel15)
                             .addComponent(jLabel16))
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 7, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addGroup(jPanel12Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(jLabel20, javax.swing.GroupLayout.DEFAULT_SIZE, 36, Short.MAX_VALUE)
                             .addComponent(jTextField7, javax.swing.GroupLayout.DEFAULT_SIZE, 36, Short.MAX_VALUE)
@@ -969,7 +978,7 @@ public class Main extends javax.swing.JFrame {
                         .addGroup(jPanel8Layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(jTextField3, javax.swing.GroupLayout.PREFERRED_SIZE, 42, javax.swing.GroupLayout.PREFERRED_SIZE)
                             .addComponent(jLabel19, javax.swing.GroupLayout.PREFERRED_SIZE, 44, javax.swing.GroupLayout.PREFERRED_SIZE))))
-                .addGap(0, 7, Short.MAX_VALUE))
+                .addGap(0, 8, Short.MAX_VALUE))
         );
 
         jTable3.setModel(new javax.swing.table.DefaultTableModel(
@@ -1274,37 +1283,16 @@ public class Main extends javax.swing.JFrame {
 
         jTable7.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null}
+                {null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null},
+                {null, null, null, null, null, null, null, null}
             },
             new String [] {
-                "Mã người dùng", "Mã bài thi", "Điểm số", "Thời gian hoàn thành"
+                "Mã người dùng", "Tên người dùng", "Mã bài thi", "Chủ đề", "Thời gian hoàn thành", "Điểm", "Tỷ lệ", "Số câu đúng/tổng câu"
             }
         ));
         jScrollPane7.setViewportView(jTable7);
-        jTable7.addMouseListener(new java.awt.event.MouseAdapter() {
-            public void mouseClicked(java.awt.event.MouseEvent evt) {
-                if (evt.getClickCount() == 2) { // Nhấp đúp
-                    int row = jTable7.getSelectedRow();
-                    if (row != -1) {
-                        String userID = jTable7.getValueAt(row, 0).toString();
-                        String exCode = jTable7.getValueAt(row, 1).toString();
-                        ArrayList<ResultDTO> results = resultBUS.getResultsByUserID(Integer.parseInt(userID));
-                        for (ResultDTO result : results) {
-                            if (result.getExCode().equals(exCode)) {
-                                JOptionPane.showMessageDialog(null,
-                                    "Đáp án: " + result.getRs_answers(),
-                                    "Chi tiết kết quả",
-                                    JOptionPane.INFORMATION_MESSAGE);
-                                break;
-                            }
-                        }
-                    }
-                }
-            }
-        });
 
         jLabel29.setFont(new java.awt.Font("Segoe UI", 1, 24)); // NOI18N
         jLabel29.setText("Thống kê");
@@ -1523,8 +1511,8 @@ public class Main extends javax.swing.JFrame {
     private void ThongKeMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_ThongKeMouseClicked
         PanelPhai.removeAll();
         PanelPhai.add(ThongKePanel, "card7");
-        loadResults();    // Tải danh sách kết quả
-        loadStatistics(); // Tải thống kê
+        loadResults();    // Tải danh sách kết quả lên jTable7
+        loadStatistics(); // Tải thống kê lên jTable6
         PanelPhai.revalidate();
         PanelPhai.repaint();
     }//GEN-LAST:event_ThongKeMouseClicked
@@ -1644,9 +1632,17 @@ public class Main extends javax.swing.JFrame {
 
     private void UserMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_UserMouseClicked
         PanelPhai.removeAll();
-        PanelPhai.add(UserPanel, "card3");
-        PanelPhai.revalidate();
-        PanelPhai.repaint();
+    PanelPhai.add(UserPanel, "card3");
+    PanelPhai.revalidate();
+    PanelPhai.repaint();
+
+    int selectedRow = jTable1.getSelectedRow();
+    if (selectedRow >= 0) {
+        String username = jTable1.getValueAt(selectedRow, 1).toString();
+        System.out.println("Main - Opening UserFrame with username: " + username);
+        UserFrame userFrame = new UserFrame(username, this);
+        userFrame.setVisible(true);
+    }
     }//GEN-LAST:event_UserMouseClicked
 
     private void TopicMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_TopicMouseClicked
@@ -1773,7 +1769,7 @@ public class Main extends javax.swing.JFrame {
             throw new RuntimeException(e);
         }
     }
-    private void loadUserTable() {
+    public void loadUserTable() {
         UserBUS userBUS = new UserBUS();
         ArrayList<UserDTO> userList = userBUS.getAllUsers();
         DefaultTableModel model = (DefaultTableModel) jTable1.getModel();
@@ -2313,85 +2309,196 @@ public class Main extends javax.swing.JFrame {
     DefaultTableModel model = (DefaultTableModel) jTable7.getModel();
     model.setRowCount(0);
 
-    ArrayList<ResultDTO> results = resultBUS.getAllResults();
-    DecimalFormat formatter = new DecimalFormat("000");
-    SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+    try {
+        ResultBUS resultBUS = new ResultBUS();
+        ArrayList<ResultDTO> results = resultBUS.getAllResults();
+        if (results.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Không có kết quả nào để hiển thị.", 
+                "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
 
-    for (ResultDTO result : results) {
-        String userID = formatter.format(result.getUserID());
-        String exCode = result.getExCode();
-        double mark = result.getRs_mark();
-        String date = dateFormat.format(Timestamp.valueOf(result.getRs_date()));
-        model.addRow(new Object[]{userID, exCode, mark, date});
+        UserBUS userBUS = new UserBUS();
+        TestBUS testBUS = new TestBUS();
+        TopicBUS topicBUS = new TopicBUS();
+        ExamBUS examBUS = new ExamBUS(); // Thêm ExamBUS để lấy exam
+        DecimalFormat formatter = new DecimalFormat("000");
+        SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+
+        for (ResultDTO result : results) {
+            // Lấy thông tin người dùng
+            String userID = formatter.format(result.getUserID());
+            UserDTO user = userBUS.getUserByID(String.valueOf(result.getUserID()));
+            String userFullName = user != null ? user.getUserFullName() : "Không xác định";
+
+            // Lấy thông tin bài thi từ exCode
+            String exCode = result.getExCode();
+            ExamDTO exam = examBUS.getExamByExCode(exCode);
+            String testCode = (exam != null) ? exam.getTestCode() : null;
+            TestDTO test = (testCode != null) ? testBUS.getTestByCode(testCode) : null;
+            String topicTitle = "Không xác định";
+            int totalQuestions = 0;
+
+            if (test != null) {
+                TopicDTO topic = topicBUS.getTopicByID(String.valueOf(test.getTpID()));
+                topicTitle = (topic != null) ? topic.getTpTitle() : "Không xác định";
+                totalQuestions = test.getNum_easy() + test.getNum_medium() + test.getNum_diff();
+            }
+
+            // Lấy thời gian làm bài từ timeTakenMap
+            String completionTime = timeTakenMap.getOrDefault(result.getRs_num(), "Không xác định");
+
+            // Tính toán điểm và tỷ lệ
+            double mark = result.getRs_mark();
+            double ratio = (mark >= 0 && totalQuestions > 0) ? (mark / 10 * 100) : 0;
+            ratio = Math.round(ratio * 100.0) / 100.0;
+            int correctAnswers = (int) Math.round(mark / 10 * totalQuestions);
+            String correctOverTotal = totalQuestions > 0 ? correctAnswers + "/" + totalQuestions : "N/A";
+
+            // Thêm dòng vào bảng
+            model.addRow(new Object[]{
+                userID,
+                userFullName,
+                exCode,
+                topicTitle,
+                completionTime, // Sử dụng completionTime từ timeTakenMap
+                String.format("%.2f", mark),
+                ratio + "%",
+                correctOverTotal
+            });
+        }
+
+        //userBUS.closeConnection();
+        //testBUS.closeConnection();
+        //topicBUS.closeConnection();
+        //examBUS.closeConnection();
+    } catch (Exception ex) {
+        JOptionPane.showMessageDialog(this, "Lỗi tải kết quả: " + ex.getMessage(), 
+            "Lỗi", JOptionPane.ERROR_MESSAGE);
+        ex.printStackTrace();
     }
 }
-    
-    private void loadStatistics() {
-    DefaultTableModel model = (DefaultTableModel) jTable6.getModel();
-    model.setRowCount(0);
 
-    Map<String, int[]> statistics = resultBUS.getStatisticsByExCode("");
-    for (Map.Entry<String, int[]> entry : statistics.entrySet()) {
-        String exCode = entry.getKey();
-        int[] stats = entry.getValue();
-        model.addRow(new Object[]{exCode, stats[0], stats[1], stats[2]});
-    }
-}
-    
-    private void filterResults() {
+private void filterResults() {
     String userFilter = jTextField8.getText().trim();
-    String testFilter = jTextField12.getText().trim();
+    String exCodeFilter = jTextField12.getText().trim(); // Đổi từ testFilter thành exCodeFilter
     String searchText = jTextField9.getText().trim().toLowerCase();
 
     DefaultTableModel model = (DefaultTableModel) jTable7.getModel();
     model.setRowCount(0);
 
+    ResultBUS resultBUS = new ResultBUS();
     ArrayList<ResultDTO> results;
     if (!userFilter.isEmpty()) {
-        results = resultBUS.getResultsByUserID(Integer.parseInt(userFilter));
-    } else if (!testFilter.isEmpty()) {
-        results = resultBUS.getResultsByExCode(testFilter);
+        try {
+            results = resultBUS.getResultsByUserID(Integer.parseInt(userFilter));
+        } catch (NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Mã người dùng phải là số!", 
+                "Lỗi", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+    } else if (!exCodeFilter.isEmpty()) { // Sử dụng exCodeFilter
+        results = resultBUS.getResultsByExCode(exCodeFilter); // Sử dụng getResultsByExCode
     } else {
         results = resultBUS.getAllResults();
     }
 
+    UserBUS userBUS = new UserBUS();
+    TestBUS testBUS = new TestBUS();
+    TopicBUS topicBUS = new TopicBUS();
     DecimalFormat formatter = new DecimalFormat("000");
     SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
 
     for (ResultDTO result : results) {
         String userID = formatter.format(result.getUserID());
-        String exCode = result.getExCode();
-        String markDisplay = String.valueOf(result.getRs_mark()); // Chỉ hiển thị điểm đạt được
-        String date = dateFormat.format(Timestamp.valueOf(result.getRs_date()));
+        UserDTO user = userBUS.getUserByID(String.valueOf(result.getUserID()));
+        String userFullName = user != null ? user.getUserFullName() : "Không xác định";
 
-        if ((!testFilter.isEmpty() && !exCode.startsWith(testFilter)) ||
-            (!userFilter.isEmpty() && !userID.equals(userFilter))) {
+        String exCode = result.getExCode(); // Sử dụng exCode
+        TestDTO test = testBUS.getTestByCode(exCode); // Giả định TestBUS có getTestByCode
+        String topicTitle = "Không xác định";
+        int totalQuestions = 0;
+        if (test != null) {
+            TopicDTO topic = topicBUS.getTopicByID(String.valueOf(test.getTpID()));
+            topicTitle = topic != null ? topic.getTpTitle() : "Không xác định";
+            totalQuestions = test.getNum_easy() + test.getNum_medium() + test.getNum_diff();
+        }
+
+        String completionTime = dateFormat.format(Timestamp.valueOf(result.getRs_date()));
+        double mark = result.getRs_mark();
+        double ratio = (mark >= 0 && totalQuestions > 0) ? (mark / 10 * 100) : 0;
+        ratio = Math.round(ratio * 100.0) / 100.0;
+        int correctAnswers = (int) Math.round(mark / 10 * totalQuestions);
+        String correctOverTotal = totalQuestions > 0 ? correctAnswers + "/" + totalQuestions : "N/A";
+
+        if ((!userFilter.isEmpty() && !userID.equals(userFilter)) ||
+            (!exCodeFilter.isEmpty() && !exCode.startsWith(exCodeFilter)) || // Sử dụng exCodeFilter
+            (!searchText.isEmpty() && !userID.toLowerCase().contains(searchText) &&
+             !userFullName.toLowerCase().contains(searchText) &&
+             !exCode.toLowerCase().contains(searchText) && // Sử dụng exCode
+             !topicTitle.toLowerCase().contains(searchText) &&
+             !completionTime.toLowerCase().contains(searchText) &&
+             !String.valueOf(mark).contains(searchText))) {
             continue;
         }
 
-        if (searchText.isEmpty() || 
-            userID.toLowerCase().contains(searchText) || 
-            exCode.toLowerCase().contains(searchText) || 
-            markDisplay.toLowerCase().contains(searchText) || 
-            date.toLowerCase().contains(searchText)) {
-            model.addRow(new Object[]{userID, exCode, markDisplay, date});
-        }
+        model.addRow(new Object[]{
+            userID,
+            userFullName,
+            exCode, // Sử dụng exCode
+            topicTitle,
+            completionTime,
+            String.format("%.2f", mark),
+            ratio + "%",
+            correctOverTotal
+        });
     }
-}
-    private void filterStatistics() {
-    String testFilter = jTextField13.getText().trim();
 
+    /*userBUS.closeConnection();
+    testBUS.closeConnection();
+    topicBUS.closeConnection();*/
+}
+    private void loadStatistics() {
     DefaultTableModel model = (DefaultTableModel) jTable6.getModel();
     model.setRowCount(0);
 
-    Map<String, int[]> statistics = resultBUS.getStatisticsByExCode(testFilter);
-    for (Map.Entry<String, int[]> entry : statistics.entrySet()) {
-        String exCode = entry.getKey();
-        int[] stats = entry.getValue();
-        model.addRow(new Object[]{exCode, stats[0], stats[1], stats[2]});
+    try {
+        ResultBUS resultBUS = new ResultBUS();
+        Map<String, int[]> statistics;
+        
+        String exCodeFilter = jTextField13.getText().trim(); // Sử dụng exCodeFilter
+        if (exCodeFilter.isEmpty()) {
+            statistics = resultBUS.getStatisticsByExCode(""); // Sử dụng getStatisticsByExCode
+        } else {
+            statistics = resultBUS.getStatisticsByExCode(exCodeFilter);
+        }
+
+        if (statistics.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Không có dữ liệu thống kê cho bộ lọc: " + exCodeFilter, 
+                "Thông báo", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
+        for (Map.Entry<String, int[]> entry : statistics.entrySet()) {
+            String exCode = entry.getKey(); // Sử dụng exCode
+            int[] stats = entry.getValue();
+            model.addRow(new Object[]{
+                exCode,    // Sử dụng exCode
+                stats[0],    // Tổng số lần thi
+                stats[1],    // Số người đạt
+                stats[2]     // Số người không đạt
+            });
+        }
+    } catch (Exception ex) {
+        JOptionPane.showMessageDialog(this, "Lỗi tải thống kê: " + ex.getMessage(), 
+            "Lỗi", JOptionPane.ERROR_MESSAGE);
+        ex.printStackTrace();
     }
 }
 
+private void filterStatistics() {
+    loadStatistics(); // Gọi lại loadStatistics để áp dụng bộ lọc từ jTextField13
+}
 private void createRandomExams(String testCode, int tpID, int numEasy, int numMedium, int numDiff, int numExams) {
     QuestionBUS questionBUS = new QuestionBUS();
     ArrayList<QuestionDTO> allQuestions = questionBUS.getQuestionsByTopic(tpID);
@@ -2442,6 +2549,39 @@ private void createRandomExams(String testCode, int tpID, int numEasy, int numMe
         examBUS.addExam(exam);
     }
 }
+private void loadTimeTakenMapFromFile() {
+        try {
+            File file = new File("time_taken_map.json");
+            if (!file.exists()) {
+                System.out.println("time_taken_map.json does not exist. Creating new file...");
+                return;
+            }
+            StringBuilder content = new StringBuilder();
+            try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    content.append(line);
+                }
+            }
+            if (content.length() == 0) {
+                System.out.println("time_taken_map.json is empty.");
+                return;
+            }
+            JSONObject json = new JSONObject(content.toString());
+            for (String key : json.keySet()) {
+                String value = json.optString(key, null);
+                if (value != null) {
+                    timeTakenMap.put(Integer.parseInt(key), value);
+                }
+            }
+            System.out.println("Successfully loaded timeTakenMap from file: " + timeTakenMap.toString());
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.err.println("Error loading timeTakenMap from file: " + e.getMessage());
+        }
+    }
+
+
     /**
      * @param args the command line arguments
      */

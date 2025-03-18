@@ -842,7 +842,7 @@
                                   </Group>
                               </Group>
                           </Group>
-                          <EmptySpace min="0" pref="7" max="32767" attributes="0"/>
+                          <EmptySpace min="0" pref="8" max="32767" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
@@ -1047,7 +1047,7 @@
                                       <Component id="jLabel15" alignment="3" min="-2" max="-2" attributes="0"/>
                                       <Component id="jLabel16" alignment="3" min="-2" max="-2" attributes="0"/>
                                   </Group>
-                                  <EmptySpace pref="7" max="32767" attributes="0"/>
+                                  <EmptySpace max="32767" attributes="0"/>
                                   <Group type="103" groupAlignment="0" max="-2" attributes="0">
                                       <Component id="jLabel20" pref="36" max="32767" attributes="0"/>
                                       <Component id="jTextField7" pref="36" max="32767" attributes="0"/>
@@ -1314,7 +1314,7 @@
                                   </Group>
                               </Group>
                           </Group>
-                          <EmptySpace min="0" pref="7" max="32767" attributes="0"/>
+                          <EmptySpace min="0" pref="8" max="32767" attributes="0"/>
                       </Group>
                   </Group>
                 </DimensionLayout>
@@ -1949,15 +1949,39 @@
                 <Component class="javax.swing.JTable" name="jTable7">
                   <Properties>
                     <Property name="model" type="javax.swing.table.TableModel" editor="org.netbeans.modules.form.editors2.TableModelEditor">
-                      <Table columnCount="4" rowCount="4">
+                      <Table columnCount="8" rowCount="4">
                         <Column editable="true" title="M&#xe3; ng&#x1b0;&#x1edd;i d&#xf9;ng" type="java.lang.Object"/>
+                        <Column editable="true" title="T&#xea;n ng&#x1b0;&#x1edd;i d&#xf9;ng" type="java.lang.Object"/>
                         <Column editable="true" title="M&#xe3; b&#xe0;i thi" type="java.lang.Object"/>
-                        <Column editable="true" title="&#x110;i&#x1ec3;m s&#x1ed1;" type="java.lang.Object"/>
+                        <Column editable="true" title="Ch&#x1ee7; &#x111;&#x1ec1;" type="java.lang.Object"/>
                         <Column editable="true" title="Th&#x1edd;i gian ho&#xe0;n th&#xe0;nh" type="java.lang.Object"/>
+                        <Column editable="true" title="&#x110;i&#x1ec3;m" type="java.lang.Object"/>
+                        <Column editable="true" title="T&#x1ef7; l&#x1ec7;" type="java.lang.Object"/>
+                        <Column editable="true" title="S&#x1ed1; c&#xe2;u &#x111;&#xfa;ng/t&#x1ed5;ng c&#xe2;u" type="java.lang.Object"/>
                       </Table>
                     </Property>
-                    <Property name="columnModel" type="javax.swing.table.TableColumnModel" editor="org.netbeans.modules.form.editors2.TableColumnModelEditor" postCode="jTable7.addMouseListener(new java.awt.event.MouseAdapter() {&#xa;    public void mouseClicked(java.awt.event.MouseEvent evt) {&#xa;        if (evt.getClickCount() == 2) { // Nh&#x1ea5;p &#x111;&#xfa;p&#xa;            int row = jTable7.getSelectedRow();&#xa;            if (row != -1) {&#xa;                String userID = jTable7.getValueAt(row, 0).toString();&#xa;                String exCode = jTable7.getValueAt(row, 1).toString();&#xa;                ArrayList&lt;ResultDTO&gt; results = resultBUS.getResultsByUserID(Integer.parseInt(userID));&#xa;                for (ResultDTO result : results) {&#xa;                    if (result.getExCode().equals(exCode)) {&#xa;                        JOptionPane.showMessageDialog(null, &#xa;                            &quot;&#x110;&#xe1;p &#xe1;n: &quot; + result.getRs_answers(), &#xa;                            &quot;Chi ti&#x1ebf;t k&#x1ebf;t qu&#x1ea3;&quot;, &#xa;                            JOptionPane.INFORMATION_MESSAGE);&#xa;                        break;&#xa;                    }&#xa;                }&#xa;            }&#xa;        }&#xa;    }&#xa;});">
+                    <Property name="columnModel" type="javax.swing.table.TableColumnModel" editor="org.netbeans.modules.form.editors2.TableColumnModelEditor">
                       <TableColumnModel selectionModel="0">
+                        <Column maxWidth="-1" minWidth="-1" prefWidth="-1" resizable="true">
+                          <Title/>
+                          <Editor/>
+                          <Renderer/>
+                        </Column>
+                        <Column maxWidth="-1" minWidth="-1" prefWidth="-1" resizable="true">
+                          <Title/>
+                          <Editor/>
+                          <Renderer/>
+                        </Column>
+                        <Column maxWidth="-1" minWidth="-1" prefWidth="-1" resizable="true">
+                          <Title/>
+                          <Editor/>
+                          <Renderer/>
+                        </Column>
+                        <Column maxWidth="-1" minWidth="-1" prefWidth="-1" resizable="true">
+                          <Title/>
+                          <Editor/>
+                          <Renderer/>
+                        </Column>
                         <Column maxWidth="-1" minWidth="-1" prefWidth="-1" resizable="true">
                           <Title/>
                           <Editor/>

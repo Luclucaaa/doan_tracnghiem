@@ -204,7 +204,7 @@ public class Regist extends javax.swing.JFrame {
                         @Override
                         public void actionPerformed(ActionEvent e) {
                             // Chuyển đến UserFrame cho người dùng mới
-                            UserFrame userFrame = new UserFrame(username); // Truyền username và số câu hỏi mặc định
+                            UserFrame userFrame = new UserFrame(username, null); // Truyền username và số câu hỏi mặc định
                             userFrame.setVisible(true);
                             dispose(); // Đóng form đăng ký
                             ((Timer) e.getSource()).stop(); // Dừng timer sau khi thực hiện

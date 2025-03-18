@@ -88,7 +88,7 @@ public class UserBUS {
         return hashtext;
     } catch (Exception e) {
         throw new RuntimeException(e);
-    }
-   
+    }  
 }
+    
 }
